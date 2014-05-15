@@ -10,11 +10,11 @@ import (
 	"text/tabwriter"
 	"time"
 
-	"github.com/coreos/updatectl/third_party/code.google.com/p/go-uuid/uuid"
-	"github.com/coreos/updatectl/third_party/github.com/codegangsta/cli"
-	"github.com/coreos/updatectl/third_party/github.com/coreos/go-omaha/omaha"
+	"github.com/coreos-inc/updatectl/third_party/code.google.com/p/go-uuid/uuid"
+	"github.com/coreos-inc/updatectl/third_party/github.com/codegangsta/cli"
+	"github.com/coreos-inc/updatectl/third_party/github.com/coreos/go-omaha/omaha"
 
-	"github.com/coreos/updatectl/client/update/v1"
+	"github.com/coreos-inc/updatectl/client/update/v1"
 )
 
 var verbose bool

@@ -14,8 +14,8 @@ import (
 	"strconv"
 	"text/tabwriter"
 
-	"github.com/coreos/updatectl/client/update/v1"
-	"github.com/coreos/updatectl/third_party/github.com/codegangsta/cli"
+	"github.com/coreos-inc/updatectl/client/update/v1"
+	"github.com/coreos-inc/updatectl/third_party/github.com/codegangsta/cli"
 )
 
 type MetadataFile struct {

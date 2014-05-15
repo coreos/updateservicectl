@@ -2,7 +2,7 @@ package cli_test
 
 import (
 	"fmt"
-	"github.com/coreos/updatectl/third_party/github.com/codegangsta/cli"
+	"github.com/coreos-inc/updatectl/third_party/github.com/codegangsta/cli"
 	"os"
 	"testing"
 )
