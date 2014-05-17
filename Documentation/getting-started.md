@@ -132,6 +132,14 @@ updatectl new-package e96281a6-d1af-4bde-9a0a-97b76e56dc57 1.1.0 \
     --signature ixi6Oebo \
     --metadata-size 190
 ```
+
+Next, publish our `1.1.0` release on the `master` channel:
+
+```
+$ updatectl update-channel e96281a6-d1af-4bde-9a0a-97b76e56dc57 master 1.1.0
+1.1.0
+```
+
 ### Start Fake Clients
 
 `updatectl` contains a tool to help you simulate many fake clients running your applcation. We're going to start 10 fake clients that are checking for updates every 30-60 seconds. This is much much faster than usual but it will allow us to see our changes take place quickly.
