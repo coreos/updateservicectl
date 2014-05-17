@@ -29,13 +29,13 @@ func WatchCommands() []cli.Command {
 			Action:      handle(watch),
 			Flags: []cli.Flag{
 				cli.IntFlag{"interval, i", 1, "Update polling interval"},
-				cli.StringFlag{"version, v", "0.0.0", "Client ID for the watcher"},
+				cli.StringFlag{"version, v", "0.0.0", "Starting version number"},
 			},
 		},
 	}
 }
 
-func fetchVersion(server string, appID string, groupID string, clientID string, version string, debug bool) string {
+func fetchUpdateCheck(server string, appID string, groupID string, clientID string, version string, debug bool) (*omaha.UpdateCheck, error) {
 	client := &http.Client{}
 
 	// TODO: Fill out the OS field correctly based on /etc/os-release
@@ -53,7 +53,7 @@ func fetchVersion(server string, appID string, groupID string, clientID string, 
 	raw, err := xml.MarshalIndent(request, "", " ")
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err)
-		return version
+		return nil, err
 	}
 
 	if debug {
@@ -63,13 +63,13 @@ func fetchVersion(server string, appID string, groupID string, clientID string, 
 	resp, err := client.Post(server+"/v1/update/", "text/xml", bytes.NewReader(raw))
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err)
-		return version
+		return nil, err
 	}
 
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err)
-		return version
+		return nil, err
 	}
 
 	if debug {
@@ -80,30 +80,26 @@ func fetchVersion(server string, appID string, groupID string, clientID string, 
 	err = xml.Unmarshal(body, oresp)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err)
-		return version
+		return nil, err
 	}
 
-	if oresp.Apps[0].UpdateCheck.Status == "noupdate" {
-		return version
-	} else if oresp.Apps[0].UpdateCheck.Status == "error-version" {
-		return version
-	}
-
-	newVersion := oresp.Apps[0].UpdateCheck.Manifest.Version
-
-	return newVersion
+	return oresp.Apps[0].UpdateCheck, nil
 }
 
-func runCmd(cmdName string, args []string, version string, oldVersion string, appID string) {
-	cmd := exec.Command(cmdName, args...)
-
+func prepareEnvironment(appID string, version string, oldVersion string, updateCheck *omaha.UpdateCheck) []string {
 	env := os.Environ()
 	env = append(env, "UPDATE_SERVICE_VERSION="+version)
 	if oldVersion != "" {
 		env = append(env, "UPDATE_SERVICE_OLD_VERSION="+oldVersion)
 	}
 	env = append(env, "UPDATE_SERVICE_APP_ID="+appID)
-	cmd.Env = env
+	env = append(env, "UPDATE_SERVICE_URL="+updateCheck.Urls.Urls[0].CodeBase)
+	return env
+}
+
+func runCmd(cmdName string, args []string, appID string, version string, oldVersion string, updateCheck *omaha.UpdateCheck) {
+	cmd := exec.Command(cmdName, args...)
+	cmd.Env = prepareEnvironment(appID, version, oldVersion, updateCheck)
 
 	stdout, err := cmd.StdoutPipe()
 	if err != nil {
@@ -140,16 +136,34 @@ func watch(c *cli.Context, service *update.Service, out *tabwriter.Writer) {
 	groupID := args[1]
 	clientID := args[2]
 
-	// TODO: Have a better way of asking omaha for whatever version
-	version = fetchVersion(server, appID, groupID, clientID, version, debug)
-	runCmd(args[3], args[4:], version, "", appID)
+	// initial check
+	updateCheck, err := fetchUpdateCheck(server, appID, groupID, clientID, version, debug)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, err.Error())
+		os.Exit(1)
+	}
+	runCmd(args[3], args[4:], appID, version, "", updateCheck)
 
 	for {
 		select {
 		case <-tick.C:
-			newVersion := fetchVersion(server, appID, groupID, clientID, version, debug)
+
+			updateCheck, err := fetchUpdateCheck(server, appID, groupID, clientID, version, debug)
+			if err != nil {
+				fmt.Fprintf(os.Stderr, err.Error())
+				os.Exit(1)
+			}
+
+			if updateCheck.Status == "noupdate" {
+				continue
+			} else if updateCheck.Status == "error-version" {
+				continue
+			}
+
+			newVersion := updateCheck.Manifest.Version
+
 			if newVersion != version {
-				runCmd(args[3], args[4:], newVersion, version, appID)
+				runCmd(args[3], args[4:], appID, newVersion, version, updateCheck)
 			}
 			version = newVersion
 		}
