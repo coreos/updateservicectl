@@ -27,6 +27,18 @@ token and update state.`,
 			Action:      handle(newGroup),
 		},
 		{
+			Name:        "update-group",
+			Usage:       "update-group [OPTION]... <appId> <groupId>",
+			Description: `Update an existing group.`,
+			Action:      handle(updateGroup),
+			Flags: []cli.Flag{
+				cli.StringFlag{"label", "", ""},
+				cli.StringFlag{"channel", "", ""},
+				cli.IntFlag{"updateCount", 0, "Number of instances per interval"},
+				cli.IntFlag{"updateInterval", 0, "Interval between updates"},
+			},
+		},
+		{
 			Name:        "delete-group",
 			Usage:       "delete-group <appId> <groupId>",
 			Description: `Delete a group given a token.`,
@@ -70,8 +82,8 @@ token and update state.`,
 }
 
 func formatGroup(group *update.Group) string {
-	return fmt.Sprintf("%s\t%s\t%s\t%s\t%s\n", group.Label, group.AppId, group.ChannelId,
-		group.Id, strconv.FormatBool(group.UpdatesPaused))
+	return fmt.Sprintf("%s\t%s\t%s\t%s\t%s\t%v\t%v\n", group.Label, group.AppId, group.ChannelId,
+		group.Id, strconv.FormatBool(group.UpdatesPaused), group.UpdateCount, group.UpdateInterval)
 }
 
 func listGroups(c *cli.Context, service *update.Service, out *tabwriter.Writer) {
@@ -217,6 +229,43 @@ func setUpdatesPaused(c *cli.Context, service *update.Service, out *tabwriter.Wr
 
 	updateCall := service.Group.Patch(args[0], args[1], group)
 	group, err = updateCall.Do()
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	fmt.Fprintf(out, "%s", formatGroup(group))
+
+	out.Flush()
+}
+
+func updateGroup(c *cli.Context, service *update.Service, out *tabwriter.Writer) {
+	args := c.Args()
+
+	if len(args) != 2 {
+		cli.ShowCommandHelp(c, "update-group")
+		os.Exit(1)
+	}
+
+	updateCount, updateInterval := c.Int("updateCount"), c.Int("updateInterval")
+
+	group := &update.Group{
+		Id:             args[1],
+		Label:          c.String("label"),
+		ChannelId:      c.String("channel"),
+		UpdateCount:    int64(updateCount),
+		UpdateInterval: int64(updateInterval),
+	}
+
+	// set update pooling based on other flags
+	if updateCount == 0 && updateInterval == 0 {
+		group.UpdatePooling = false
+	} else {
+		group.UpdatePooling = true
+	}
+
+	updateCall := service.Group.Patch(args[0], args[1], group)
+	group, err := updateCall.Do()
 
 	if err != nil {
 		log.Fatal(err)
