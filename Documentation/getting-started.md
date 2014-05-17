@@ -158,8 +158,8 @@ $ updatectl fakeclients -c 10 -m 30 -M 60 e96281a6-d1af-4bde-9a0a-97b76e56dc57 m
 Now let's see how the fake clients react when we promote the new package `1.1.0` to the master channel. First, let's set the rate limit of the group to slow down the roll-out. This will make it easier to see what's going on. Since we only have 10 clients, 2 updates per 60 seconds should be slow enough:
 
 ```
-$ updatectl update-group e96281a6-d1af-4bde-9a0a-97b76e56dc57 aca12080-0e1c-4baa-82eb-945b7416d6cd --updateCount 2 --updateInterval 60
-Fake Clients	e96281a6-d1af-4bde-9a0a-97b76e56dc57		aca12080-0e1c-4baa-82eb-945b7416d6cd	false	2	60
+$ updatectl update-group e96281a6-d1af-4bde-9a0a-97b76e56dc57 aca12080-0e1c-4baa-82eb-945b7416d6cd --channel master --updateCount 2 --updateInterval 60
+Fake Clients	e96281a6-d1af-4bde-9a0a-97b76e56dc57	master	aca12080-0e1c-4baa-82eb-945b7416d6cd	false	2	60
 ```
 
 Next, promote our `1.1.0` release on the `master` channel:
