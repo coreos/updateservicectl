@@ -8,6 +8,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"net/url"
 	"os"
 	"os/exec"
 	"text/tabwriter"
@@ -93,7 +94,15 @@ func prepareEnvironment(appID string, version string, oldVersion string, updateC
 		env = append(env, "UPDATE_SERVICE_OLD_VERSION="+oldVersion)
 	}
 	env = append(env, "UPDATE_SERVICE_APP_ID="+appID)
-	env = append(env, "UPDATE_SERVICE_URL="+updateCheck.Urls.Urls[0].CodeBase)
+
+	url, err := url.Parse(updateCheck.Urls.Urls[0].CodeBase)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, err.Error())
+		os.Exit(1)
+	}
+
+	url.Path = updateCheck.Manifest.Packages.Packages[0].Name
+	env = append(env, "UPDATE_SERVICE_URL="+url.String())
 	return env
 }
 
