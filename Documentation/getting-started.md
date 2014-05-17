@@ -120,18 +120,25 @@ $ updatectl new-group e96281a6-d1af-4bde-9a0a-97b76e56dc57 master fake1 "Fake Cl
 
 ### Uploading and Signing a Package
 
-Now that we have our application, group and channel set up, we can almost test an upgrade. The last step is to load in a new package. In this example, the new package will be fake, with an incremented version:
+Now that we have our application, group and channel set up, we can almost test an upgrade. The last step is to load in a new package. In this example, the new package will be fake, with an incremented version.
+
+Start by preparing a fake `update.gz` and fake `update.meta`:
 
 ```
-updatectl new-package e96281a6-d1af-4bde-9a0a-97b76e56dc57 1.1.0 \
-    --name foobar \
-    --path update.gz \
-    --size 23 \
-    --sha1sum fe7374bddde2ddf07f6bfcc728d115d14338964b \
-    --sha256sum b602d630f0a081840d0ca8fc4d35810e42806642b3127bb702d65c3df227d0f5 \
-    --signature ixi6Oebo \
-    --metadata-size 190
+touch update-1.1.0.gz
+echo '{"metadata_size": "0", "metadata_signature_rsa": "xxx"}' > update-1.1.0.meta
+``
+
+You can now use the `new-package` command to publish this fake package as version `1.1.0` (with a fake URL):
+
 ```
+updatectl new-package e96281a6-d1af-4bde-9a0a-97b76e56dc57 \
+    --version 1.1.0 \
+    --file update-1.1.0.gz \
+    --meta update-1.1.0.meta \
+    --url https://fakepackage.local/update-1.1.0.gz
+```
+
 ### Start Fake Clients
 
 `updatectl` contains a tool to help you simulate many fake clients running your applcation. We're going to start 10 fake clients that are checking for updates every 30-60 seconds. This is much much faster than usual but it will allow us to see our changes take place quickly.
@@ -152,6 +159,13 @@ Now let's see how the fake clients react when we promote the new package `1.1.0`
 
 ```
 INSERT COMMAND HERE
+```
+
+Next, promote our `1.1.0` release on the `master` channel:
+
+```
+$ updatectl update-channel e96281a6-d1af-4bde-9a0a-97b76e56dc57 master 1.1.0
+1.1.0
 ```
 
 In the terminal window running the fake clients, you should see a few of them start to upgrade. The output looks like:
