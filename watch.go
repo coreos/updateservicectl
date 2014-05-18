@@ -11,6 +11,7 @@ import (
 	"net/url"
 	"os"
 	"os/exec"
+	"path"
 	"text/tabwriter"
 	"time"
 
@@ -101,7 +102,7 @@ func prepareEnvironment(appID string, version string, oldVersion string, updateC
 		os.Exit(1)
 	}
 
-	url.Path = updateCheck.Manifest.Packages.Packages[0].Name
+	url.Path = path.Join(url.Path, updateCheck.Manifest.Packages.Packages[0].Name)
 	env = append(env, "UPDATE_SERVICE_URL="+url.String())
 	return env
 }
