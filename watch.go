@@ -160,8 +160,8 @@ func watch(c *cli.Context, service *update.Service, out *tabwriter.Writer) {
 
 			updateCheck, err := fetchUpdateCheck(server, appID, groupID, clientID, version, debug)
 			if err != nil {
-				fmt.Fprintf(os.Stderr, err.Error())
-				os.Exit(1)
+				log.Printf("warning: update check failed (%v)\n", err)
+				continue
 			}
 
 			if updateCheck.Status == "noupdate" {
