@@ -40,7 +40,7 @@ func PackageCommands() []cli.Command {
 				cli.StringFlag{"version", "", ""},
 				cli.StringFlag{"url", "", ""},
 				cli.StringFlag{"file", "update.gz", ""},
-				cli.StringFlag{"meta", "update.meta", ""},
+				cli.StringFlag{"meta", "", ""},
 			},
 		},
 	}
@@ -54,25 +54,27 @@ func newPackage(c *cli.Context, service *update.Service, out *tabwriter.Writer) 
 		os.Exit(1)
 	}
 
-	file := c.String("meta")
-	content, err := ioutil.ReadFile(file)
-	if err != nil {
-		log.Fatalf("reading %s failed: %v", file, err)
-	}
-	var meta MetadataFile
-	err = json.Unmarshal(content, &meta)
-	if err != nil {
-		log.Fatalf("reading %s failed: %v", file, err)
-	}
-
-	file = c.String("file")
+	file := c.String("file")
 	info, err := os.Stat(file)
 	if err != nil {
 		log.Fatalf("state of %s failed: %v", file, err)
 	}
-	content, err = ioutil.ReadFile(file)
+	content, err := ioutil.ReadFile(file)
 	if err != nil {
 		log.Fatalf("reading %s failed: %v", file, err)
+	}
+
+	file = c.String("meta")
+	var meta MetadataFile
+	if file != "" {
+		content, err = ioutil.ReadFile(file)
+		if err != nil {
+			log.Fatalf("reading %s failed: %v", file, err)
+		}
+		err = json.Unmarshal(content, &meta)
+		if err != nil {
+			log.Fatalf("reading %s failed: %v", file, err)
+		}
 	}
 
 	var sha1base64 bytes.Buffer
