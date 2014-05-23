@@ -83,6 +83,11 @@ func (c *Client) OmahaRequest(otype, result string, updateCheck, isPing bool) *o
 		event := app.AddEvent()
 		event.Type = otype
 		event.Result = result
+		if result == "0" {
+			event.ErrorCode = "2000"
+		} else {
+			event.ErrorCode = ""
+		}
 	}
 
 	return req
