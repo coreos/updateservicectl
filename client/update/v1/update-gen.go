@@ -12,13 +12,12 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/coreos-inc/roller/third_party/code.google.com/p/google-api-go-client/googleapi"
 	"io"
 	"net/http"
 	"net/url"
 	"strconv"
 	"strings"
-
-	"github.com/coreos-inc/updatectl/third_party/code.google.com/p/google-api-go-client/googleapi"
 )
 
 // Always reference these packages, just in case the auto-generated code

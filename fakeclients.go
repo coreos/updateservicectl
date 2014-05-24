@@ -19,6 +19,7 @@ import (
 
 var verbose bool
 var OEM string
+var minSleep int
 
 func FakeClientsCommand() []cli.Command {
 	return []cli.Command{
@@ -160,6 +161,7 @@ func (c *Client) SetVersion(resp *omaha.Response) {
 		failed, err := randFailRequest(r[0], r[1])
 		if failed {
 			log.Printf("failed to update in eventType: %s, eventResult: %s. Retrying.", r[0], r[1])
+			time.Sleep(time.Second * time.Duration(minSleep))
 			c.MakeRequest(r[0], r[1], false, false)
 			return
 		}
@@ -223,7 +225,7 @@ func fakeClients(c *cli.Context, service *update.Service, out *tabwriter.Writer)
 	version := args[2]
 
 	server := c.GlobalString("server")
-	minSleep := c.Int("minsleep")
+	minSleep = c.Int("minsleep")
 	maxSleep := c.Int("maxsleep")
 	clientsPerApp := c.Int("clientsperapp")
 	verbose = c.Bool("verbose")
