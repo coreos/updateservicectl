@@ -15,13 +15,13 @@ The update service is an optional hosted service provided by CoreOS and is not i
 Authentication for `updatectl` is done with a username and API key combination. Additional users and API keys can be provisioned by an existing user. Substitute the server address you were given during the activation process:
 
 ```
-updatectl -u admin -k d3b07384d113edec49eaa6238ad5ff00 -s https://example.update.core-os.net <command>
+updatectl -u user@example.com -k d3b07384d113edec49eaa6238ad5ff00 -s https://example.update.core-os.net <command>
 ```
 
 Since you'll have to provide these flags each time, it's recommended that you set up an alias in your bash profile. We'll assume that you've done this for the rest of this document:
 
 ```
-alias updatectl="/bin/updatectl -u admin -k d3b07384d113edec49eaa6238ad5ff00 -s https://example.update.core-os.net"
+alias updatectl="/bin/updatectl -u user@example.com -k d3b07384d113edec49eaa6238ad5ff00 -s https://example.update.core-os.net"
 ```
 
 ## Anatomy of an Update
@@ -103,7 +103,9 @@ You should now see it in the list of apps:
 
 ```
 $updatectl list-apps
-INSERT ME
+Id                                    Label     Description
+e96281a6-d1af-4bde-9a0a-97b76e56dc56  FakeApp   Fake app for testing
+f217d8ba-76e6-4b07-8136-049c54b30f21  CoreOS    Linux for Servers
 ```
 
 Next, create a channel that our group of fake clients will track. Let's call it `master` and start it out on version `1.0.0`:
@@ -122,11 +124,10 @@ $ updatectl new-group e96281a6-d1af-4bde-9a0a-97b76e56dc57 master fake1 "Fake Cl
 
 Now that we have our application, group and channel set up, we can almost test an upgrade. The last step is to load in a new package. In this example, the new package will be fake, with an incremented version.
 
-Start by preparing a fake `update.gz` and fake `update.meta`:
+Start by preparing a fake `update.gz`:
 
 ```
 touch update-1.1.0.gz
-echo '{"metadata_size": "0", "metadata_signature_rsa": "xxx"}' > update-1.1.0.meta
 ```
 
 You can now use the `new-package` command to publish this fake package as version `1.1.0` (with a fake URL):
@@ -135,7 +136,6 @@ You can now use the `new-package` command to publish this fake package as versio
 updatectl new-package e96281a6-d1af-4bde-9a0a-97b76e56dc57 \
     --version 1.1.0 \
     --file update-1.1.0.gz \
-    --meta update-1.1.0.meta \
     --url https://fakepackage.local/update-1.1.0.gz
 ```
 
@@ -176,6 +176,8 @@ In the terminal window running the fake clients, you should see a few of them st
 
 In the UI, navigate to the app and group, then click on "View All Graphs". You should see the instances slowly start to converge on version `1.1.0`:
 
+[screenshot]
+
 ## Further Reading
 
-Now that you've got the basics, checkout the [example update workflow]() for a practical application of the update service. If you're ready to start writing a custom update client for your application, the [Omaha protocol spec]() is a good place to start. The complete list of update service docs can be [found here]().
+Now that you've got the basics, checkout the [example update workflow](https://github.com/coreos-inc/updatectl/blob/master/Documentation/example-container-update.md) for a practical application of the update service. If you're ready to start writing a custom update client for your application, the [Omaha protocol spec](https://github.com/coreos-inc/updatectl/blob/master/Documentation/protocol.md) is a good place to start. The complete list of update service docs can be [found here](https://github.com/coreos-inc/updatectl/tree/master/Documentation).
