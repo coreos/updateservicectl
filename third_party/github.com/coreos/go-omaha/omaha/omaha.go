@@ -157,6 +157,7 @@ type Event struct {
 	Type            string   `xml:"eventtype,attr,omitempty"`
 	Result          string   `xml:"eventresult,attr,omitempty"`
 	PreviousVersion string   `xml:"previousversion,attr,omitempty"`
+	ErrorCode       string   `xml:"errorcode,attr,omitempty"`
 }
 
 type Urls struct {
@@ -245,6 +246,7 @@ var EventTypes = map[int]string{
 	100: "setup failure",
 	102: "COM server failure",
 	103: "setup update failure",
+	800: "ping",
 }
 
 var EventResults = map[int]string{

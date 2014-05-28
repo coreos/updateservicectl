@@ -1,6 +1,6 @@
 {
  "kind": "discovery#restDescription",
- "etag": "\"0NZZm4UuLZgEQBhMTwnFS1XIMrM/G3rkrDe1idwk8OLarfaSQ7A_wfc\"",
+ "etag": "\"0NZZm4UuLZgEQBhMTwnFS1XIMrM/Fmga-qhdaVomBW_uFFYezuzC5Y4\"",
  "discoveryVersion": "v1",
  "id": "update:v1",
  "name": "update",
@@ -259,6 +259,9 @@
      "type": "string"
     },
     "clientId": {
+     "type": "string"
+    },
+    "errorCode": {
      "type": "string"
     },
     "eventResult": {

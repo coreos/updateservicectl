@@ -12,12 +12,13 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/coreos-inc/updatectl/third_party/code.google.com/p/google-api-go-client/googleapi"
 	"io"
 	"net/http"
 	"net/url"
 	"strconv"
 	"strings"
+
+	"github.com/coreos-inc/updatectl/third_party/code.google.com/p/google-api-go-client/googleapi"
 )
 
 // Always reference these packages, just in case the auto-generated code
@@ -284,6 +285,8 @@ type ClientUpdate struct {
 	AppId string `json:"appId,omitempty"`
 
 	ClientId string `json:"clientId,omitempty"`
+
+	ErrorCode string `json:"errorCode,omitempty"`
 
 	EventResult string `json:"eventResult,omitempty"`
 
