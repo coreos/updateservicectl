@@ -39,6 +39,12 @@ token and update state.`,
 			Action:      handle(pauseGroup),
 		},
 		{
+			Name:        "unpause-group",
+			Usage:       "unpause-group <appId> <groupId>",
+			Description: `Unpause a group given an id.`,
+			Action:      handle(unpauseGroup),
+		},
+		{
 			Name:        "rollup-group-versions",
 			Usage:       "rollup-group-versions [OPTION]... <appId> <groupId>",
 			Description: "Rollup versions from events by time.",
@@ -184,6 +190,15 @@ func deleteGroup(c *cli.Context, service *update.Service, out *tabwriter.Writer)
 }
 
 func pauseGroup(c *cli.Context, service *update.Service, out *tabwriter.Writer) {
+	setUpdatesPaused(c, service, out, true)
+}
+
+func unpauseGroup(c *cli.Context, service *update.Service, out *tabwriter.Writer) {
+	setUpdatesPaused(c, service, out, false)
+}
+
+// Helper function for pause/unpause-group commands
+func setUpdatesPaused(c *cli.Context, service *update.Service, out *tabwriter.Writer, paused bool) {
 	args := c.Args()
 
 	if len(args) != 2 {
@@ -198,7 +213,7 @@ func pauseGroup(c *cli.Context, service *update.Service, out *tabwriter.Writer) 
 		log.Fatal(err)
 	}
 
-	group.UpdatesPaused = true
+	group.UpdatesPaused = paused
 
 	updateCall := service.Group.Patch(args[0], args[1], group)
 	group, err = updateCall.Do()
