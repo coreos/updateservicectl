@@ -127,7 +127,7 @@ Start by preparing a fake `update.gz` and fake `update.meta`:
 ```
 touch update-1.1.0.gz
 echo '{"metadata_size": "0", "metadata_signature_rsa": "xxx"}' > update-1.1.0.meta
-``
+```
 
 You can now use the `new-package` command to publish this fake package as version `1.1.0` (with a fake URL):
 
