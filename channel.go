@@ -13,6 +13,12 @@ import (
 func ChannelCommands() []cli.Command {
 	return []cli.Command{
 		{
+			Name:        "list-channels",
+			Usage:       "list-channels <appId>",
+			Description: `List all channels for an application.`,
+			Action:      handle(listChannels),
+		},
+		{
 			Name:        "update-channel",
 			Usage:       "update-channel <appId> <channel> <version>",
 			Description: `Update a given channel given a group, app, channel and version.`,
@@ -20,6 +26,31 @@ func ChannelCommands() []cli.Command {
 		},
 	}
 }
+
+func formatChannel(channel *update.AppChannel) string {
+	return fmt.Sprintf("%s\t%s\n", channel.Label, channel.Version)
+}
+
+func listChannels(c *cli.Context, service *update.Service, out *tabwriter.Writer) {
+	args := c.Args()
+
+	if len(args) != 1 {
+		cli.ShowCommandHelp(c, "list-channels")
+		os.Exit(1)
+	}
+
+	listCall := service.Channel.List(args[0])
+	list, err := listCall.Do()
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Fprint(out, "Label\tVersion\n")
+	for _, channel := range list.Items {
+		fmt.Fprintf(out, "%s", formatChannel(channel))
+	}
+	out.Flush()
+}
+
 
 func updateChannel(c *cli.Context, service *update.Service, out *tabwriter.Writer) {
 	args := c.Args()
