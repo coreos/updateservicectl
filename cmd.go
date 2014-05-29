@@ -47,8 +47,8 @@ func main() {
 	app.Flags = []cli.Flag{
 		cli.StringFlag{"server, s", "http://localhost:8000", "Update server to connect to"},
 		cli.BoolFlag{"debug, D", "Output debugging info to stderr"},
-		cli.StringFlag{"user, u", "", "API Username"},
-		cli.StringFlag{"key, k", "", "API Key"},
+		cli.StringFlag{"user, u", os.Getenv("UPDATECTL_USER"), "API Username"},
+		cli.StringFlag{"key, k", os.Getenv("UPDATECTL_KEY"), "API Key"},
 	}
 
 	app.Commands = append(app.Commands, GroupCommands()...)
