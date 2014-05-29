@@ -6,6 +6,7 @@ import (
 	"os"
 	"text/tabwriter"
 
+	"github.com/coreos-inc/updatectl/third_party/code.google.com/p/go-uuid/uuid"
 	"github.com/coreos-inc/updatectl/client/update/v1"
 	"github.com/coreos-inc/updatectl/third_party/github.com/codegangsta/cli"
 )
@@ -20,8 +21,14 @@ token and update state.`,
 			Action: handle(listApps),
 		},
 		{
+			Name:        "create-app",
+			Usage:       "create-app [<appId>] <label> <description>",
+			Description: `Create a new application. If appId is not provided it will be created randomly.`,
+			Action:      handle(createApp),
+		},
+		{
 			Name:        "update-app",
-			Usage:       "update-app <appId> <channelId> <label>",
+			Usage:       "update-app <appId> <label> <description>",
 			Description: `Update an app given a label.`,
 			Action:      handle(updateApp),
 		},
@@ -54,13 +61,32 @@ func listApps(c *cli.Context, service *update.Service, out *tabwriter.Writer) {
 	out.Flush()
 }
 
-func updateApp(c *cli.Context, service *update.Service, out *tabwriter.Writer) {
+func createApp(c *cli.Context, service *update.Service, out *tabwriter.Writer) {
 	args := c.Args()
 
+	if !(len(args) == 2 || len(args) == 3) {
+		cli.ShowCommandHelp(c, "create-app")
+		os.Exit(1)
+	}
+
+	if len(args) == 2 {
+		appId := uuid.New()
+		args = append([]string{appId}, args...)
+	}
+
+	updateAppHelper(c, service, out, args)
+}
+
+func updateApp(c *cli.Context, service *update.Service, out *tabwriter.Writer) {
+	args := c.Args()
 	if len(args) != 3 {
 		cli.ShowCommandHelp(c, "update-app")
 		os.Exit(1)
 	}
+	updateAppHelper(c, service, out, args)
+}
+
+func updateAppHelper(c *cli.Context, service *update.Service, out *tabwriter.Writer, args []string) {
 	appReq := &update.AppUpdateReq{Label: args[1], Description: args[2]}
 	call := service.App.Update(args[0], appReq)
 	app, err := call.Do()
