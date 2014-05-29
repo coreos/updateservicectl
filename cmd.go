@@ -7,6 +7,7 @@ import (
 	"text/tabwriter"
 
 	"github.com/coreos-inc/updatectl/auth"
+	"github.com/coreos-inc/updatectl/version"
 	"github.com/coreos-inc/updatectl/client/update/v1"
 	"github.com/coreos-inc/updatectl/third_party/github.com/codegangsta/cli"
 )
@@ -42,7 +43,7 @@ func main() {
 	app.Name = "updatectl"
 	app.Usage = "updatectl is a command line driven interface to the roller."
 	app.Action = handle(listGroups)
-	app.Version = "0.1.0"
+	app.Version = version.SemVersion.String()
 	app.Flags = []cli.Flag{
 		cli.StringFlag{"server, s", "http://localhost:8000", "Update server to connect to"},
 		cli.BoolFlag{"debug, D", "Output debugging info to stderr"},
