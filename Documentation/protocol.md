@@ -72,10 +72,40 @@ The most important parts of the response are the `codebase`, which points to the
 
 ## Report Progress, Errors and Completion
 
-[not sure how to capture these...]
-must report progress every X seconds
-must report all errors
-must report success
+Events are submitted to the update service as the updater passes certain milestones such as starting the download, installing the update and confirming that the update was complete and successful. Events are specified in numerical codes corresponding to the event initiated and the resulting state. You can find a [full list of the event codes](https://code.google.com/p/omaha/wiki/ServerProtocol#event_Element) in Google's documentation. The CoreOS update service implements a subset of these events:
+
+| Event Description | Event Type | Event Result |
+|-------------------|------------|--------------|
+| Downloading latest version. | `1` | `13` |
+| Update package arrived successfully. | `1` | `14` |
+| Updater has processed and applied package. | `1` | `3` |
+| Install success. Update completion prevented by instance. | `1` | `800` |
+| Instances upgraded to current channel version. | `3` | `2` |
+| Instance reported an error during an update step. | `0` | `3` |
+
+For example, a `3:2` represents a successful update and a successful reboot. Here's the request and response:
+
+### Request
+
+```
+<?xml version="1.0" encoding="UTF-8"?>
+<request protocol="3.0">
+ <app appid="e96281a6-d1af-4bde-9a0a-97b76e56dc57" version="1.0.0" track="beta" bootid="{fake-client-018}">
+  <event eventtype="3" eventresult="2"></event>
+ </app>
+</request>
+```
+
+### Response
+
+The protocol dictates that each event should be acknowledged even if no data needs to be returned:
+
+```
+<response protocol="3.0" server="update.core-os.net">
+  <daystart elapsed_seconds="0"></daystart>
+  <app appid="e96281a6-d1af-4bde-9a0a-97b76e56dc57" status="ok"></app>
+</response>
+```
 
 ## Further Reading
 
