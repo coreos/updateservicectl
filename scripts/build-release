@@ -1,0 +1,75 @@
+#!/bin/sh -e
+
+function usage {
+    echo "usage: ${0} <git-ref>"
+    exit 1
+}
+
+VER=$1
+
+if [ -z $VER ]; then
+    usage
+fi
+
+function checkout {
+    proj=${1}
+    ver=${2}
+
+    if [ ! -d ${proj} ]; then
+        git clone git@github.com:coreos-inc/${proj}.git
+    fi
+
+    cd ${proj}
+    git checkout master
+    git fetch --all
+    git reset --hard origin/master
+    git checkout $ver
+    cd -
+}
+
+function build {
+    proj=${1}
+    ver=${2}
+
+    cd ${proj}
+    ./build
+    cd -
+}
+
+function package {
+    proj=${1}
+    target=${2}
+
+    ccdir="${proj}/bin/${GOOS}_${GOARCH}"
+    if [ -d ${ccdir} ]; then
+        cp ${ccdir}/${proj}* ${target}
+    else
+        cp ${proj}/bin/${proj} ${target}
+    fi
+
+    cp ${proj}/README.md ${target}/README.md
+    cp -R ${proj}/Documentation ${target}
+}
+
+mkdir release
+cd release
+
+checkout updatectl ${VER}
+
+for i in darwin windows linux; do
+    export GOOS=${i}
+    export GOARCH="amd64"
+
+    build updatectl ${VER}
+
+    TARGET="updatectl-${VER}-${GOOS}-${GOARCH}"
+    mkdir ${TARGET}
+
+    package updatectl ${TARGET}
+
+    if [ ${GOOS} == "linux" ]; then
+        tar cvvfz ${TARGET}.tar.gz ${TARGET}
+    else
+        zip -r ${TARGET}.zip ${TARGET}
+    fi
+done
