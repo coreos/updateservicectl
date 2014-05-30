@@ -9,7 +9,7 @@ import (
 	"github.com/coreos-inc/updatectl/auth"
 	"github.com/coreos-inc/updatectl/version"
 	"github.com/coreos-inc/updatectl/client/update/v1"
-	"github.com/coreos-inc/updatectl/third_party/github.com/codegangsta/cli"
+	"github.com/codegangsta/cli"
 )
 
 type handlerFunc func(*cli.Context, *update.Service, *tabwriter.Writer)

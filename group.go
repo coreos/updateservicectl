@@ -8,7 +8,7 @@ import (
 	"text/tabwriter"
 
 	"github.com/coreos-inc/updatectl/client/update/v1"
-	"github.com/coreos-inc/updatectl/third_party/github.com/codegangsta/cli"
+	"github.com/codegangsta/cli"
 )
 
 func GroupCommands() []cli.Command {

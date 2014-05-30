@@ -10,9 +10,9 @@ import (
 	"text/tabwriter"
 	"time"
 
-	"github.com/coreos-inc/updatectl/third_party/code.google.com/p/go-uuid/uuid"
-	"github.com/coreos-inc/updatectl/third_party/github.com/codegangsta/cli"
-	"github.com/coreos-inc/updatectl/third_party/github.com/coreos/go-omaha/omaha"
+	"code.google.com/p/go-uuid/uuid"
+	"github.com/codegangsta/cli"
+	"github.com/coreos/go-omaha/omaha"
 
 	"github.com/coreos-inc/updatectl/client/update/v1"
 )

@@ -6,9 +6,9 @@ import (
 	"os"
 	"text/tabwriter"
 
-	"github.com/coreos-inc/updatectl/third_party/code.google.com/p/go-uuid/uuid"
+	"code.google.com/p/go-uuid/uuid"
 	"github.com/coreos-inc/updatectl/client/update/v1"
-	"github.com/coreos-inc/updatectl/third_party/github.com/codegangsta/cli"
+	"github.com/codegangsta/cli"
 )
 
 func AppCommands() []cli.Command {

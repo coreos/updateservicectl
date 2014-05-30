@@ -1,7 +1,7 @@
 package version
 
 import (
-	"github.com/coreos-inc/updatectl/third_party/github.com/coreos/go-semver/semver"
+	"github.com/coreos/go-semver/semver"
 )
 
 const Version = "0.1.0+git"
