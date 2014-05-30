@@ -18,7 +18,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/coreos-inc/updatectl/third_party/code.google.com/p/google-api-go-client/googleapi"
+	"code.google.com/p/google-api-go-client/googleapi"
 )
 
 // Always reference these packages, just in case the auto-generated code

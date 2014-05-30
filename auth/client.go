@@ -4,7 +4,7 @@ import (
 	"crypto/sha256"
 	"net/http"
 
-	"github.com/coreos-inc/updatectl/third_party/github.com/tent/hawk-go"
+	"github.com/tent/hawk-go"
 )
 
 var DefaultHawkHasher = sha256.New

@@ -6,7 +6,7 @@ import (
 	"text/tabwriter"
 
 	update "github.com/coreos-inc/updatectl/client/update/v1"
-	"github.com/coreos-inc/updatectl/third_party/github.com/codegangsta/cli"
+	"github.com/codegangsta/cli"
 )
 
 func ClientUpdateCommands() []cli.Command {
