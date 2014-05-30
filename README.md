@@ -20,11 +20,8 @@ Once you have gained access to your update service installation, check out the [
 
 Major releases for all platforms are listed under the [Releases tab](https://github.com/coreos-inc/updatectl/releases) on this repository. If you'd like to build your own client:
 
-1. Configure a [Go path](http://golang.org/doc/code.html#GOPATH)
-2. `go get github.com/coreos-inc/updatectl`
-3. `cd $GOPATH/src/github.com/coreos-inc/updatectl`
-4. `go build`
-5. The client is now built. Use it with `./updatectl <command>`
+1. `./build`
+2. The client is now built. Use it with `./updatectl <command>`
 
 ## Documentation
 
