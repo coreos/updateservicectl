@@ -247,25 +247,41 @@ func updateGroup(c *cli.Context, service *update.Service, out *tabwriter.Writer)
 		os.Exit(1)
 	}
 
-	updateCount, updateInterval := c.Int("updateCount"), c.Int("updateInterval")
+	call := service.Group.Get(args[0], args[1])
+	group, err := call.Do()
 
-	group := &update.Group{
-		Id:             args[1],
-		Label:          c.String("label"),
-		ChannelId:      c.String("channel"),
-		UpdateCount:    int64(updateCount),
-		UpdateInterval: int64(updateInterval),
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	checkUpdatePooling := false
+	if c.IsSet("updateCount") {
+		group.UpdateCount = int64(c.Int("updateCount"))
+		checkUpdatePooling = true
+	}
+	if c.IsSet("updateInterval") {
+		group.UpdateInterval = int64(c.Int("updateInterval"))
+		checkUpdatePooling = true
+	}
+	if c.IsSet("label") {
+		group.Label = c.String("label")
+	}
+	if c.IsSet("channel") {
+		group.ChannelId = c.String("channel")
 	}
 
 	// set update pooling based on other flags
-	if updateCount == 0 && updateInterval == 0 {
-		group.UpdatePooling = false
-	} else {
-		group.UpdatePooling = true
+	// this only changes if the user changed a value
+	if checkUpdatePooling {
+		if group.UpdateCount == 0 && group.UpdateInterval == 0 {
+			group.UpdatePooling = false
+		} else {
+			group.UpdatePooling = true
+		}
 	}
 
 	updateCall := service.Group.Patch(args[0], args[1], group)
-	group, err := updateCall.Do()
+	group, err = updateCall.Do()
 
 	if err != nil {
 		log.Fatal(err)
