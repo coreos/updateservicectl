@@ -23,6 +23,17 @@ Major releases for all platforms are listed under the [Releases tab](https://git
 1. `./build`
 2. The client is now built. Use it with `./updatectl <command>`
 
+## Creating Releases
+
+You can build a release of a specfic version by running
+`scripts/build-release <git-tag-of-version>`.
+
+If you are a CoreOS developer, you may bump the version with
+`scripts/bump-version <version>`. You can do this and build a release
+at the same time with `scripts/new-release`.
+
+Example: `scripts/new-release 0.2.0+git`.
+
 ## Documentation
 
 [Using the Client](Documentation/client.md) - Read about all of the supported commands in `updatectl`
