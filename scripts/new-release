@@ -1,0 +1,17 @@
+#!/bin/sh -e
+
+function usage {
+    echo "usage: $0 <new-version>"
+    exit 1
+}
+
+VER=$1
+
+if [ -z $VER ]; then
+    usage
+fi
+
+BASEDIR=$(dirname $0)
+
+$BASEDIR/bump-version $VER
+$BASEDIR/build-release v$VER
