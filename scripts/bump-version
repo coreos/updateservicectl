@@ -1,0 +1,34 @@
+#!/bin/sh -e
+
+function usage {
+    echo "usage: $0 <version>"
+    exit 1
+}
+
+VER=$1
+
+if [ -z $VER ]; then
+    usage
+fi
+
+BASEDIR=$(dirname $0)/..
+cd $BASEDIR
+
+VERSION_FILE=version/version.go
+
+# edit version.go
+cat <<EOF > $VERSION_FILE
+package version
+
+const Version = "${VER}"
+EOF
+
+# Commit changes to version.go
+git add version/version.go
+git commit -m "chore(version): ${VER}"
+
+# Tag the latest commit with the verison number.
+git tag v${VER} --sign -m "v${VER}"
+echo "New version tagged at v$VER. Pushing to coreos-inc/updatectl."
+
+git push git@github.com:coreos-inc/updatectl v${VER}
