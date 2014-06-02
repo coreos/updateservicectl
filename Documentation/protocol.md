@@ -76,12 +76,12 @@ Events are submitted to the update service as the updater passes certain milesto
 
 | Event Description | Event Type | Event Result |
 |-------------------|------------|--------------|
-| Downloading latest version. | `1` | `13` |
-| Update package arrived successfully. | `1` | `14` |
-| Updater has processed and applied package. | `1` | `3` |
-| Install success. Update completion prevented by instance. | `1` | `800` |
+| Downloading latest version. | `13` | `1` |
+| Update package arrived successfully. | `14` | `1` |
+| Updater has processed and applied package. | `3` | `1` |
+| Install success. Update completion prevented by instance. | `800` | `1` |
 | Instances upgraded to current channel version. | `3` | `2` |
-| Instance reported an error during an update step. | `0` | `3` |
+| Instance reported an error during an update step. | `3` | `0` |
 
 For example, a `3:2` represents a successful update and a successful reboot. Here's the request and response:
 
