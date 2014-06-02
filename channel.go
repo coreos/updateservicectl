@@ -3,40 +3,33 @@ package main
 import (
 	"fmt"
 	"log"
-	"os"
 	"text/tabwriter"
 
 	"github.com/coreos-inc/updatectl/client/update/v1"
-	"github.com/codegangsta/cli"
 )
 
-func ChannelCommands() []cli.Command {
-	return []cli.Command{
-		{
-			Name:        "list-channels",
-			Usage:       "list-channels <appId>",
-			Description: `List all channels for an application.`,
-			Action:      handle(listChannels),
-		},
-		{
-			Name:        "update-channel",
-			Usage:       "update-channel <appId> <channel> <version>",
-			Description: `Update a given channel given a group, app, channel and version.`,
-			Action:      handle(updateChannel),
-		},
+var (
+	cmdListChannels = &Command{
+		Name:        "list-channels",
+		Usage:       "<appId>",
+		Description: `List all channels for an application.`,
+		Run:         listChannels,
 	}
-}
+	cmdUpdateChannel = &Command{
+		Name:        "update-channel",
+		Usage:       "<appId> <channel> <version>",
+		Description: `Update a given channel given a group, app, channel and version.`,
+		Run:         updateChannel,
+	}
+)
 
 func formatChannel(channel *update.AppChannel) string {
 	return fmt.Sprintf("%s\t%s\n", channel.Label, channel.Version)
 }
 
-func listChannels(c *cli.Context, service *update.Service, out *tabwriter.Writer) {
-	args := c.Args()
-
+func listChannels(args []string, service *update.Service, out *tabwriter.Writer) int {
 	if len(args) != 1 {
-		cli.ShowCommandHelp(c, "list-channels")
-		os.Exit(1)
+		return ERROR_USAGE
 	}
 
 	listCall := service.Channel.List(args[0])
@@ -49,15 +42,12 @@ func listChannels(c *cli.Context, service *update.Service, out *tabwriter.Writer
 		fmt.Fprintf(out, "%s", formatChannel(channel))
 	}
 	out.Flush()
+	return OK
 }
 
-
-func updateChannel(c *cli.Context, service *update.Service, out *tabwriter.Writer) {
-	args := c.Args()
-
+func updateChannel(args []string, service *update.Service, out *tabwriter.Writer) int {
 	if len(args) != 3 {
-		fmt.Println("usage: <appid> <channel> <version>")
-		os.Exit(1)
+		return ERROR_USAGE
 	}
 
 	channelReq := &update.ChannelRequest{Version: args[2]}
@@ -70,4 +60,5 @@ func updateChannel(c *cli.Context, service *update.Service, out *tabwriter.Write
 
 	fmt.Fprintf(out, "%s\n", channel.Version)
 	out.Flush()
+	return OK
 }

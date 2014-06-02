@@ -16,25 +16,27 @@ import (
 	"time"
 
 	"code.google.com/p/go-uuid/uuid"
-	"github.com/codegangsta/cli"
 	"github.com/coreos/go-omaha/omaha"
 
 	"github.com/coreos-inc/updatectl/client/update/v1"
 )
 
-func WatchCommands() []cli.Command {
-	return []cli.Command{
-		{
-			Name:        "watch",
-			Usage:       "watch [OPTION]... <appID> <groupID> <clientID> <cmd> <args>",
-			Description: `Watch for app versions and exec a script`,
-			Action:      handle(watch),
-			Flags: []cli.Flag{
-				cli.IntFlag{"interval, i", 1, "Update polling interval"},
-				cli.StringFlag{"version, v", "0.0.0", "Starting version number"},
-			},
-		},
+var (
+	watchFlags struct {
+		interval int
+		version  string
 	}
+	cmdWatch = &Command{
+		Name:        "watch",
+		Usage:       "[OPTION]... <appID> <groupID> <clientID> <cmd> <args>",
+		Description: `Watch for app versions and exec a script`,
+		Run:         watch,
+	}
+)
+
+func init() {
+	cmdWatch.Flags.IntVar(&watchFlags.interval, "interval", 1, "Update polling interval")
+	cmdWatch.Flags.StringVar(&watchFlags.version, "version", "0.0.0", "Starting version number")
 }
 
 func fetchUpdateCheck(server string, appID string, groupID string, clientID string, version string, debug bool) (*omaha.UpdateCheck, error) {
@@ -131,15 +133,14 @@ func runCmd(cmdName string, args []string, appID string, version string, oldVers
 	cmd.Wait()
 }
 
-func watch(c *cli.Context, service *update.Service, out *tabwriter.Writer) {
-	tick := time.NewTicker(time.Second * time.Duration(c.Int("interval")))
-	server := c.GlobalString("server")
-	debug := c.GlobalBool("debug")
-	version := c.String("version")
-	args := c.Args()
+func watch(args []string, service *update.Service, out *tabwriter.Writer) int {
+	tick := time.NewTicker(time.Second * time.Duration(watchFlags.interval))
+	server := globalFlags.Server
+	debug := globalFlags.Debug
+	version := watchFlags.version
 
 	if len(args) < 4 {
-		log.Fatalf("appID, groupID and clientID required")
+		return ERROR_USAGE
 	}
 
 	appID := args[0]
@@ -180,4 +181,5 @@ func watch(c *cli.Context, service *update.Service, out *tabwriter.Writer) {
 	}
 
 	tick.Stop()
+	return OK
 }

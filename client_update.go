@@ -6,42 +6,47 @@ import (
 	"text/tabwriter"
 
 	update "github.com/coreos-inc/updatectl/client/update/v1"
-	"github.com/codegangsta/cli"
 )
 
-func ClientUpdateCommands() []cli.Command {
-	return []cli.Command{
-		{
-			Name:        "list-clientupdates",
-			Usage:       "list-clientupdates [OPTION]...",
-			Description: "Generates a list of client updates.",
-			Action:      handle(listClientUpdates),
-			Flags: []cli.Flag{
-				cli.StringFlag{"group-id", "", "Group id"},
-				cli.StringFlag{"app-id", "", "App id"},
-				cli.IntFlag{"start", 0, "Start date filter"},
-				cli.IntFlag{"end", 0, "End date filter"},
-			},
-		},
-		{
-			Name:        "list-appversions",
-			Usage:       "list-appversions [OPTION]...",
-			Description: "Generates a list of Apps/versions with client count.",
-			Action:      handle(listAppVersions),
-			Flags: []cli.Flag{
-				cli.IntFlag{"start", 0, "Start date filter"},
-				cli.IntFlag{"end", 0, "End date filter"},
-			},
-		},
+var (
+	clientUpdateFlags struct {
+		groupId string
+		appId   string
+		start   int64
+		end     int64
 	}
+
+	cmdListClientUpdates = &Command{
+		Name:        "list-clientupdates",
+		Usage:       "[OPTION]...",
+		Description: "Generates a list of client updates.",
+		Run:         listClientUpdates,
+	}
+
+	cmdListAppVersions = &Command{
+		Name:        "list-appversions",
+		Usage:       "[OPTION]...",
+		Description: "Generates a list of apps/versions with client count.",
+		Run:         listAppVersions,
+	}
+)
+
+func init() {
+	cmdListClientUpdates.Flags.StringVar(&clientUpdateFlags.groupId, "group-id", "", "Group id")
+	cmdListClientUpdates.Flags.StringVar(&clientUpdateFlags.appId, "app-id", "", "App id")
+	cmdListClientUpdates.Flags.Int64Var(&clientUpdateFlags.start, "start", 0, "Start date filter")
+	cmdListClientUpdates.Flags.Int64Var(&clientUpdateFlags.end, "end", 0, "End date filter")
+
+	cmdListAppVersions.Flags.Int64Var(&clientUpdateFlags.start, "start", 0, "Start date filter")
+	cmdListAppVersions.Flags.Int64Var(&clientUpdateFlags.end, "end", 0, "End date filter")
 }
 
-func listClientUpdates(c *cli.Context, service *update.Service, out *tabwriter.Writer) {
+func listClientUpdates(args []string, service *update.Service, out *tabwriter.Writer) int {
 	call := service.Clientupdate.List()
-	call.DateStart(int64(c.Int("start")))
-	call.DateEnd(int64(c.Int("end")))
-	call.GroupId(c.String("group-id"))
-	call.AppId(c.String("app-id"))
+	call.DateStart(clientUpdateFlags.start)
+	call.DateEnd(clientUpdateFlags.end)
+	call.GroupId(clientUpdateFlags.groupId)
+	call.AppId(clientUpdateFlags.appId)
 	list, err := call.Do()
 
 	if err != nil {
@@ -55,20 +60,21 @@ func listClientUpdates(c *cli.Context, service *update.Service, out *tabwriter.W
 			cl.Status, cl.Oem)
 	}
 	out.Flush()
+	return OK
 }
 
-func listAppVersions(c *cli.Context, service *update.Service, out *tabwriter.Writer) {
+func listAppVersions(args []string, service *update.Service, out *tabwriter.Writer) int {
 	call := service.Appversion.List()
 
-	call.GroupId(c.String("group-id"))
-	call.AppId(c.String("app-id"))
+	call.GroupId(clientUpdateFlags.groupId)
+	call.AppId(clientUpdateFlags.appId)
 
-	if c.Int("start") != 0 {
-		call.DateStart(int64(c.Int("start")))
+	if clientUpdateFlags.start != 0 {
+		call.DateStart(clientUpdateFlags.start)
 	}
 
-	if c.Int("end") != 0 {
-		call.DateEnd(int64(c.Int("end")))
+	if clientUpdateFlags.end != 0 {
+		call.DateEnd(clientUpdateFlags.end)
 	}
 
 	list, err := call.Do()
@@ -82,4 +88,5 @@ func listAppVersions(c *cli.Context, service *update.Service, out *tabwriter.Wri
 		fmt.Fprintf(out, "%s\t%s\t%s\t%d\n", cl.AppId, cl.GroupId, cl.Version, cl.Count)
 	}
 	out.Flush()
+	return OK
 }

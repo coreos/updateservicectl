@@ -3,82 +3,86 @@ package main
 import (
 	"fmt"
 	"log"
-	"os"
 	"strconv"
 	"text/tabwriter"
 
 	"github.com/coreos-inc/updatectl/client/update/v1"
-	"github.com/codegangsta/cli"
 )
 
-func GroupCommands() []cli.Command {
-	return []cli.Command{
-		{
-			Name:  "list-groups",
-			Usage: "list-groups <appId>",
-			Description: `List all of the groups that exist including their label,
-token and update state.`,
-			Action: handle(listGroups),
-		},
-		{
-			Name:        "new-group",
-			Usage:       "new-group <appId> <channelId> <groupId> <appLabel>",
-			Description: `Create a new group given a label.`,
-			Action:      handle(newGroup),
-		},
-		{
-			Name:        "update-group",
-			Usage:       "update-group [OPTION]... <appId> <groupId>",
-			Description: `Update an existing group.`,
-			Action:      handle(updateGroup),
-			Flags: []cli.Flag{
-				cli.StringFlag{"label", "", "Label to easily identify this group"},
-				cli.StringFlag{"channel", "", "Name of channel (defaults to nil)"},
-				cli.IntFlag{"updateCount", 0, "Number of instances per interval"},
-				cli.IntFlag{"updateInterval", 0, "Interval between updates"},
-			},
-		},
-		{
-			Name:        "delete-group",
-			Usage:       "delete-group <appId> <groupId>",
-			Description: `Delete a group given a token.`,
-			Action:      handle(deleteGroup),
-		},
-		{
-			Name:        "pause-group",
-			Usage:       "pause-group <appId> <groupId>",
-			Description: `Pause a group given an id.`,
-			Action:      handle(pauseGroup),
-		},
-		{
-			Name:        "unpause-group",
-			Usage:       "unpause-group <appId> <groupId>",
-			Description: `Unpause a group given an id.`,
-			Action:      handle(unpauseGroup),
-		},
-		{
-			Name:        "rollup-group-versions",
-			Usage:       "rollup-group-versions [OPTION]... <appId> <groupId>",
-			Description: "Rollup versions from events by time.",
-			Action:      handle(rollupGroupVersions),
-			Flags: []cli.Flag{
-				cli.IntFlag{"resolution", 60, "60, 3600 or 86400 seconds"},
-				cli.IntFlag{"start", 0, "Start date filter"},
-				cli.IntFlag{"end", 0, "End date filter"},
-			},
-		},
-		{
-			Name:        "rollup-group-events",
-			Usage:       "rollup-group-events [OPTION]... <appId> <groupId>",
-			Description: "Rollup versions from events by time.",
-			Action:      handle(rollupGroupEvents),
-			Flags: []cli.Flag{
-				cli.IntFlag{"resolution", 60, "60, 3600 or 86400 seconds"},
-				cli.IntFlag{"start", 0, "Start date filter"},
-				cli.IntFlag{"end", 0, "End date filter"},
-			},
-		},
+var (
+	groupFlags struct {
+		label          string
+		channel        string
+		start          int64
+		end            int64
+		resolution     int64
+		updateCount    int64
+		updateInterval int64
 	}
+
+	cmdListGroups = &Command{
+		Name:    "list-groups",
+		Usage:   "<appId>",
+		Summary: `List all of the groups that exist including their label, token and update state.`,
+		Run:     listGroups,
+	}
+	cmdNewGroup = &Command{
+		Name:    "new-group",
+		Usage:   "<appId> <channelId> <groupId> <appLabel>",
+		Summary: `Create a new group given a label.`,
+		Run:     newGroup,
+	}
+	cmdDeleteGroup = &Command{
+		Name:    "delete-group",
+		Usage:   "<appId> <groupId>",
+		Summary: `Delete a group given a token.`,
+		Run:     deleteGroup,
+	}
+	cmdUpdateGroup = &Command{
+		Name:        "update-group",
+		Usage:       "[OPTION]... <appId> <groupId>",
+		Description: `Update an existing group.`,
+		Run:         updateGroup,
+	}
+	cmdPauseGroup = &Command{
+		Name:    "pause-group",
+		Usage:   "<appId> <groupId>",
+		Summary: `Pause a group given an id.`,
+		Run:     pauseGroup,
+	}
+	cmdUnpauseGroup = &Command{
+		Name:    "unpause-group",
+		Usage:   "<appId> <groupId>",
+		Summary: `Unpause a group given an id.`,
+		Run:     unpauseGroup,
+	}
+	cmdRollupGroupVersions = &Command{
+		Name:    "rollup-group-versions",
+		Usage:   "[OPTION]... <appId> <groupId>",
+		Summary: "Rollup versions from events by time.",
+		Run:     rollupGroupVersions,
+	}
+	cmdRollupGroupEvents = &Command{
+		Name:    "rollup-group-events",
+		Usage:   "[OPTION]... <appId> <groupId>",
+		Summary: "Rollup events from events by time.",
+		Run:     rollupGroupEvents,
+	}
+)
+
+func init() {
+	cmdUpdateGroup.Flags.StringVar(&groupFlags.label, "label", "", "")
+	cmdUpdateGroup.Flags.StringVar(&groupFlags.channel, "channel", "", "")
+	cmdUpdateGroup.Flags.Int64Var(&groupFlags.updateCount, "updateCount", -1, "Number of instances per interval")
+	cmdUpdateGroup.Flags.Int64Var(&groupFlags.updateInterval, "updateInterval", -1, "Interval between updates")
+
+	cmdRollupGroupVersions.Flags.Int64Var(&groupFlags.resolution, "resolution", 60, "60, 3600 or 86400 seconds")
+	cmdRollupGroupVersions.Flags.Int64Var(&groupFlags.start, "start", 0, "Start date filter")
+	cmdRollupGroupVersions.Flags.Int64Var(&groupFlags.end, "end", 0, "End date filter")
+
+	cmdRollupGroupEvents.Flags.Int64Var(&groupFlags.resolution, "resolution", 60, "60, 3600 or 86400 seconds")
+	cmdRollupGroupEvents.Flags.Int64Var(&groupFlags.start, "start", 0, "Start date filter")
+	cmdRollupGroupEvents.Flags.Int64Var(&groupFlags.end, "end", 0, "End date filter")
 }
 
 func formatGroup(group *update.Group) string {
@@ -86,12 +90,9 @@ func formatGroup(group *update.Group) string {
 		group.Id, strconv.FormatBool(group.UpdatesPaused), group.UpdateCount, group.UpdateInterval)
 }
 
-func listGroups(c *cli.Context, service *update.Service, out *tabwriter.Writer) {
-	args := c.Args()
-
+func listGroups(args []string, service *update.Service, out *tabwriter.Writer) int {
 	if len(args) != 1 {
-		fmt.Println("AppId required")
-		os.Exit(1)
+		return ERROR_USAGE
 	}
 
 	listCall := service.Group.List(args[0])
@@ -107,18 +108,16 @@ func listGroups(c *cli.Context, service *update.Service, out *tabwriter.Writer) 
 	}
 
 	out.Flush()
+	return OK
 }
 
-func rollupGroupEvents(c *cli.Context, service *update.Service, out *tabwriter.Writer) {
-	args := c.Args()
-
+func rollupGroupEvents(args []string, service *update.Service, out *tabwriter.Writer) int {
 	if len(args) != 2 {
-		cli.ShowCommandHelp(c, "rollup-group-events")
-		os.Exit(1)
+		return ERROR_USAGE
 	}
 
-	call := service.Group.Requests.Events.Rollup(args[0], args[1], int64(c.Int("start")), int64(c.Int("end")))
-	call.Resolution(int64(c.Int("resolution")))
+	call := service.Group.Requests.Events.Rollup(args[0], args[1], groupFlags.start, groupFlags.end)
+	call.Resolution(groupFlags.resolution)
 	list, err := call.Do()
 
 	if err != nil {
@@ -133,18 +132,16 @@ func rollupGroupEvents(c *cli.Context, service *update.Service, out *tabwriter.W
 		}
 	}
 	out.Flush()
+	return OK
 }
 
-func rollupGroupVersions(c *cli.Context, service *update.Service, out *tabwriter.Writer) {
-	args := c.Args()
-
+func rollupGroupVersions(args []string, service *update.Service, out *tabwriter.Writer) int {
 	if len(args) != 2 {
-		cli.ShowCommandHelp(c, "rollup-group-versions")
-		os.Exit(1)
+		return ERROR_USAGE
 	}
 
-	call := service.Group.Requests.Versions.Rollup(args[0], args[1], int64(c.Int("start")), int64(c.Int("end")))
-	call.Resolution(int64(c.Int("resolution")))
+	call := service.Group.Requests.Versions.Rollup(args[0], args[1], groupFlags.start, groupFlags.end)
+	call.Resolution(groupFlags.resolution)
 	list, err := call.Do()
 
 	if err != nil {
@@ -159,14 +156,12 @@ func rollupGroupVersions(c *cli.Context, service *update.Service, out *tabwriter
 		}
 	}
 	out.Flush()
+	return OK
 }
 
-func newGroup(c *cli.Context, service *update.Service, out *tabwriter.Writer) {
-	args := c.Args()
-
+func newGroup(args []string, service *update.Service, out *tabwriter.Writer) int {
 	if len(args) != 4 {
-		fmt.Println("AppId, ChannelId, GroupId and app label required")
-		os.Exit(1)
+		return ERROR_USAGE
 	}
 	group := &update.Group{ChannelId: args[1], Id: args[2], Label: args[3]}
 	call := service.Group.Insert(args[0], group)
@@ -179,14 +174,12 @@ func newGroup(c *cli.Context, service *update.Service, out *tabwriter.Writer) {
 	fmt.Fprintf(out, "%s", formatGroup(group))
 
 	out.Flush()
+	return OK
 }
 
-func deleteGroup(c *cli.Context, service *update.Service, out *tabwriter.Writer) {
-	args := c.Args()
-
+func deleteGroup(args []string, service *update.Service, out *tabwriter.Writer) int {
 	if len(args) != 2 {
-		fmt.Println("AppId and GroupId is required")
-		os.Exit(1)
+		return ERROR_USAGE
 	}
 
 	call := service.Group.Delete(args[0], args[1])
@@ -199,25 +192,25 @@ func deleteGroup(c *cli.Context, service *update.Service, out *tabwriter.Writer)
 	fmt.Fprintf(out, "%s", formatGroup(group))
 
 	out.Flush()
+	return OK
 }
 
-func pauseGroup(c *cli.Context, service *update.Service, out *tabwriter.Writer) {
-	setUpdatesPaused(c, service, out, true)
+func pauseGroup(args []string, service *update.Service, out *tabwriter.Writer) int {
+	if len(args) != 2 {
+		return ERROR_USAGE
+	}
+	return setUpdatesPaused(args, service, out, true)
 }
 
-func unpauseGroup(c *cli.Context, service *update.Service, out *tabwriter.Writer) {
-	setUpdatesPaused(c, service, out, false)
+func unpauseGroup(args []string, service *update.Service, out *tabwriter.Writer) int {
+	if len(args) != 2 {
+		return ERROR_USAGE
+	}
+	return setUpdatesPaused(args, service, out, false)
 }
 
 // Helper function for pause/unpause-group commands
-func setUpdatesPaused(c *cli.Context, service *update.Service, out *tabwriter.Writer, paused bool) {
-	args := c.Args()
-
-	if len(args) != 2 {
-		fmt.Println("AppId and GroupId is required")
-		os.Exit(1)
-	}
-
+func setUpdatesPaused(args []string, service *update.Service, out *tabwriter.Writer, paused bool) int {
 	call := service.Group.Get(args[0], args[1])
 	group, err := call.Do()
 
@@ -237,14 +230,12 @@ func setUpdatesPaused(c *cli.Context, service *update.Service, out *tabwriter.Wr
 	fmt.Fprintf(out, "%s", formatGroup(group))
 
 	out.Flush()
+	return OK
 }
 
-func updateGroup(c *cli.Context, service *update.Service, out *tabwriter.Writer) {
-	args := c.Args()
-
+func updateGroup(args []string, service *update.Service, out *tabwriter.Writer) int {
 	if len(args) != 2 {
-		cli.ShowCommandHelp(c, "update-group")
-		os.Exit(1)
+		return ERROR_USAGE
 	}
 
 	call := service.Group.Get(args[0], args[1])
@@ -255,19 +246,19 @@ func updateGroup(c *cli.Context, service *update.Service, out *tabwriter.Writer)
 	}
 
 	checkUpdatePooling := false
-	if c.IsSet("updateCount") {
-		group.UpdateCount = int64(c.Int("updateCount"))
+	if groupFlags.updateCount != -1 {
+		group.UpdateCount = groupFlags.updateCount
 		checkUpdatePooling = true
 	}
-	if c.IsSet("updateInterval") {
-		group.UpdateInterval = int64(c.Int("updateInterval"))
+	if groupFlags.updateInterval != -1 {
+		group.UpdateInterval = groupFlags.updateInterval
 		checkUpdatePooling = true
 	}
-	if c.IsSet("label") {
-		group.Label = c.String("label")
+	if groupFlags.label != "" {
+		group.Label = groupFlags.label
 	}
-	if c.IsSet("channel") {
-		group.ChannelId = c.String("channel")
+	if groupFlags.channel != "" {
+		group.ChannelId = groupFlags.channel
 	}
 
 	// set update pooling based on other flags
@@ -290,4 +281,5 @@ func updateGroup(c *cli.Context, service *update.Service, out *tabwriter.Writer)
 	fmt.Fprintf(out, "%s", formatGroup(group))
 
 	out.Flush()
+	return OK
 }

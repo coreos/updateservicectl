@@ -11,35 +11,39 @@ import (
 	"time"
 
 	"code.google.com/p/go-uuid/uuid"
-	"github.com/codegangsta/cli"
 	"github.com/coreos/go-omaha/omaha"
 
 	"github.com/coreos-inc/updatectl/client/update/v1"
 )
 
-var verbose bool
-var OEM string
-var minSleep int
-
-func FakeClientsCommand() []cli.Command {
-	return []cli.Command{
-		{
-			Name:        "fakeclients",
-			Usage:       "fakeclients <appid> <groupid> <version>",
-			Description: "Simulate multiple clients.",
-			Action:      handle(fakeClients),
-			Flags: []cli.Flag{
-				cli.BoolFlag{"verbose, v", "Print out the request bodies"},
-				cli.IntFlag{"clientsperapp, c", 20, "Number of fake clients per appid."},
-				cli.IntFlag{"minsleep, m", 1, "Minimum time between update checks."},
-				cli.IntFlag{"maxsleep, M", 10, "Maximum time between update checks."},
-				cli.IntFlag{"errorrate", 1, "Chance of error (0-100)%."},
-				cli.StringFlag{"oem", "fakeclient", "oem to report"},
-				// simulate reboot lock.
-				cli.IntFlag{"pingonly, p", 0, "halt update and just send ping requests this many times."},
-			},
-		},
+var (
+	fakeClientFlags struct {
+		verbose       bool
+		clientsPerApp int
+		minSleep      int
+		maxSleep      int
+		errorRate     int
+		OEM           string
+		pingOnly      int
 	}
+
+	cmdFakeClients = &Command{
+		Name:        "fakeclients",
+		Usage:       "<appid> <groupid> <version>",
+		Description: "Simulate multiple clients.",
+		Run:         fakeClients,
+	}
+)
+
+func init() {
+	cmdFakeClients.Flags.BoolVar(&fakeClientFlags.verbose, "verbose", false, "Print out the request bodies")
+	cmdFakeClients.Flags.IntVar(&fakeClientFlags.clientsPerApp, "clientsperapp", 20, "Number of fake fents per appid.")
+	cmdFakeClients.Flags.IntVar(&fakeClientFlags.minSleep, "minsleep", 1, "Minimum time between update checks.")
+	cmdFakeClients.Flags.IntVar(&fakeClientFlags.maxSleep, "maxsleep", 10, "Maximum time between update checks.")
+	cmdFakeClients.Flags.IntVar(&fakeClientFlags.errorRate, "errorrate", 1, "Chance of error (0-100)%.")
+	cmdFakeClients.Flags.StringVar(&fakeClientFlags.OEM, "oem", "fakefent", "oem to report")
+	// simulate reboot lock.
+	cmdFakeClients.Flags.IntVar(&fakeClientFlags.pingOnly, "pingonly", 0, "halt update and just send ping requests this many times.")
 }
 
 type serverConfig struct {
@@ -68,7 +72,7 @@ func (c *Client) OmahaRequest(otype, result string, updateCheck, isPing bool) *o
 	app.MachineID = c.Id
 	app.BootId = c.SessionId
 	app.Track = c.Track
-	app.OEM = OEM
+	app.OEM = fakeClientFlags.OEM
 
 	if updateCheck {
 		app.AddUpdateCheck()
@@ -114,7 +118,7 @@ func (c *Client) MakeRequest(otype, result string, updateCheck, isPing bool) (*o
 		return nil, err
 	}
 
-	if verbose {
+	if fakeClientFlags.verbose {
 		raw, _ := xml.MarshalIndent(req, "", " ")
 		c.Log("request: %s\n", string(raw))
 		raw, _ = xml.MarshalIndent(oresp, "", " ")
@@ -161,7 +165,7 @@ func (c *Client) SetVersion(resp *omaha.Response) {
 		failed, err := randFailRequest(r[0], r[1])
 		if failed {
 			log.Printf("failed to update in eventType: %s, eventResult: %s. Retrying.", r[0], r[1])
-			time.Sleep(time.Second * time.Duration(minSleep))
+			time.Sleep(time.Second * time.Duration(fakeClientFlags.minSleep))
 			c.MakeRequest(r[0], r[1], false, false)
 			return
 		}
@@ -213,31 +217,20 @@ func randSleep(n, m int) {
 	time.Sleep(time.Duration(r) * time.Second)
 }
 
-func fakeClients(c *cli.Context, service *update.Service, out *tabwriter.Writer) {
-	args := c.Args()
-
+func fakeClients(args []string, service *update.Service, out *tabwriter.Writer) int {
 	if len(args) != 3 {
-		log.Fatalf("app, group and initial version required")
+		return ERROR_USAGE
 	}
 
 	appId := args[0]
 	group := args[1]
 	version := args[2]
 
-	server := c.GlobalString("server")
-	minSleep = c.Int("minsleep")
-	maxSleep := c.Int("maxsleep")
-	clientsPerApp := c.Int("clientsperapp")
-	verbose = c.Bool("verbose")
-	errorRate := c.Int("errorrate")
-	OEM = c.String("oem")
-	pingonly := c.Int("pingonly")
-
 	conf := &serverConfig{
-		server: server,
+		server: globalFlags.Server,
 	}
 
-	for i := 0; i < clientsPerApp; i++ {
+	for i := 0; i < fakeClientFlags.clientsPerApp; i++ {
 		c := &Client{
 			Id:             fmt.Sprintf("{fake-client-%03d}", i),
 			SessionId:      uuid.New(),
@@ -245,13 +238,14 @@ func fakeClients(c *cli.Context, service *update.Service, out *tabwriter.Writer)
 			AppId:          appId,
 			Track:          group,
 			config:         conf,
-			errorRate:      errorRate,
-			pingsRemaining: pingonly,
+			errorRate:      fakeClientFlags.errorRate,
+			pingsRemaining: fakeClientFlags.pingOnly,
 		}
-		go c.Loop(minSleep, maxSleep)
+		go c.Loop(fakeClientFlags.minSleep, fakeClientFlags.maxSleep)
 	}
 
 	// run forever
 	wait := make(chan bool)
 	<-wait
+	return OK
 }
