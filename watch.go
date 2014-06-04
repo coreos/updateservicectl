@@ -98,14 +98,16 @@ func prepareEnvironment(appID string, version string, oldVersion string, updateC
 	}
 	env = append(env, "UPDATE_SERVICE_APP_ID="+appID)
 
-	url, err := url.Parse(updateCheck.Urls.Urls[0].CodeBase)
-	if err != nil {
-		fmt.Fprintf(os.Stderr, err.Error())
-		os.Exit(1)
-	}
+	if updateCheck.Status == "ok" {
+		url, err := url.Parse(updateCheck.Urls.Urls[0].CodeBase)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, err.Error())
+			os.Exit(1)
+		}
 
-	url.Path = path.Join(url.Path, updateCheck.Manifest.Packages.Packages[0].Name)
-	env = append(env, "UPDATE_SERVICE_URL="+url.String())
+		url.Path = path.Join(url.Path, updateCheck.Manifest.Packages.Packages[0].Name)
+		env = append(env, "UPDATE_SERVICE_URL="+url.String())
+	}
 	return env
 }
 
