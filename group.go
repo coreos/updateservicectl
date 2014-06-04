@@ -11,8 +11,10 @@ import (
 
 var (
 	groupFlags struct {
-		label          string
-		channel        string
+		label          StringFlag
+		channel        StringFlag
+		appId          StringFlag
+		groupId        StringFlag
 		start          int64
 		end            int64
 		resolution     int64
@@ -22,67 +24,117 @@ var (
 
 	cmdListGroups = &Command{
 		Name:    "list-groups",
-		Usage:   "<appId>",
+		Usage:   "[OPTION]...",
 		Summary: `List all of the groups that exist including their label, token and update state.`,
 		Run:     listGroups,
 	}
 	cmdNewGroup = &Command{
 		Name:    "new-group",
-		Usage:   "<appId> <channelId> <groupId> <appLabel>",
-		Summary: `Create a new group given a label.`,
+		Usage:   "[OPTION]...",
+		Summary: `Create a new group.`,
 		Run:     newGroup,
 	}
 	cmdDeleteGroup = &Command{
 		Name:    "delete-group",
-		Usage:   "<appId> <groupId>",
-		Summary: `Delete a group given a token.`,
+		Usage:   "[OPTION]...",
+		Summary: `Delete a group.`,
 		Run:     deleteGroup,
 	}
 	cmdUpdateGroup = &Command{
 		Name:        "update-group",
-		Usage:       "[OPTION]... <appId> <groupId>",
+		Usage:       "[OPTION]...",
 		Description: `Update an existing group.`,
 		Run:         updateGroup,
 	}
 	cmdPauseGroup = &Command{
 		Name:    "pause-group",
-		Usage:   "<appId> <groupId>",
-		Summary: `Pause a group given an id.`,
+		Usage:   "[OPTION]...",
+		Summary: `Pause a group's updates.`,
 		Run:     pauseGroup,
 	}
 	cmdUnpauseGroup = &Command{
 		Name:    "unpause-group",
-		Usage:   "<appId> <groupId>",
-		Summary: `Unpause a group given an id.`,
+		Usage:   "[OPTION]...",
+		Summary: `Unpause a group's updates.`,
 		Run:     unpauseGroup,
 	}
 	cmdRollupGroupVersions = &Command{
 		Name:    "rollup-group-versions",
-		Usage:   "[OPTION]... <appId> <groupId>",
+		Usage:   "[OPTION]...",
 		Summary: "Rollup versions from events by time.",
 		Run:     rollupGroupVersions,
 	}
 	cmdRollupGroupEvents = &Command{
 		Name:    "rollup-group-events",
-		Usage:   "[OPTION]... <appId> <groupId>",
+		Usage:   "[OPTION]...",
 		Summary: "Rollup events from events by time.",
 		Run:     rollupGroupEvents,
 	}
 )
 
 func init() {
-	cmdUpdateGroup.Flags.StringVar(&groupFlags.label, "label", "", "")
-	cmdUpdateGroup.Flags.StringVar(&groupFlags.channel, "channel", "", "")
-	cmdUpdateGroup.Flags.Int64Var(&groupFlags.updateCount, "updateCount", -1, "Number of instances per interval")
-	cmdUpdateGroup.Flags.Int64Var(&groupFlags.updateInterval, "updateInterval", -1, "Interval between updates")
+	cmdListGroups.Flags.Var(&groupFlags.appId, "app-id",
+		"Application containing the groups to list.")
 
-	cmdRollupGroupVersions.Flags.Int64Var(&groupFlags.resolution, "resolution", 60, "60, 3600 or 86400 seconds")
-	cmdRollupGroupVersions.Flags.Int64Var(&groupFlags.start, "start", 0, "Start date filter")
-	cmdRollupGroupVersions.Flags.Int64Var(&groupFlags.end, "end", 0, "End date filter")
+	cmdDeleteGroup.Flags.Var(&groupFlags.appId, "app-id",
+		"Application with group to delete.")
+	cmdDeleteGroup.Flags.Var(&groupFlags.groupId, "group-id",
+		"ID of group to delete.")
 
-	cmdRollupGroupEvents.Flags.Int64Var(&groupFlags.resolution, "resolution", 60, "60, 3600 or 86400 seconds")
-	cmdRollupGroupEvents.Flags.Int64Var(&groupFlags.start, "start", 0, "Start date filter")
-	cmdRollupGroupEvents.Flags.Int64Var(&groupFlags.end, "end", 0, "End date filter")
+
+	cmdNewGroup.Flags.Var(&groupFlags.appId, "app-id",
+		"Application to add group to.")
+	cmdNewGroup.Flags.Var(&groupFlags.groupId, "group-id",
+		 "ID for the new group.")
+	cmdNewGroup.Flags.Var(&groupFlags.channel, "channel",
+		 "Channel to associate with the group.")
+	cmdNewGroup.Flags.Var(&groupFlags.label, "label",
+		"Label describing the new group.")
+
+	cmdUpdateGroup.Flags.Var(&groupFlags.appId, "app-id",
+		 "Application containing the group to update.")
+	cmdUpdateGroup.Flags.Var(&groupFlags.groupId, "group-id",
+		 "ID for the group.")
+	cmdUpdateGroup.Flags.Var(&groupFlags.label, "label",
+		"Label describing the group")
+	cmdUpdateGroup.Flags.Var(&groupFlags.channel, "channel",
+		"Channel to associate with the group.")
+	cmdUpdateGroup.Flags.Int64Var(&groupFlags.updateCount, "update-count",
+		-1, "Number of instances per interval")
+	cmdUpdateGroup.Flags.Int64Var(&groupFlags.updateInterval,
+		"update-interval", -1, "Interval between updates")
+
+	cmdPauseGroup.Flags.Var(&groupFlags.appId, "app-id",
+		 "Application containing the group to pause.")
+	cmdPauseGroup.Flags.Var(&groupFlags.groupId, "group-id",
+		 "ID for the group.")
+
+	cmdUnpauseGroup.Flags.Var(&groupFlags.appId, "app-id",
+		 "Application containing the group to unpause.")
+	cmdUnpauseGroup.Flags.Var(&groupFlags.groupId, "group-id",
+		 "ID for the group.")
+
+	cmdRollupGroupVersions.Flags.Var(&groupFlags.appId, "app-id",
+		 "Application containing the group.")
+	cmdRollupGroupVersions.Flags.Var(&groupFlags.groupId, "group-id",
+		 "ID for the group.")
+	cmdRollupGroupVersions.Flags.Int64Var(&groupFlags.resolution,
+		"resolution", 60, "60, 3600 or 86400 seconds")
+	cmdRollupGroupVersions.Flags.Int64Var(&groupFlags.start, "start", 0,
+		"Start date filter")
+	cmdRollupGroupVersions.Flags.Int64Var(&groupFlags.end, "end", 0,
+		"End date filter")
+
+	cmdRollupGroupEvents.Flags.Var(&groupFlags.appId, "app-id",
+		 "Application containing the group.")
+	cmdRollupGroupEvents.Flags.Var(&groupFlags.groupId, "group-id",
+		 "ID for the group.")
+	cmdRollupGroupEvents.Flags.Int64Var(&groupFlags.resolution,
+		"resolution", 60, "60, 3600 or 86400 seconds")
+	cmdRollupGroupEvents.Flags.Int64Var(&groupFlags.start, "start", 0,
+		"Start date filter")
+	cmdRollupGroupEvents.Flags.Int64Var(&groupFlags.end, "end", 0,
+		"End date filter")
 }
 
 func formatGroup(group *update.Group) string {
@@ -91,11 +143,11 @@ func formatGroup(group *update.Group) string {
 }
 
 func listGroups(args []string, service *update.Service, out *tabwriter.Writer) int {
-	if len(args) != 1 {
+	if groupFlags.appId.Get() == nil {
 		return ERROR_USAGE
 	}
 
-	listCall := service.Group.List(args[0])
+	listCall := service.Group.List(groupFlags.appId.String())
 	list, err := listCall.Do()
 
 	if err != nil {
@@ -112,11 +164,16 @@ func listGroups(args []string, service *update.Service, out *tabwriter.Writer) i
 }
 
 func rollupGroupEvents(args []string, service *update.Service, out *tabwriter.Writer) int {
-	if len(args) != 2 {
+	if groupFlags.appId.Get() == nil || groupFlags.groupId.Get() == nil {
 		return ERROR_USAGE
 	}
 
-	call := service.Group.Requests.Events.Rollup(args[0], args[1], groupFlags.start, groupFlags.end)
+	call := service.Group.Requests.Events.Rollup(
+		groupFlags.appId.String(),
+		groupFlags.groupId.String(),
+		groupFlags.start,
+		groupFlags.end,
+	)
 	call.Resolution(groupFlags.resolution)
 	list, err := call.Do()
 
@@ -136,11 +193,16 @@ func rollupGroupEvents(args []string, service *update.Service, out *tabwriter.Wr
 }
 
 func rollupGroupVersions(args []string, service *update.Service, out *tabwriter.Writer) int {
-	if len(args) != 2 {
+	if groupFlags.appId.Get() == nil || groupFlags.groupId.Get() == nil {
 		return ERROR_USAGE
 	}
 
-	call := service.Group.Requests.Versions.Rollup(args[0], args[1], groupFlags.start, groupFlags.end)
+	call := service.Group.Requests.Versions.Rollup(
+		groupFlags.appId.String(),
+		groupFlags.groupId.String(),
+		groupFlags.start,
+		groupFlags.end,
+	)
 	call.Resolution(groupFlags.resolution)
 	list, err := call.Do()
 
@@ -160,11 +222,18 @@ func rollupGroupVersions(args []string, service *update.Service, out *tabwriter.
 }
 
 func newGroup(args []string, service *update.Service, out *tabwriter.Writer) int {
-	if len(args) != 4 {
+	if groupFlags.appId.Get() == nil ||
+		groupFlags.groupId.Get() == nil ||
+		groupFlags.channel.Get() == nil {
 		return ERROR_USAGE
 	}
-	group := &update.Group{ChannelId: args[1], Id: args[2], Label: args[3]}
-	call := service.Group.Insert(args[0], group)
+
+	group := &update.Group{
+		ChannelId: groupFlags.channel.String(),
+		Id: groupFlags.groupId.String(),
+		Label: groupFlags.label.String(),
+	}
+	call := service.Group.Insert(groupFlags.appId.String(), group)
 	group, err := call.Do()
 
 	if err != nil {
@@ -178,11 +247,12 @@ func newGroup(args []string, service *update.Service, out *tabwriter.Writer) int
 }
 
 func deleteGroup(args []string, service *update.Service, out *tabwriter.Writer) int {
-	if len(args) != 2 {
+	if groupFlags.appId.Get() == nil ||
+		groupFlags.groupId.Get() == nil {
 		return ERROR_USAGE
 	}
 
-	call := service.Group.Delete(args[0], args[1])
+	call := service.Group.Delete(groupFlags.appId.String(), groupFlags.groupId.String())
 	group, err := call.Do()
 
 	if err != nil {
@@ -196,22 +266,21 @@ func deleteGroup(args []string, service *update.Service, out *tabwriter.Writer) 
 }
 
 func pauseGroup(args []string, service *update.Service, out *tabwriter.Writer) int {
-	if len(args) != 2 {
-		return ERROR_USAGE
-	}
-	return setUpdatesPaused(args, service, out, true)
+	return setUpdatesPaused(service, out, true)
 }
 
 func unpauseGroup(args []string, service *update.Service, out *tabwriter.Writer) int {
-	if len(args) != 2 {
-		return ERROR_USAGE
-	}
-	return setUpdatesPaused(args, service, out, false)
+	return setUpdatesPaused(service, out, false)
 }
 
 // Helper function for pause/unpause-group commands
-func setUpdatesPaused(args []string, service *update.Service, out *tabwriter.Writer, paused bool) int {
-	call := service.Group.Get(args[0], args[1])
+func setUpdatesPaused(service *update.Service, out *tabwriter.Writer, paused bool) int {
+	if groupFlags.appId.Get() == nil ||
+		groupFlags.groupId.Get() == nil {
+		return ERROR_USAGE
+	}
+
+	call := service.Group.Get(groupFlags.appId.String(), groupFlags.groupId.String())
 	group, err := call.Do()
 
 	if err != nil {
@@ -220,7 +289,7 @@ func setUpdatesPaused(args []string, service *update.Service, out *tabwriter.Wri
 
 	group.UpdatesPaused = paused
 
-	updateCall := service.Group.Patch(args[0], args[1], group)
+	updateCall := service.Group.Patch(groupFlags.appId.String(), groupFlags.groupId.String(), group)
 	group, err = updateCall.Do()
 
 	if err != nil {
@@ -234,11 +303,12 @@ func setUpdatesPaused(args []string, service *update.Service, out *tabwriter.Wri
 }
 
 func updateGroup(args []string, service *update.Service, out *tabwriter.Writer) int {
-	if len(args) != 2 {
+	if groupFlags.appId.Get() == nil ||
+		groupFlags.groupId.Get() == nil {
 		return ERROR_USAGE
 	}
 
-	call := service.Group.Get(args[0], args[1])
+	call := service.Group.Get(groupFlags.appId.String(), groupFlags.groupId.String())
 	group, err := call.Do()
 
 	if err != nil {
@@ -254,11 +324,11 @@ func updateGroup(args []string, service *update.Service, out *tabwriter.Writer) 
 		group.UpdateInterval = groupFlags.updateInterval
 		checkUpdatePooling = true
 	}
-	if groupFlags.label != "" {
-		group.Label = groupFlags.label
+	if groupFlags.label.Get() != nil {
+		group.Label = groupFlags.label.String()
 	}
-	if groupFlags.channel != "" {
-		group.ChannelId = groupFlags.channel
+	if groupFlags.channel.Get() != nil {
+		group.ChannelId = groupFlags.channel.String()
 	}
 
 	// set update pooling based on other flags
@@ -271,7 +341,7 @@ func updateGroup(args []string, service *update.Service, out *tabwriter.Writer) 
 		}
 	}
 
-	updateCall := service.Group.Patch(args[0], args[1], group)
+	updateCall := service.Group.Patch(groupFlags.appId.String(), groupFlags.groupId.String(), group)
 	group, err = updateCall.Do()
 
 	if err != nil {
