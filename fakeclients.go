@@ -25,11 +25,14 @@ var (
 		errorRate     int
 		OEM           string
 		pingOnly      int
+		appId         StringFlag
+		groupId       StringFlag
+		version       string
 	}
 
 	cmdFakeClients = &Command{
 		Name:        "fakeclients",
-		Usage:       "<appid> <groupid> <version>",
+		Usage:       "[OPTION]...",
 		Description: "Simulate multiple clients.",
 		Run:         fakeClients,
 	}
@@ -37,13 +40,18 @@ var (
 
 func init() {
 	cmdFakeClients.Flags.BoolVar(&fakeClientFlags.verbose, "verbose", false, "Print out the request bodies")
-	cmdFakeClients.Flags.IntVar(&fakeClientFlags.clientsPerApp, "clientsperapp", 20, "Number of fake fents per appid.")
-	cmdFakeClients.Flags.IntVar(&fakeClientFlags.minSleep, "minsleep", 1, "Minimum time between update checks.")
-	cmdFakeClients.Flags.IntVar(&fakeClientFlags.maxSleep, "maxsleep", 10, "Maximum time between update checks.")
+	cmdFakeClients.Flags.IntVar(&fakeClientFlags.clientsPerApp, "clients-per-app", 20, "Number of fake fents per appid.")
+	cmdFakeClients.Flags.IntVar(&fakeClientFlags.minSleep, "min-sleep", 1, "Minimum time between update checks.")
+	cmdFakeClients.Flags.IntVar(&fakeClientFlags.maxSleep, "max-sleep", 10, "Maximum time between update checks.")
 	cmdFakeClients.Flags.IntVar(&fakeClientFlags.errorRate, "errorrate", 1, "Chance of error (0-100)%.")
-	cmdFakeClients.Flags.StringVar(&fakeClientFlags.OEM, "oem", "fakefent", "oem to report")
+	cmdFakeClients.Flags.StringVar(&fakeClientFlags.OEM, "oem", "fakeclient", "oem to report")
 	// simulate reboot lock.
-	cmdFakeClients.Flags.IntVar(&fakeClientFlags.pingOnly, "pingonly", 0, "halt update and just send ping requests this many times.")
+	cmdFakeClients.Flags.IntVar(&fakeClientFlags.pingOnly, "ping-only", 0, "halt update and just send ping requests this many times.")
+	cmdFakeClients.Flags.Var(&fakeClientFlags.appId, "app-id", "Application ID to update.")
+	fakeClientFlags.appId.required = true
+	cmdFakeClients.Flags.Var(&fakeClientFlags.groupId, "group-id", "Group ID to update.")
+	fakeClientFlags.groupId.required = true
+	cmdFakeClients.Flags.StringVar(&fakeClientFlags.version, "version", "0.0.0", "Version to report.")
 }
 
 type serverConfig struct {
@@ -218,13 +226,9 @@ func randSleep(n, m int) {
 }
 
 func fakeClients(args []string, service *update.Service, out *tabwriter.Writer) int {
-	if len(args) != 3 {
+	if fakeClientFlags.appId.Get() == nil || fakeClientFlags.groupId.Get() == nil {
 		return ERROR_USAGE
 	}
-
-	appId := args[0]
-	group := args[1]
-	version := args[2]
 
 	conf := &serverConfig{
 		server: globalFlags.Server,
@@ -234,9 +238,9 @@ func fakeClients(args []string, service *update.Service, out *tabwriter.Writer) 
 		c := &Client{
 			Id:             fmt.Sprintf("{fake-client-%03d}", i),
 			SessionId:      uuid.New(),
-			Version:        version,
-			AppId:          appId,
-			Track:          group,
+			Version:        fakeClientFlags.version,
+			AppId:          fakeClientFlags.appId.String(),
+			Track:          fakeClientFlags.groupId.String(),
 			config:         conf,
 			errorRate:      fakeClientFlags.errorRate,
 			pingsRemaining: fakeClientFlags.pingOnly,
