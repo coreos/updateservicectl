@@ -15,7 +15,6 @@ import (
 	"text/tabwriter"
 
 	"github.com/coreos-inc/updatectl/client/update/v1"
-	"github.com/codegangsta/cli"
 )
 
 type MetadataFile struct {
@@ -23,38 +22,41 @@ type MetadataFile struct {
 	MetadataSignatureRsa string `json:"metadata_signature_rsa"`
 }
 
-func PackageCommands() []cli.Command {
-	return []cli.Command{
-		{
-			Name:        "list-packages",
-			Usage:       "list-packages <appId>",
-			Description: `List all of the packages that exist including their metadata.`,
-			Action:      handle(listPackages),
-		},
-		{
-			Name:        "new-package",
-			Usage:       "new-package [OPTION]... <appId>",
-			Description: `Create a new package given version,  meta file.`,
-			Action:      handle(newPackage),
-			Flags: []cli.Flag{
-				cli.StringFlag{"version", "", ""},
-				cli.StringFlag{"url", "", ""},
-				cli.StringFlag{"file", "update.gz", ""},
-				cli.StringFlag{"meta", "", ""},
-			},
-		},
+var (
+	packageFlags struct {
+		version string
+		url     string
+		file    string
+		meta    string
 	}
+
+	cmdListPackages = &Command{
+		Name:        "list-packages",
+		Usage:       "<appId>",
+		Description: `List all of the packages that exist including their metadata.`,
+		Run:         listPackages,
+	}
+	cmdNewPackage = &Command{
+		Name:        "new-package",
+		Usage:       "[OPTION]... <appId>",
+		Description: `Create a new package for an application.`,
+		Run:         newPackage,
+	}
+)
+
+func init() {
+	cmdNewPackage.Flags.StringVar(&packageFlags.version, "version", "", "")
+	cmdNewPackage.Flags.StringVar(&packageFlags.url, "url", "", "")
+	cmdNewPackage.Flags.StringVar(&packageFlags.file, "file", "update.gz", "")
+	cmdNewPackage.Flags.StringVar(&packageFlags.meta, "meta", "", "")
 }
 
-func newPackage(c *cli.Context, service *update.Service, out *tabwriter.Writer) {
-	args := c.Args()
-
+func newPackage(args []string, service *update.Service, out *tabwriter.Writer) int {
 	if len(args) != 1 {
-		fmt.Println("usage: <appid>")
-		os.Exit(1)
+		return ERROR_USAGE
 	}
 
-	file := c.String("file")
+	file := packageFlags.file
 	info, err := os.Stat(file)
 	if err != nil {
 		log.Fatalf("state of %s failed: %v", file, err)
@@ -64,7 +66,7 @@ func newPackage(c *cli.Context, service *update.Service, out *tabwriter.Writer) 
 		log.Fatalf("reading %s failed: %v", file, err)
 	}
 
-	file = c.String("meta")
+	file = packageFlags.meta
 	var meta MetadataFile
 	if file != "" {
 		content, err = ioutil.ReadFile(file)
@@ -92,7 +94,7 @@ func newPackage(c *cli.Context, service *update.Service, out *tabwriter.Writer) 
 	encoder.Close()
 
 	pkg := &update.Package{
-		Url:                  c.String("url"),
+		Url:                  packageFlags.url,
 		Size:                 strconv.FormatInt(info.Size(), 10),
 		Sha1Sum:              sha1base64.String(),
 		Sha256Sum:            sha256base64.String(),
@@ -103,24 +105,22 @@ func newPackage(c *cli.Context, service *update.Service, out *tabwriter.Writer) 
 	jbytes, _ := json.MarshalIndent(pkg, "", " ")
 	fmt.Printf("%s\n", string(jbytes))
 
-	call := service.App.Package.Insert(args[0], c.String("version"), pkg)
+	call := service.App.Package.Insert(args[0], packageFlags.version, pkg)
 	pkg, err = call.Do()
 
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	fmt.Fprintln(out, args[0], c.String("version"))
+	fmt.Fprintln(out, args[0], packageFlags.version)
 
 	out.Flush()
+	return OK
 }
 
-func listPackages(c *cli.Context, service *update.Service, out *tabwriter.Writer) {
-	args := c.Args()
-
+func listPackages(args []string, service *update.Service, out *tabwriter.Writer) int {
 	if len(args) != 1 {
-		fmt.Println("usage: <appid>")
-		os.Exit(1)
+		return ERROR_USAGE
 	}
 
 	call := service.App.Package.List(args[0])
@@ -133,6 +133,8 @@ func listPackages(c *cli.Context, service *update.Service, out *tabwriter.Writer
 	fmt.Fprintln(out, "Version\t\tURL\tSize")
 	for _, pkg := range list.Items {
 		fmt.Fprintf(out, "%s\t%s\t%s\n", pkg.Version, pkg.Url, pkg.Size)
-		out.Flush()
 	}
+
+	out.Flush()
+	return OK
 }

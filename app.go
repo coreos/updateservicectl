@@ -3,49 +3,44 @@ package main
 import (
 	"fmt"
 	"log"
-	"os"
 	"text/tabwriter"
 
 	"code.google.com/p/go-uuid/uuid"
 	"github.com/coreos-inc/updatectl/client/update/v1"
-	"github.com/codegangsta/cli"
 )
 
-func AppCommands() []cli.Command {
-	return []cli.Command{
-		{
-			Name:  "list-apps",
-			Usage: "list-apps",
-			Description: `List all of the apps that exist including their label,
+var (
+	cmdListApps = &Command{
+		Name:  "list-apps",
+		Description: `List all of the apps that exist including their label,
 token and update state.`,
-			Action: handle(listApps),
-		},
-		{
-			Name:        "create-app",
-			Usage:       "create-app [<appId>] <label> <description>",
-			Description: `Create a new application. If appId is not provided it will be created randomly.`,
-			Action:      handle(createApp),
-		},
-		{
-			Name:        "update-app",
-			Usage:       "update-app <appId> <label> <description>",
-			Description: `Update an app given a label.`,
-			Action:      handle(updateApp),
-		},
-		{
-			Name:        "delete-app",
-			Usage:       "delete-app <appId>",
-			Description: `Delete a app given an id.`,
-			Action:      handle(deleteApp),
-		},
+		Run: listApps,
 	}
-}
+	cmdCreateApp = &Command{
+		Name:        "create-app",
+		Usage:       "[<appId>] <label> <description>",
+		Description: `Create a new application. If appId is not provided it will be created randomly.`,
+		Run:         createApp,
+	}
+	cmdUpdateApp = &Command{
+		Name:        "update-app",
+		Usage:       "<appId> <label> <description>",
+		Description: `Update an app given a label.`,
+		Run:         updateApp,
+	}
+	cmdDeleteApp = &Command{
+		Name:        "delete-app",
+		Usage:       "<appId>",
+		Description: `Delete an app given an id.`,
+		Run:         deleteApp,
+	}
+)
 
 func formatApp(app *update.App) string {
 	return fmt.Sprintf("%s\t%s\t%s\n", app.Id, app.Label, app.Description)
 }
 
-func listApps(c *cli.Context, service *update.Service, out *tabwriter.Writer) {
+func listApps(args []string, service *update.Service, out *tabwriter.Writer) int {
 	listCall := service.App.List()
 	list, err := listCall.Do()
 
@@ -59,14 +54,12 @@ func listApps(c *cli.Context, service *update.Service, out *tabwriter.Writer) {
 	}
 
 	out.Flush()
+	return OK
 }
 
-func createApp(c *cli.Context, service *update.Service, out *tabwriter.Writer) {
-	args := c.Args()
-
+func createApp(args []string, service *update.Service, out *tabwriter.Writer) int {
 	if !(len(args) == 2 || len(args) == 3) {
-		cli.ShowCommandHelp(c, "create-app")
-		os.Exit(1)
+		return ERROR_USAGE
 	}
 
 	if len(args) == 2 {
@@ -74,19 +67,18 @@ func createApp(c *cli.Context, service *update.Service, out *tabwriter.Writer) {
 		args = append([]string{appId}, args...)
 	}
 
-	updateAppHelper(c, service, out, args)
+	updateAppHelper(args, service, out)
+	return OK
 }
 
-func updateApp(c *cli.Context, service *update.Service, out *tabwriter.Writer) {
-	args := c.Args()
+func updateApp(args []string, service *update.Service, out *tabwriter.Writer) int {
 	if len(args) != 3 {
-		cli.ShowCommandHelp(c, "update-app")
-		os.Exit(1)
+		return ERROR_USAGE
 	}
-	updateAppHelper(c, service, out, args)
+	return updateAppHelper(args, service, out)
 }
 
-func updateAppHelper(c *cli.Context, service *update.Service, out *tabwriter.Writer, args []string) {
+func updateAppHelper(args []string, service *update.Service, out *tabwriter.Writer) int {
 	appReq := &update.AppUpdateReq{Label: args[1], Description: args[2]}
 	call := service.App.Update(args[0], appReq)
 	app, err := call.Do()
@@ -98,14 +90,12 @@ func updateAppHelper(c *cli.Context, service *update.Service, out *tabwriter.Wri
 	fmt.Fprintf(out, "%s", formatApp(app))
 
 	out.Flush()
+	return OK
 }
 
-func deleteApp(c *cli.Context, service *update.Service, out *tabwriter.Writer) {
-	args := c.Args()
-
+func deleteApp(args []string, service *update.Service, out *tabwriter.Writer) int {
 	if len(args) != 1 {
-		fmt.Println("App token is required")
-		os.Exit(1)
+		return ERROR_USAGE
 	}
 
 	call := service.App.Delete(args[0])
@@ -118,4 +108,5 @@ func deleteApp(c *cli.Context, service *update.Service, out *tabwriter.Writer) {
 	fmt.Fprintf(out, "%s", formatApp(app))
 
 	out.Flush()
+	return OK
 }
