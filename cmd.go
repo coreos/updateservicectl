@@ -44,6 +44,7 @@ var (
 		Key     string
 		Debug   bool
 		Version bool
+		Help bool
 	}
 )
 
@@ -54,7 +55,8 @@ func init() {
 	globalFlagSet = flag.NewFlagSet(cliName, flag.ExitOnError)
 	globalFlagSet.StringVar(&globalFlags.Server, "server", "http://localhost:8000", "Update server to connect to")
 	globalFlagSet.BoolVar(&globalFlags.Debug, "debug", false, "Output debugging info to stderr")
-	globalFlagSet.BoolVar(&globalFlags.Version, "version", false, "Print version information")
+	globalFlagSet.BoolVar(&globalFlags.Version, "version", false, "Print version information and exit.")
+	globalFlagSet.BoolVar(&globalFlags.Help, "help", false, "Print usage information and exit.")
 	globalFlagSet.StringVar(&globalFlags.User, "user", os.Getenv("UPDATECTL_USER"), "API Username")
 	globalFlagSet.StringVar(&globalFlags.Key, "key", os.Getenv("UPDATECTL_KEY"), "API Key")
 
@@ -142,6 +144,11 @@ func main() {
 
 	if globalFlags.Version {
 		printVersion(out)
+		os.Exit(OK)
+	}
+
+	if globalFlags.Help {
+		printGlobalUsage()
 		os.Exit(OK)
 	}
 
