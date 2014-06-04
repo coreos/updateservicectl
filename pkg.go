@@ -24,7 +24,8 @@ type MetadataFile struct {
 
 var (
 	packageFlags struct {
-		version string
+		appId   StringFlag
+		version StringFlag
 		url     string
 		file    string
 		meta    string
@@ -32,34 +33,38 @@ var (
 
 	cmdListPackages = &Command{
 		Name:        "list-packages",
-		Usage:       "<appId>",
+		Usage:       "[OPTION]...",
 		Description: `List all of the packages that exist including their metadata.`,
 		Run:         listPackages,
 	}
 	cmdNewPackage = &Command{
 		Name:        "new-package",
-		Usage:       "[OPTION]... <appId>",
+		Usage:       "[OPTION]...",
 		Description: `Create a new package for an application.`,
 		Run:         newPackage,
 	}
 )
 
 func init() {
-	cmdNewPackage.Flags.StringVar(&packageFlags.version, "version", "", "")
-	cmdNewPackage.Flags.StringVar(&packageFlags.url, "url", "", "")
-	cmdNewPackage.Flags.StringVar(&packageFlags.file, "file", "update.gz", "")
-	cmdNewPackage.Flags.StringVar(&packageFlags.meta, "meta", "", "")
+	cmdListPackages.Flags.Var(&packageFlags.appId, "app-id", "Application to list the package of.")
+
+	cmdNewPackage.Flags.Var(&packageFlags.appId, "app-id", "Application to add the package to.")
+	cmdNewPackage.Flags.Var(&packageFlags.version, "version", "Application version associated with the package.")
+	cmdNewPackage.Flags.StringVar(&packageFlags.url, "url", "", "Package URL.")
+	cmdNewPackage.Flags.StringVar(&packageFlags.file, "file", "update.gz", "Package file.")
+	cmdNewPackage.Flags.StringVar(&packageFlags.meta, "meta", "", "JSON file containing metadata.")
 }
 
 func newPackage(args []string, service *update.Service, out *tabwriter.Writer) int {
-	if len(args) != 1 {
+	if packageFlags.appId.Get() == nil ||
+		packageFlags.version.Get() == nil {
 		return ERROR_USAGE
 	}
 
 	file := packageFlags.file
 	info, err := os.Stat(file)
 	if err != nil {
-		log.Fatalf("state of %s failed: %v", file, err)
+		log.Fatalf("stat of %s failed: %v", file, err)
 	}
 	content, err := ioutil.ReadFile(file)
 	if err != nil {
@@ -105,32 +110,32 @@ func newPackage(args []string, service *update.Service, out *tabwriter.Writer) i
 	jbytes, _ := json.MarshalIndent(pkg, "", " ")
 	fmt.Printf("%s\n", string(jbytes))
 
-	call := service.App.Package.Insert(args[0], packageFlags.version, pkg)
+	call := service.App.Package.Insert(packageFlags.appId.String(), packageFlags.version.String(), pkg)
 	pkg, err = call.Do()
 
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	fmt.Fprintln(out, args[0], packageFlags.version)
+	fmt.Fprintln(out, packageFlags.appId, packageFlags.version)
 
 	out.Flush()
 	return OK
 }
 
 func listPackages(args []string, service *update.Service, out *tabwriter.Writer) int {
-	if len(args) != 1 {
+	if packageFlags.appId.Get() == nil {
 		return ERROR_USAGE
 	}
 
-	call := service.App.Package.List(args[0])
+	call := service.App.Package.List(packageFlags.appId.String())
 	list, err := call.Do()
 
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	fmt.Fprintln(out, "Version\t\tURL\tSize")
+	fmt.Fprintln(out, "Version\tURL\tSize")
 	for _, pkg := range list.Items {
 		fmt.Fprintf(out, "%s\t%s\t%s\n", pkg.Version, pkg.Url, pkg.Size)
 	}
