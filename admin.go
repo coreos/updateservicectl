@@ -11,10 +11,6 @@ import (
 )
 
 var (
-	adminFlags struct {
-		user string
-	}
-
 	cmdAdminInit = &Command{
 		Name:        "admin-init",
 		Description: "Initializes the database.",
@@ -22,7 +18,7 @@ var (
 	}
 	cmdAdminCreateUser = &Command{
 		Name:        "admin-create-user",
-		Usage:       "-user USER",
+		Usage:       "<username>",
 		Description: "Creates an admin user.",
 		Run:         adminCreateUser,
 	}
@@ -38,10 +34,6 @@ var (
 		Run:         adminListUsers,
 	}
 )
-
-func init() {
-	cmdAdminCreateUser.Flags.StringVar(&adminFlags.user, "user", "", "New Username")
-}
 
 func adminInit(args []string, service *update.Service, out *tabwriter.Writer) int {
 	adminUrl := globalFlags.Server + "/admin/v1/init"
@@ -63,8 +55,12 @@ func adminInit(args []string, service *update.Service, out *tabwriter.Writer) in
 }
 
 func adminCreateUser(args []string, service *update.Service, out *tabwriter.Writer) int {
+	if len(args) != 1 {
+		return ERROR_USAGE
+	}
+
 	req := &update.AdminUserReq{
-		UserName: adminFlags.user,
+		UserName: args[0],
 	}
 	call := service.Admin.CreateUser(req)
 	u, err := call.Do()
