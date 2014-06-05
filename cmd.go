@@ -96,6 +96,8 @@ func init() {
 		// client_update.go
 		cmdListClientUpdates,
 		cmdListAppVersions,
+		// database.go
+		cmdDatabase,
 		// fakeclients.go
 		cmdFakeClients,
 		// group.go

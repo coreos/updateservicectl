@@ -2,59 +2,43 @@ package main
 
 import (
 	"fmt"
-	"io/ioutil"
 	"log"
-	"net/http"
 	"text/tabwriter"
 
 	"github.com/coreos-inc/updatectl/client/update/v1"
 )
 
 var (
-	cmdAdminInit = &Command{
-		Name:        "admin-init",
-		Description: "Initializes the database.",
-		Run:         adminInit,
+	cmdAdminUser = &Command{
+		Name:    "admin-user",
+		Usage:   "",
+		Summary: "Operations for modifying admin users.",
+		Subcommands: []*Command{
+			cmdAdminUserCreate,
+			cmdAdminUserList,
+			cmdAdminUserDelete,
+		},
 	}
-	cmdAdminCreateUser = &Command{
-		Name:        "admin-create-user",
+	cmdAdminUserCreate = &Command{
+		Name:        "admin-user create",
 		Usage:       "<username>",
 		Description: "Creates an admin user.",
-		Run:         adminCreateUser,
+		Run:         adminUserCreate,
 	}
-	cmdAdminDeleteUser = &Command{
-		Name:        "admin-delete-user",
+	cmdAdminUserList = &Command{
+		Name:        "admin-user list",
+		Description: "Lists admin users.",
+		Run:         adminUserList,
+	}
+	cmdAdminUserDelete = &Command{
+		Name:        "admin-user delete",
 		Usage:       "<username>",
 		Description: "Deletes an admin user.",
-		Run:         adminDeleteUser,
-	}
-	cmdAdminListUsers = &Command{
-		Name:        "admin-list-users",
-		Description: "Lists admin users.",
-		Run:         adminListUsers,
+		Run:         adminUserDelete,
 	}
 )
 
-func adminInit(args []string, service *update.Service, out *tabwriter.Writer) int {
-	adminUrl := globalFlags.Server + "/admin/v1/init"
-	client := &http.Client{}
-	resp, err := client.Get(adminUrl)
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer resp.Body.Close()
-	body, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		log.Fatal(err)
-	}
-	fmt.Println(string(body))
-	if string(body) != "ok" {
-		return ERROR_API
-	}
-	return OK
-}
-
-func adminCreateUser(args []string, service *update.Service, out *tabwriter.Writer) int {
+func adminUserCreate(args []string, service *update.Service, out *tabwriter.Writer) int {
 	if len(args) != 1 {
 		return ERROR_USAGE
 	}
@@ -71,7 +55,7 @@ func adminCreateUser(args []string, service *update.Service, out *tabwriter.Writ
 	return OK
 }
 
-func adminDeleteUser(args []string, service *update.Service, out *tabwriter.Writer) int {
+func adminUserDelete(args []string, service *update.Service, out *tabwriter.Writer) int {
 	if len(args) != 1 {
 		return ERROR_USAGE
 	}
@@ -85,7 +69,7 @@ func adminDeleteUser(args []string, service *update.Service, out *tabwriter.Writ
 	return OK
 }
 
-func adminListUsers(args []string, service *update.Service, out *tabwriter.Writer) int {
+func adminUserList(args []string, service *update.Service, out *tabwriter.Writer) int {
 	call := service.Admin.ListUsers()
 	resp, err := call.Do()
 	if err != nil {
