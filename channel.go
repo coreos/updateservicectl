@@ -9,6 +9,11 @@ import (
 )
 
 var (
+	channelFlags struct {
+		appId   string
+		channel string
+	}
+
 	cmdListChannels = &Command{
 		Name:        "list-channels",
 		Usage:       "<appId>",
@@ -17,11 +22,16 @@ var (
 	}
 	cmdUpdateChannel = &Command{
 		Name:        "update-channel",
-		Usage:       "<appId> <channel> <version>",
-		Description: `Update a given channel given a group, app, channel and version.`,
+		Usage:       "[OPTIONS]... <version>",
+		Description: `Update a channel to a new version.`,
 		Run:         updateChannel,
 	}
 )
+
+func init() {
+	cmdUpdateChannel.Flags.StringVar(&channelFlags.appId, "appid", REQUIRED_FLAG, "The application ID that the channel belongs to.")
+	cmdUpdateChannel.Flags.StringVar(&channelFlags.channel, "channel", REQUIRED_FLAG, "The channel to update.")
+}
 
 func formatChannel(channel *update.AppChannel) string {
 	return fmt.Sprintf("%s\t%s\n", channel.Label, channel.Version)
@@ -46,13 +56,17 @@ func listChannels(args []string, service *update.Service, out *tabwriter.Writer)
 }
 
 func updateChannel(args []string, service *update.Service, out *tabwriter.Writer) int {
-	if len(args) != 3 {
+	if len(args) != 1 {
 		return ERROR_USAGE
 	}
 
-	channelReq := &update.ChannelRequest{Version: args[2]}
+	if channelFlags.appId == REQUIRED_FLAG || channelFlags.channel == REQUIRED_FLAG {
+		return ERROR_USAGE
+	}
 
-	call := service.Channel.Update(args[0], args[1], channelReq)
+	channelReq := &update.ChannelRequest{Version: args[0]}
+
+	call := service.Channel.Update(channelFlags.appId, channelFlags.channel, channelReq)
 	channel, err := call.Do()
 	if err != nil {
 		log.Fatal(err)
