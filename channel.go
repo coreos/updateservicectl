@@ -14,32 +14,41 @@ var (
 		channel StringFlag
 	}
 
-	cmdListChannels = &Command{
-		Name:        "list-channels",
+	cmdChannel = &Command{
+		Name: "channel",
+		Summary: "Manage channels for an application",
+		Subcommands: []*Command{
+			cmdChannelList,
+			cmdChannelUpdate,
+		},
+	}
+
+	cmdChannelList = &Command{
+		Name:        "channel list",
 		Usage:       "[OPTION]...",
 		Description: `List all channels for an application.`,
-		Run:         listChannels,
+		Run:         channelList,
 	}
-	cmdUpdateChannel = &Command{
-		Name:        "update-channel",
+	cmdChannelUpdate = &Command{
+		Name:        "channel update",
 		Usage:       "[OPTION]... <version>",
 		Description: `Update a channel to a new version.`,
-		Run:         updateChannel,
+		Run:         channelUpdate,
 	}
 )
 
 func init() {
-	cmdListChannels.Flags.Var(&channelFlags.appId, "app-id", "The application ID to list the channels of.")
+	cmdChannelList.Flags.Var(&channelFlags.appId, "app-id", "The application ID to list the channels of.")
 
-	cmdUpdateChannel.Flags.Var(&channelFlags.appId, "app-id", "The application ID that the channel belongs to.")
-	cmdUpdateChannel.Flags.Var(&channelFlags.channel, "channel", "The channel to update.")
+	cmdChannelUpdate.Flags.Var(&channelFlags.appId, "app-id", "The application ID that the channel belongs to.")
+	cmdChannelUpdate.Flags.Var(&channelFlags.channel, "channel", "The channel to update.")
 }
 
 func formatChannel(channel *update.AppChannel) string {
 	return fmt.Sprintf("%s\t%s\n", channel.Label, channel.Version)
 }
 
-func listChannels(args []string, service *update.Service, out *tabwriter.Writer) int {
+func channelList(args []string, service *update.Service, out *tabwriter.Writer) int {
 	if channelFlags.appId.Get() == nil {
 		return ERROR_USAGE
 	}
@@ -57,7 +66,7 @@ func listChannels(args []string, service *update.Service, out *tabwriter.Writer)
 	return OK
 }
 
-func updateChannel(args []string, service *update.Service, out *tabwriter.Writer) int {
+func channelUpdate(args []string, service *update.Service, out *tabwriter.Writer) int {
 	if channelFlags.appId.Get() == nil || channelFlags.channel.Get() == nil {
 		return ERROR_USAGE
 	}

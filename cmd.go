@@ -88,8 +88,7 @@ func init() {
 		// app.go
 		cmdApp,
 		// channel.go
-		cmdListChannels,
-		cmdUpdateChannel,
+		cmdChannel,
 		// client_update.go
 		cmdListClientUpdates,
 		cmdListAppVersions,
