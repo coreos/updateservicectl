@@ -86,10 +86,7 @@ func init() {
 		// admin.go
 		cmdAdminUser,
 		// app.go
-		cmdListApps,
-		cmdCreateApp,
-		cmdUpdateApp,
-		cmdDeleteApp,
+		cmdApp,
 		// channel.go
 		cmdListChannels,
 		cmdUpdateChannel,
