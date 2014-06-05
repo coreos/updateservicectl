@@ -52,6 +52,7 @@ type Command struct {
 	Description string       // Detailed description of command
 	Flags       flag.FlagSet // Set of flags associated with this command
 	Run         handlerFunc  // Run a command with the given arguments
+	Subcommands []*Command // Subcommands for this command.
 }
 
 var (
@@ -83,10 +84,7 @@ func init() {
 
 	commands = []*Command{
 		// admin.go
-		cmdAdminInit,
-		cmdAdminCreateUser,
-		cmdAdminDeleteUser,
-		cmdAdminListUsers,
+		cmdAdminUser,
 		// app.go
 		cmdListApps,
 		cmdCreateApp,
@@ -159,6 +157,34 @@ func getFlags(flagset *flag.FlagSet) (flags []*flag.Flag) {
 	return
 }
 
+// determine which Command should be run
+func findCommand(search string, args []string, commands []*Command) (cmd *Command, name string) {
+	if len(args) < 1 {
+		return
+	}
+	if search == "" {
+		search = args[0]
+	} else {
+		search = fmt.Sprintf("%s %s", search, args[0])
+	}
+	name = search
+	for _, c := range commands {
+		if c.Name == search {
+			cmd = c
+			if err := c.Flags.Parse(args[1:]); err != nil {
+				fmt.Println(err.Error())
+				os.Exit(ERROR_USAGE)
+			}
+			if len(cmd.Subcommands) != 0 {
+				subArgs := cmd.Flags.Args()
+				cmd, name = findCommand(search, subArgs, cmd.Subcommands)
+			}
+			break
+		}
+	}
+	return
+}
+
 func main() {
 	globalFlagSet.Parse(os.Args[1:])
 	var args = globalFlagSet.Args()
@@ -178,22 +204,10 @@ func main() {
 		args = append(args, "help")
 	}
 
-	var cmd *Command
-
-	// determine which Command should be run
-	for _, c := range commands {
-		if c.Name == args[0] {
-			cmd = c
-			if err := c.Flags.Parse(args[1:]); err != nil {
-				fmt.Println(err.Error())
-				os.Exit(ERROR_USAGE)
-			}
-			break
-		}
-	}
+	cmd, name := findCommand("", args, commands)
 
 	if cmd == nil {
-		fmt.Printf("%v: unknown subcommand: %q\n", cliName, args[0])
+		fmt.Printf("%v: unknown subcommand: %q\n", cliName, name)
 		fmt.Printf("Run '%v help' for usage.\n", cliName)
 		os.Exit(ERROR_NO_COMMAND)
 	}
