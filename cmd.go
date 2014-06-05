@@ -24,6 +24,27 @@ const (
 	ERROR_NO_COMMAND
 )
 
+type StringFlag struct {
+	value *string
+	required bool
+}
+
+func (f *StringFlag) Set(value string) error {
+	f.value = &value
+	return nil
+}
+
+func (f *StringFlag) Get() *string {
+	return f.value
+}
+
+func (f *StringFlag) String() string {
+	if f.value != nil {
+		return *f.value
+	}
+	return ""
+}
+
 type Command struct {
 	Name        string       // Name of the Command and the string to use to invoke it
 	Summary     string       // One-sentence summary of what the Command does
