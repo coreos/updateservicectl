@@ -164,7 +164,11 @@ func findCommand(search string, args []string, commands []*Command) (cmd *Comman
 			}
 			if len(cmd.Subcommands) != 0 {
 				subArgs := cmd.Flags.Args()
-				cmd, name = findCommand(search, subArgs, cmd.Subcommands)
+				var subCmd *Command
+				subCmd, name = findCommand(search, subArgs, cmd.Subcommands)
+				if subCmd != nil {
+					cmd = subCmd
+				}
 			}
 			break
 		}
@@ -199,10 +203,14 @@ func main() {
 		os.Exit(ERROR_NO_COMMAND)
 	}
 
-	exit := handle(cmd.Run)(&cmd.Flags)
-
-	if exit == ERROR_USAGE {
+	if cmd.Run == nil {
 		printCommandUsage(cmd)
+		os.Exit(ERROR_USAGE)
+	} else {
+		exit := handle(cmd.Run)(&cmd.Flags)
+		if exit == ERROR_USAGE {
+			printCommandUsage(cmd)
+		}
+		os.Exit(exit)
 	}
-	os.Exit(exit)
 }
