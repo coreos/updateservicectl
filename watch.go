@@ -26,13 +26,13 @@ var (
 		interval int
 		version  string
 		appId    StringFlag
-		groupId    StringFlag
-		clientId   string
+		groupId  StringFlag
+		clientId string
 	}
 	cmdWatch = &Command{
 		Name:        "watch",
 		Usage:       "[OPTION]... <cmd> <args>",
-		Description: `Watch for app versions and exec a script with provided args/`,
+		Description: `Watch for app versions and exec a script with provided args.`,
 		Run:         watch,
 	}
 )
