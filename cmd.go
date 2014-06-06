@@ -52,7 +52,7 @@ type Command struct {
 	Description string       // Detailed description of command
 	Flags       flag.FlagSet // Set of flags associated with this command
 	Run         handlerFunc  // Run a command with the given arguments
-	Subcommands []*Command // Subcommands for this command.
+	Subcommands []*Command   // Subcommands for this command.
 }
 
 var (
@@ -89,9 +89,6 @@ func init() {
 		cmdApp,
 		// channel.go
 		cmdChannel,
-		// client_update.go
-		cmdListClientUpdates,
-		cmdListAppVersions,
 		// database.go
 		cmdDatabase,
 		// fakeclients.go
@@ -107,6 +104,8 @@ func init() {
 		cmdRollupGroupEvents,
 		// help.go
 		cmdHelp,
+		// instance.go
+		cmdInstance,
 		// pkg.go
 		cmdListPackages,
 		cmdNewPackage,
