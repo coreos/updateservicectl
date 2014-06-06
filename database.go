@@ -10,7 +10,6 @@ import (
 	"github.com/coreos-inc/updatectl/client/update/v1"
 )
 
-
 var (
 	cmdDatabase = &Command{
 		Name:    "database",
@@ -27,7 +26,6 @@ var (
 		Run:         databaseInit,
 	}
 )
-
 
 func databaseInit(args []string, service *update.Service, out *tabwriter.Writer) int {
 	adminUrl := globalFlags.Server + "/admin/v1/init"

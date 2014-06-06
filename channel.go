@@ -15,7 +15,7 @@ var (
 	}
 
 	cmdChannel = &Command{
-		Name: "channel",
+		Name:    "channel",
 		Summary: "Manage channels for an application",
 		Subcommands: []*Command{
 			cmdChannelList,
