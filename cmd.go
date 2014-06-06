@@ -92,14 +92,7 @@ func init() {
 		// database.go
 		cmdDatabase,
 		// group.go
-		cmdListGroups,
-		cmdNewGroup,
-		cmdDeleteGroup,
-		cmdUpdateGroup,
-		cmdPauseGroup,
-		cmdUnpauseGroup,
-		cmdRollupGroupVersions,
-		cmdRollupGroupEvents,
+		cmdGroup,
 		// help.go
 		cmdHelp,
 		// instance.go
