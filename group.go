@@ -32,8 +32,8 @@ var (
 			cmdGroupUpdate,
 			cmdGroupPause,
 			cmdGroupUnpause,
-			cmdGroupRollupEvents,
-			cmdGroupRollupVersions,
+			cmdGroupEvents,
+			cmdGroupVersions,
 		},
 	}
 
@@ -73,17 +73,17 @@ var (
 		Summary: `Unpause a group's updates.`,
 		Run:     groupUnpause,
 	}
-	cmdGroupRollupVersions = &Command{
-		Name:    "group rollup-versions",
+	cmdGroupVersions = &Command{
+		Name:    "group versions",
 		Usage:   "[OPTION]...",
-		Summary: "Rollup versions from events by time.",
-		Run:     groupRollupVersions,
+		Summary: "List versions from clients by time.",
+		Run:     groupVersions,
 	}
-	cmdGroupRollupEvents = &Command{
-		Name:    "group rollup events",
+	cmdGroupEvents = &Command{
+		Name:    "group events",
 		Usage:   "[OPTION]...",
-		Summary: "Rollup events from events by time.",
-		Run:     groupRollupEvents,
+		Summary: "List events from clients by time.",
+		Run:     groupEvents,
 	}
 )
 
@@ -128,33 +128,26 @@ func init() {
 	cmdGroupUnpause.Flags.Var(&groupFlags.groupId, "group-id",
 		"ID for the group.")
 
-	cmdGroupRollupVersions.Flags.Var(&groupFlags.appId, "app-id",
+	cmdGroupVersions.Flags.Var(&groupFlags.appId, "app-id",
 		"Application containing the group.")
-	cmdGroupRollupVersions.Flags.Var(&groupFlags.groupId, "group-id",
+	cmdGroupVersions.Flags.Var(&groupFlags.groupId, "group-id",
 		"ID for the group.")
-	cmdGroupRollupVersions.Flags.Int64Var(&groupFlags.resolution,
+	cmdGroupVersions.Flags.Int64Var(&groupFlags.resolution,
 		"resolution", 60, "60, 3600 or 86400 seconds")
-	cmdGroupRollupVersions.Flags.Int64Var(&groupFlags.start, "start", 0,
+	cmdGroupVersions.Flags.Int64Var(&groupFlags.start, "start", 0,
 		"Start date filter")
-	cmdGroupRollupVersions.Flags.Int64Var(&groupFlags.end, "end", 0,
+	cmdGroupVersions.Flags.Int64Var(&groupFlags.end, "end", 0,
 		"End date filter")
 
-	cmdRollupGroupEvents.Flags.Var(&groupFlags.appId, "app-id",
+	cmdGroupEvents.Flags.Var(&groupFlags.appId, "app-id",
 		"Application containing the group.")
-	cmdRollupGroupEvents.Flags.Var(&groupFlags.groupId, "group-id",
+	cmdGroupEvents.Flags.Var(&groupFlags.groupId, "group-id",
 		"ID for the group.")
-	cmdRollupGroupEvents.Flags.Int64Var(&groupFlags.resolution,
-=======
-	cmdGroupRollupEvents.Flags.Var(&groupFlags.appId, "app-id",
-		"Application containing the group.")
-	cmdGroupRollupEvents.Flags.Var(&groupFlags.groupId, "group-id",
-		"ID for the group.")
-	cmdGroupRollupEvents.Flags.Int64Var(&groupFlags.resolution,
->>>>>>> f4fb7b8... refactor(group): move group commands to subcommands
+	cmdGroupEvents.Flags.Int64Var(&groupFlags.resolution,
 		"resolution", 60, "60, 3600 or 86400 seconds")
-	cmdGroupRollupEvents.Flags.Int64Var(&groupFlags.start, "start", 0,
+	cmdGroupEvents.Flags.Int64Var(&groupFlags.start, "start", 0,
 		"Start date filter")
-	cmdGroupRollupEvents.Flags.Int64Var(&groupFlags.end, "end", 0,
+	cmdGroupEvents.Flags.Int64Var(&groupFlags.end, "end", 0,
 		"End date filter")
 }
 
@@ -184,7 +177,7 @@ func groupList(args []string, service *update.Service, out *tabwriter.Writer) in
 	return OK
 }
 
-func groupRollupEvents(args []string, service *update.Service, out *tabwriter.Writer) int {
+func groupEvents(args []string, service *update.Service, out *tabwriter.Writer) int {
 	if groupFlags.appId.Get() == nil || groupFlags.groupId.Get() == nil {
 		return ERROR_USAGE
 	}
@@ -213,7 +206,7 @@ func groupRollupEvents(args []string, service *update.Service, out *tabwriter.Wr
 	return OK
 }
 
-func groupRollupVersions(args []string, service *update.Service, out *tabwriter.Writer) int {
+func groupVersions(args []string, service *update.Service, out *tabwriter.Writer) int {
 	if groupFlags.appId.Get() == nil || groupFlags.groupId.Get() == nil {
 		return ERROR_USAGE
 	}
