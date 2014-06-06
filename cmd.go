@@ -91,8 +91,6 @@ func init() {
 		cmdChannel,
 		// database.go
 		cmdDatabase,
-		// fakeclients.go
-		cmdFakeClients,
 		// group.go
 		cmdListGroups,
 		cmdNewGroup,
