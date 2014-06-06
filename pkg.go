@@ -31,31 +31,40 @@ var (
 		meta    string
 	}
 
-	cmdListPackages = &Command{
-		Name:        "list-packages",
+	cmdPackage = &Command{
+		Name:    "package",
+		Summary: "List or create packages for an application.",
+		Subcommands: []*Command{
+			cmdPackageList,
+			cmdPackageCreate,
+		},
+	}
+
+	cmdPackageList = &Command{
+		Name:        "package list",
 		Usage:       "[OPTION]...",
 		Description: `List all of the packages that exist including their metadata.`,
-		Run:         listPackages,
+		Run:         packageList,
 	}
-	cmdNewPackage = &Command{
-		Name:        "new-package",
+	cmdPackageCreate = &Command{
+		Name:        "package create",
 		Usage:       "[OPTION]...",
 		Description: `Create a new package for an application.`,
-		Run:         newPackage,
+		Run:         packageCreate,
 	}
 )
 
 func init() {
-	cmdListPackages.Flags.Var(&packageFlags.appId, "app-id", "Application to list the package of.")
+	cmdPackageList.Flags.Var(&packageFlags.appId, "app-id", "Application to list the package of.")
 
-	cmdNewPackage.Flags.Var(&packageFlags.appId, "app-id", "Application to add the package to.")
-	cmdNewPackage.Flags.Var(&packageFlags.version, "version", "Application version associated with the package.")
-	cmdNewPackage.Flags.StringVar(&packageFlags.url, "url", "", "Package URL.")
-	cmdNewPackage.Flags.StringVar(&packageFlags.file, "file", "update.gz", "Package file.")
-	cmdNewPackage.Flags.StringVar(&packageFlags.meta, "meta", "", "JSON file containing metadata.")
+	cmdPackageCreate.Flags.Var(&packageFlags.appId, "app-id", "Application to add the package to.")
+	cmdPackageCreate.Flags.Var(&packageFlags.version, "version", "Application version associated with the package.")
+	cmdPackageCreate.Flags.StringVar(&packageFlags.url, "url", "", "Package URL.")
+	cmdPackageCreate.Flags.StringVar(&packageFlags.file, "file", "update.gz", "Package file.")
+	cmdPackageCreate.Flags.StringVar(&packageFlags.meta, "meta", "", "JSON file containing metadata.")
 }
 
-func newPackage(args []string, service *update.Service, out *tabwriter.Writer) int {
+func packageCreate(args []string, service *update.Service, out *tabwriter.Writer) int {
 	if packageFlags.appId.Get() == nil ||
 		packageFlags.version.Get() == nil {
 		return ERROR_USAGE
@@ -123,7 +132,7 @@ func newPackage(args []string, service *update.Service, out *tabwriter.Writer) i
 	return OK
 }
 
-func listPackages(args []string, service *update.Service, out *tabwriter.Writer) int {
+func packageList(args []string, service *update.Service, out *tabwriter.Writer) int {
 	if packageFlags.appId.Get() == nil {
 		return ERROR_USAGE
 	}

@@ -98,8 +98,7 @@ func init() {
 		// instance.go
 		cmdInstance,
 		// pkg.go
-		cmdListPackages,
-		cmdNewPackage,
+		cmdPackage,
 		// watch.go
 		cmdWatch,
 	}
