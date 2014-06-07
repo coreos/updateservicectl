@@ -47,7 +47,7 @@ var (
 		Name:    "group create",
 		Usage:   "[OPTION]...",
 		Summary: `Create a new group.`,
-		Run:     groupNew,
+		Run:     groupCreate,
 	}
 	cmdGroupDelete = &Command{
 		Name:    "group delete",
@@ -235,7 +235,7 @@ func groupVersions(args []string, service *update.Service, out *tabwriter.Writer
 	return OK
 }
 
-func groupNew(args []string, service *update.Service, out *tabwriter.Writer) int {
+func groupCreate(args []string, service *update.Service, out *tabwriter.Writer) int {
 	if groupFlags.appId.Get() == nil ||
 		groupFlags.groupId.Get() == nil ||
 		groupFlags.channel.Get() == nil {
