@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"log"
-	"strconv"
 	"text/tabwriter"
 
 	"github.com/coreos-inc/updatectl/client/update/v1"
@@ -20,6 +19,11 @@ var (
 		resolution     int64
 		updateCount    int64
 		updateInterval int64
+		autoPause      BoolFlag
+		errorThreshold int64
+		errorInterval  int64
+		dropThreshold  int64
+		dropInterval   int64
 	}
 
 	cmdGroup = &Command{
@@ -117,6 +121,16 @@ func init() {
 		-1, "Number of instances per interval")
 	cmdGroupUpdate.Flags.Int64Var(&groupFlags.updateInterval,
 		"update-interval", -1, "Interval between updates")
+	cmdGroupUpdate.Flags.Var(&groupFlags.autoPause,
+		"auto-pause", "Enable/Disable AutoPause feature.")
+	cmdGroupUpdate.Flags.Int64Var(&groupFlags.errorThreshold,
+		"error-threshold", -1, "Errors per interval for autopause.")
+	cmdGroupUpdate.Flags.Int64Var(&groupFlags.errorInterval,
+		"error-interval", -1, "Interval for error threshold.")
+	cmdGroupUpdate.Flags.Int64Var(&groupFlags.dropThreshold, "drop-threshold",
+		-1, "Number of instances that can drop per drop interval.")
+	cmdGroupUpdate.Flags.Int64Var(&groupFlags.dropInterval,
+		"drop-interval", -1, "Interval for drop threshold.")
 
 	cmdGroupPause.Flags.Var(&groupFlags.appId, "app-id",
 		"Application containing the group to pause.")
@@ -151,9 +165,13 @@ func init() {
 		"End date filter")
 }
 
+const groupLegend = "Label\tApp\tChannel\tId\tUpdatesPaused\tAutoPause\tErrors\tDrops"
+
 func formatGroup(group *update.Group) string {
-	return fmt.Sprintf("%s\t%s\t%s\t%s\t%s\t%v\t%v\n", group.Label, group.AppId, group.ChannelId,
-		group.Id, strconv.FormatBool(group.UpdatesPaused), group.UpdateCount, group.UpdateInterval)
+	return fmt.Sprintf("%s\t%s\t%s\t%s\t%t\t%t\t%d/%dmin\t%d/%dmin\n",
+		group.Label, group.AppId, group.ChannelId, group.Id,
+		group.UpdatesPaused, group.AutoPause, group.ErrorThreshold,
+		group.ErrorInterval, group.DropThreshold, group.DropInterval)
 }
 
 func groupList(args []string, service *update.Service, out *tabwriter.Writer) int {
@@ -168,7 +186,7 @@ func groupList(args []string, service *update.Service, out *tabwriter.Writer) in
 		log.Fatal(err)
 	}
 
-	fmt.Fprintln(out, "Label\tApp\tChannel\tId\tUpdatesPaused")
+	fmt.Fprintln(out, groupLegend)
 	for _, group := range list.Items {
 		fmt.Fprintf(out, "%s", formatGroup(group))
 	}
@@ -353,6 +371,22 @@ func groupUpdate(args []string, service *update.Service, out *tabwriter.Writer) 
 		} else {
 			group.UpdatePooling = true
 		}
+	}
+
+	if autoPause := groupFlags.autoPause.Get(); autoPause != nil {
+		group.AutoPause = *autoPause
+	}
+	if groupFlags.errorThreshold != -1 {
+		group.ErrorThreshold = groupFlags.errorThreshold
+	}
+	if groupFlags.errorInterval != -1 {
+		group.ErrorInterval = groupFlags.errorInterval
+	}
+	if groupFlags.dropThreshold != -1 {
+		group.DropThreshold = groupFlags.dropThreshold
+	}
+	if groupFlags.dropInterval != -1 {
+		group.DropInterval = groupFlags.dropInterval
 	}
 
 	updateCall := service.Group.Patch(groupFlags.appId.String(), groupFlags.groupId.String(), group)
