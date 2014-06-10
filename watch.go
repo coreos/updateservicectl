@@ -25,11 +25,14 @@ var (
 	watchFlags struct {
 		interval int
 		version  string
+		appId    StringFlag
+		groupId  StringFlag
+		clientId string
 	}
 	cmdWatch = &Command{
 		Name:        "watch",
-		Usage:       "[OPTION]... <appID> <groupID> <clientID> <cmd> <args>",
-		Description: `Watch for app versions and exec a script`,
+		Usage:       "[OPTION]... <cmd> <args>",
+		Description: `Watch for app versions and exec a script with provided args.`,
 		Run:         watch,
 	}
 )
@@ -37,6 +40,9 @@ var (
 func init() {
 	cmdWatch.Flags.IntVar(&watchFlags.interval, "interval", 1, "Update polling interval")
 	cmdWatch.Flags.StringVar(&watchFlags.version, "version", "0.0.0", "Starting version number")
+	cmdWatch.Flags.Var(&watchFlags.appId, "app-id", "Application to watch.")
+	cmdWatch.Flags.Var(&watchFlags.groupId, "group-id", "Group of application to subscribe to.")
+	cmdWatch.Flags.StringVar(&watchFlags.clientId, "client-id", "", "Client id to report ad. If not provided a random UUID will be generated.")
 }
 
 func fetchUpdateCheck(server string, appID string, groupID string, clientID string, version string, debug bool) (*omaha.UpdateCheck, error) {
@@ -141,27 +147,36 @@ func watch(args []string, service *update.Service, out *tabwriter.Writer) int {
 	debug := globalFlags.Debug
 	version := watchFlags.version
 
-	if len(args) < 4 {
+	if watchFlags.appId.Get() == nil || watchFlags.groupId.Get() == nil {
 		return ERROR_USAGE
 	}
 
-	appID := args[0]
-	groupID := args[1]
-	clientID := args[2]
+	if len(args) == 0 {
+		return ERROR_USAGE
+	}
+
+	appId := watchFlags.appId.String()
+	groupId := watchFlags.groupId.String()
+	clientId := watchFlags.clientId
+
+	if clientId == "" {
+		clientId = uuid.New()
+	}
 
 	// initial check
-	updateCheck, err := fetchUpdateCheck(server, appID, groupID, clientID, version, debug)
+	updateCheck, err := fetchUpdateCheck(server, appId, groupId, clientId, version, debug)
+
 	if err != nil {
 		fmt.Fprintf(os.Stderr, err.Error())
 		os.Exit(1)
 	}
-	runCmd(args[3], args[4:], appID, version, "", updateCheck)
+	runCmd(args[0], args[1:], appId, version, "", updateCheck)
 
 	for {
 		select {
 		case <-tick.C:
 
-			updateCheck, err := fetchUpdateCheck(server, appID, groupID, clientID, version, debug)
+			updateCheck, err := fetchUpdateCheck(server, appId, groupId, clientId, version, debug)
 			if err != nil {
 				log.Printf("warning: update check failed (%v)\n", err)
 				continue
@@ -176,7 +191,7 @@ func watch(args []string, service *update.Service, out *tabwriter.Writer) int {
 			newVersion := updateCheck.Manifest.Version
 
 			if newVersion != version {
-				runCmd(args[3], args[4:], appID, newVersion, version, updateCheck)
+				runCmd(args[0], args[1:], appId, newVersion, version, updateCheck)
 			}
 			version = newVersion
 		}

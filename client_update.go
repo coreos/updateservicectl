@@ -10,8 +10,8 @@ import (
 
 var (
 	clientUpdateFlags struct {
-		groupId string
-		appId   string
+		groupId StringFlag
+		appId   StringFlag
 		start   int64
 		end     int64
 	}
@@ -32,21 +32,28 @@ var (
 )
 
 func init() {
-	cmdListClientUpdates.Flags.StringVar(&clientUpdateFlags.groupId, "group-id", "", "Group id")
-	cmdListClientUpdates.Flags.StringVar(&clientUpdateFlags.appId, "app-id", "", "App id")
+	cmdListClientUpdates.Flags.Var(&clientUpdateFlags.groupId, "group-id", "Group id")
+	cmdListClientUpdates.Flags.Var(&clientUpdateFlags.appId, "app-id", "App id")
 	cmdListClientUpdates.Flags.Int64Var(&clientUpdateFlags.start, "start", 0, "Start date filter")
 	cmdListClientUpdates.Flags.Int64Var(&clientUpdateFlags.end, "end", 0, "End date filter")
 
+	cmdListAppVersions.Flags.Var(&clientUpdateFlags.groupId, "group-id", "Group id")
+	cmdListAppVersions.Flags.Var(&clientUpdateFlags.appId, "app-id", "App id")
 	cmdListAppVersions.Flags.Int64Var(&clientUpdateFlags.start, "start", 0, "Start date filter")
 	cmdListAppVersions.Flags.Int64Var(&clientUpdateFlags.end, "end", 0, "End date filter")
 }
 
 func listClientUpdates(args []string, service *update.Service, out *tabwriter.Writer) int {
+	if clientUpdateFlags.appId.Get() == nil ||
+		clientUpdateFlags.groupId.Get() == nil {
+		return ERROR_USAGE
+	}
+
 	call := service.Clientupdate.List()
 	call.DateStart(clientUpdateFlags.start)
 	call.DateEnd(clientUpdateFlags.end)
-	call.GroupId(clientUpdateFlags.groupId)
-	call.AppId(clientUpdateFlags.appId)
+	call.GroupId(clientUpdateFlags.groupId.String())
+	call.AppId(clientUpdateFlags.appId.String())
 	list, err := call.Do()
 
 	if err != nil {
@@ -64,10 +71,15 @@ func listClientUpdates(args []string, service *update.Service, out *tabwriter.Wr
 }
 
 func listAppVersions(args []string, service *update.Service, out *tabwriter.Writer) int {
+	if clientUpdateFlags.appId.Get() == nil ||
+		clientUpdateFlags.groupId.Get() == nil {
+		return ERROR_USAGE
+	}
+
 	call := service.Appversion.List()
 
-	call.GroupId(clientUpdateFlags.groupId)
-	call.AppId(clientUpdateFlags.appId)
+	call.GroupId(clientUpdateFlags.groupId.String())
+	call.AppId(clientUpdateFlags.appId.String())
 
 	if clientUpdateFlags.start != 0 {
 		call.DateStart(clientUpdateFlags.start)
