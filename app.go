@@ -5,7 +5,7 @@ import (
 	"log"
 	"text/tabwriter"
 
-	"code.google.com/p/go-uuid/uuid"
+	"github.com/coreos-inc/updatectl/Godeps/_workspace/src/code.google.com/p/go-uuid/uuid"
 	"github.com/coreos-inc/updatectl/client/update/v1"
 )
 
@@ -46,7 +46,7 @@ func init() {
 	cmdCreateApp.Flags.Var(&appFlags.label, "label", "New application label.")
 	cmdCreateApp.Flags.Var(&appFlags.description, "description", "New application description.")
 
-	cmdUpdateApp.Flags.Var(&appFlags.appId, "app-id",  "Application ID to update.")
+	cmdUpdateApp.Flags.Var(&appFlags.appId, "app-id", "Application ID to update.")
 	cmdUpdateApp.Flags.Var(&appFlags.label, "label", "Set application label.")
 	cmdUpdateApp.Flags.Var(&appFlags.description, "description", "Set application description.")
 
@@ -75,7 +75,7 @@ func listApps(args []string, service *update.Service, out *tabwriter.Writer) int
 }
 
 func createApp(args []string, service *update.Service, out *tabwriter.Writer) int {
-	if appFlags.appId.Get() == nil  {
+	if appFlags.appId.Get() == nil {
 		appFlags.appId.Set(uuid.New())
 	}
 	return updateAppHelper(service, out)

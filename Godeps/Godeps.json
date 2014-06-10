@@ -13,17 +13,8 @@
 			"Rev": "46967f157fd4008b48fe78dcbc97ab67006a5658"
 		},
 		{
-			"ImportPath": "github.com/codegangsta/cli",
-			"Comment": "1.0.0-72-gbb91895",
-			"Rev": "bb9189510af1f49580c073c9e59e8bf288f0df27"
-		},
-		{
 			"ImportPath": "github.com/coreos/go-omaha/omaha",
 			"Rev": "bd37826a4f37c8b94ec7241c91c2c03be13f72b7"
-		},
-		{
-			"ImportPath": "github.com/coreos/go-semver/semver",
-			"Rev": "a9a0c39c7e4a2929f73d4b757d1860fbb8e66d06"
 		},
 		{
 			"ImportPath": "github.com/tent/hawk-go",

@@ -81,20 +81,19 @@ func init() {
 	cmdDeleteGroup.Flags.Var(&groupFlags.groupId, "group-id",
 		"ID of group to delete.")
 
-
 	cmdNewGroup.Flags.Var(&groupFlags.appId, "app-id",
 		"Application to add group to.")
 	cmdNewGroup.Flags.Var(&groupFlags.groupId, "group-id",
-		 "ID for the new group.")
+		"ID for the new group.")
 	cmdNewGroup.Flags.Var(&groupFlags.channel, "channel",
-		 "Channel to associate with the group.")
+		"Channel to associate with the group.")
 	cmdNewGroup.Flags.Var(&groupFlags.label, "label",
 		"Label describing the new group.")
 
 	cmdUpdateGroup.Flags.Var(&groupFlags.appId, "app-id",
-		 "Application containing the group to update.")
+		"Application containing the group to update.")
 	cmdUpdateGroup.Flags.Var(&groupFlags.groupId, "group-id",
-		 "ID for the group.")
+		"ID for the group.")
 	cmdUpdateGroup.Flags.Var(&groupFlags.label, "label",
 		"Label describing the group")
 	cmdUpdateGroup.Flags.Var(&groupFlags.channel, "channel",
@@ -105,19 +104,19 @@ func init() {
 		"update-interval", -1, "Interval between updates")
 
 	cmdPauseGroup.Flags.Var(&groupFlags.appId, "app-id",
-		 "Application containing the group to pause.")
+		"Application containing the group to pause.")
 	cmdPauseGroup.Flags.Var(&groupFlags.groupId, "group-id",
-		 "ID for the group.")
+		"ID for the group.")
 
 	cmdUnpauseGroup.Flags.Var(&groupFlags.appId, "app-id",
-		 "Application containing the group to unpause.")
+		"Application containing the group to unpause.")
 	cmdUnpauseGroup.Flags.Var(&groupFlags.groupId, "group-id",
-		 "ID for the group.")
+		"ID for the group.")
 
 	cmdRollupGroupVersions.Flags.Var(&groupFlags.appId, "app-id",
-		 "Application containing the group.")
+		"Application containing the group.")
 	cmdRollupGroupVersions.Flags.Var(&groupFlags.groupId, "group-id",
-		 "ID for the group.")
+		"ID for the group.")
 	cmdRollupGroupVersions.Flags.Int64Var(&groupFlags.resolution,
 		"resolution", 60, "60, 3600 or 86400 seconds")
 	cmdRollupGroupVersions.Flags.Int64Var(&groupFlags.start, "start", 0,
@@ -126,9 +125,9 @@ func init() {
 		"End date filter")
 
 	cmdRollupGroupEvents.Flags.Var(&groupFlags.appId, "app-id",
-		 "Application containing the group.")
+		"Application containing the group.")
 	cmdRollupGroupEvents.Flags.Var(&groupFlags.groupId, "group-id",
-		 "ID for the group.")
+		"ID for the group.")
 	cmdRollupGroupEvents.Flags.Int64Var(&groupFlags.resolution,
 		"resolution", 60, "60, 3600 or 86400 seconds")
 	cmdRollupGroupEvents.Flags.Int64Var(&groupFlags.start, "start", 0,
@@ -230,8 +229,8 @@ func newGroup(args []string, service *update.Service, out *tabwriter.Writer) int
 
 	group := &update.Group{
 		ChannelId: groupFlags.channel.String(),
-		Id: groupFlags.groupId.String(),
-		Label: groupFlags.label.String(),
+		Id:        groupFlags.groupId.String(),
+		Label:     groupFlags.label.String(),
 	}
 	call := service.Group.Insert(groupFlags.appId.String(), group)
 	group, err := call.Do()
