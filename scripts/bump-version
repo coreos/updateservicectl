@@ -32,3 +32,4 @@ git tag v${VER} --sign -m "v${VER}"
 echo "New version tagged at v$VER. Pushing to coreos-inc/updatectl."
 
 git push git@github.com:coreos-inc/updatectl v${VER}
+git push git@github.com:coreos-inc/updatectl master
