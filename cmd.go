@@ -14,14 +14,14 @@ import (
 )
 
 const (
-	cliName        = "updatectl"
-	cliDescription = "updatectl is a command line driven interface to the roller."
-
 	OK = iota
 	// Error Codes
 	ERROR_API
 	ERROR_USAGE
 	ERROR_NO_COMMAND
+
+	cliName        = "updatectl"
+	cliDescription = "updatectl is a command line driven interface to the roller."
 )
 
 type StringFlag struct {
