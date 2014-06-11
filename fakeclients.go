@@ -10,8 +10,8 @@ import (
 	"text/tabwriter"
 	"time"
 
-	"code.google.com/p/go-uuid/uuid"
-	"github.com/coreos/go-omaha/omaha"
+	"github.com/coreos-inc/updatectl/Godeps/_workspace/src/code.google.com/p/go-uuid/uuid"
+	"github.com/coreos-inc/updatectl/Godeps/_workspace/src/github.com/coreos/go-omaha/omaha"
 
 	"github.com/coreos-inc/updatectl/client/update/v1"
 )

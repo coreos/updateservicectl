@@ -25,7 +25,7 @@ const (
 )
 
 type StringFlag struct {
-	value *string
+	value    *string
 	required bool
 }
 
@@ -65,7 +65,7 @@ var (
 		Key     string
 		Debug   bool
 		Version bool
-		Help bool
+		Help    bool
 	}
 )
 
