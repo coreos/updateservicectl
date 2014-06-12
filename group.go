@@ -126,11 +126,11 @@ func init() {
 	cmdGroupUpdate.Flags.Int64Var(&groupFlags.errorThreshold,
 		"error-threshold", -1, "Errors per interval for autopause.")
 	cmdGroupUpdate.Flags.Int64Var(&groupFlags.errorInterval,
-		"error-interval", -1, "Interval for error threshold.")
+		"error-interval", -1, "Interval for error threshold in seconds.")
 	cmdGroupUpdate.Flags.Int64Var(&groupFlags.dropThreshold, "drop-threshold",
 		-1, "Number of instances that can drop per drop interval.")
 	cmdGroupUpdate.Flags.Int64Var(&groupFlags.dropInterval,
-		"drop-interval", -1, "Interval for drop threshold.")
+		"drop-interval", -1, "Interval for drop threshold in seconds.")
 
 	cmdGroupPause.Flags.Var(&groupFlags.appId, "app-id",
 		"Application containing the group to pause.")
@@ -168,7 +168,7 @@ func init() {
 const groupLegend = "Label\tApp\tChannel\tId\tUpdatesPaused\tAutoPause\tErrors\tDrops"
 
 func formatGroup(group *update.Group) string {
-	return fmt.Sprintf("%s\t%s\t%s\t%s\t%t\t%t\t%d/%dmin\t%d/%dmin\n",
+	return fmt.Sprintf("%s\t%s\t%s\t%s\t%t\t%t\t%d/%ds\t%d/%ds\n",
 		group.Label, group.AppId, group.ChannelId, group.Id,
 		group.UpdatesPaused, group.AutoPause, group.ErrorThreshold,
 		group.ErrorInterval, group.DropThreshold, group.DropInterval)
