@@ -65,6 +65,10 @@ func databaseBackup(args []string, service *update.Service, out *tabwriter.Write
 	if err != nil {
 		log.Fatal(err)
 	}
+	if resp.StatusCode != http.StatusOK {
+		body, _ := ioutil.ReadAll(resp.Body)
+		log.Fatal(string(body))
+	}
 	defer resp.Body.Close()
 	outFile, err := os.Create(args[0])
 	if err != nil {
