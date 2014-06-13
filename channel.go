@@ -67,7 +67,8 @@ func channelList(args []string, service *update.Service, out *tabwriter.Writer) 
 }
 
 func channelUpdate(args []string, service *update.Service, out *tabwriter.Writer) int {
-	if channelFlags.appId.Get() == nil || channelFlags.channel.Get() == nil {
+	if len(args) != 1 || channelFlags.appId.Get() == nil ||
+		channelFlags.channel.Get() == nil{
 		return ERROR_USAGE
 	}
 
