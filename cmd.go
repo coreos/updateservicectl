@@ -158,8 +158,8 @@ func findCommand(search string, args []string, commands []*Command) (cmd *Comman
 	for _, c := range commands {
 		if c.Name == search {
 			cmd = c
-			if err := c.Flags.Parse(args[1:]); err != nil {
-				fmt.Println(err.Error())
+			if errHelp := c.Flags.Parse(args[1:]); errHelp != nil {
+				printCommandUsage(cmd)
 				os.Exit(ERROR_USAGE)
 			}
 			if len(cmd.Subcommands) != 0 {
