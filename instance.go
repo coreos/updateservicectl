@@ -33,7 +33,7 @@ var (
 	cmdInstance = &Command{
 		Name:        "instance",
 		Usage:       "[OPTION]...",
-		Description: "Operations to view instances.",
+		Summary: "Operations to view instances.",
 		Subcommands: []*Command{
 			cmdInstanceListUpdates,
 			cmdInstanceListAppVersions,
