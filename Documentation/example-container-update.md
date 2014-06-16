@@ -2,7 +2,7 @@
 
 Getting a distributed application running across a CoreOS cluster is [easy with fleet]({{site.url}}/docs/launching-containers/launching/fleet-example-deployment/). The hard part is deploying an update to the containers that make up the system, without having any downtime. The update service provides the tools we need to make this happen in a graceful and transparent way.
 
-This orchestration happens through an updater which is responsible for reporting the progress of the update ([via the Omaha protocol](https://github.com/coreos-inc/updatectl/blob/master/Documentation/protocol.md)) and executing the commands that actually verify and apply the update. Each application can have their own updater to execute app-specific commands or you can share the same update logic across the applications that you run. This guide will implement an extremly simple updater that uses the `updatectl watch` command to be notified of an update. It's important to note that using this scheme shouldn't be used for any production system. 
+This orchestration happens through an updater which is responsible for reporting the progress of the update ([via the Omaha protocol](https://github.com/coreos-inc/updatectl/blob/master/Documentation/protocol.md)) and executing the commands that actually verify and apply the update. Each application can have their own updater to execute app-specific commands or you can share the same update logic across the applications that you run. This guide will implement an extremly simple updater that uses the `updatectl watch` command to be notified of an update. It's important to note that using this scheme shouldn't be used for any production system.
 
 To orchestrate the update, we need to run a "sidekick" for each of the app containers, which will check for an update and run a few [fleetctl]({{site.url}}/docs/launching-containers/launching/fleet-using-the-client/) commands if there is a new version.
 
@@ -13,17 +13,15 @@ We're going to build off the example described in the [Zero Downtime Frontend De
 Before we can update the example application, we need to set it up in the update service. You can read the detailed information in the [Getting Started]() guide, or quickly execute these commands:
 
 ```
-$ updatectl update-app e96281a6-d1af-4bde-9a0a-97b76e56dc57 "Example App" "Sample application to test container updates"
-$ updatectl new-group e96281a6-d1af-4bde-9a0a-97b76e56dc57 master 13DEFFFC-90C2-4B94-B3C2-1322BE8DC4E3 "Example Group"
-$ updatectl new-package e96281a6-d1af-4bde-9a0a-97b76e56dc57 1.0.0 \
-        --name foobar \
-        --path coreos/example:1.0.0 \
-        --size 23 \
-        --sha1sum fe7374bddde2ddf07f6bfcc728d115d14338964b \
-        --sha256sum b602d630f0a081840d0ca8fc4d35810e42806642b3127bb702d65c3df227d0f5 \
-        --signature ixi6Oebo \
-        --metadata-size 190
-$ updatectl update-channel e96281a6-d1af-4bde-9a0a-97b76e56dc57 master 1.0.0
+$ updatectl app update --app-id e96281a6-d1af-4bde-9a0a-97b76e56dc57 \
+	--label "Example App" --description "Sample application to test container updates"
+$ updatectl group create --app-id e96281a6-d1af-4bde-9a0a-97b76e56dc57 \
+	--channel master --group-id 13DEFFFC-90C2-4B94-B3C2-1322BE8DC4E3 \
+	--label "Example Group"
+$ echo '{"medatdata_size":"190","metadata_signature_rsa":"ixi60ebe"}' > metadata.json
+$ updatectl package create --app-id e96281a6-d1af-4bde-9a0a-97b76e56dc57 \
+	--version 1.0.0 --meta metadata.json --file coreos/example:1.0.0
+$ updatectl channel update --app-id e96281a6-d1af-4bde-9a0a-97b76e56dc57 --channel master 1.0.0
 ```
 
 In the web interface, you should see everything that you just created:
@@ -97,14 +95,8 @@ Now that we know everything is running, let's load a new package into the update
 Create a new package pointing to the 2.0.0 tag of the container:
 
 ```
-updatectl new-package e96281a6-d1af-4bde-9a0a-97b76e56dc57 2.0.0 \
-	--name foobar \
-	--path coreos/example:2.0.0 \
-	--size 23 \
-	--sha1sum fe7374bddde2ddf07f6bfcc728d115d14338964b \
-	--sha256sum b602d630f0a081840d0ca8fc4d35810e42806642b3127bb702d65c3df227d0f5 \
-	--signature ixi6Oebo \
-	--metadata-size 190
+updatectl package create --app-id e96281a6-d1af-4bde-9a0a-97b76e56dc57 \
+	--version 2.0.0 --file coreos/example:2.0.0  --meta metadata.json
 ```
 
 ### Start the Update
