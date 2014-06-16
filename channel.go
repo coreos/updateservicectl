@@ -32,7 +32,9 @@ var (
 	cmdChannelUpdate = &Command{
 		Name:        "channel update",
 		Usage:       "[OPTION]... <version>",
-		Description: `Update a channel to a new version.`,
+		Summary: `Update a channel for an application to a new version.`,
+		Description: `Given an application ID (--app-id) and channel (--channel),
+you can change the channel to a new version (<version>).`,
 		Run:         channelUpdate,
 	}
 )
