@@ -18,9 +18,8 @@ $ updatectl app update --app-id e96281a6-d1af-4bde-9a0a-97b76e56dc57 \
 $ updatectl group create --app-id e96281a6-d1af-4bde-9a0a-97b76e56dc57 \
 	--channel master --group-id 13DEFFFC-90C2-4B94-B3C2-1322BE8DC4E3 \
 	--label "Example Group"
-$ echo '{"medatdata_size":"190","metadata_signature_rsa":"ixi60ebe"}' > metadata.json
 $ updatectl package create --app-id e96281a6-d1af-4bde-9a0a-97b76e56dc57 \
-	--version 1.0.0 --meta metadata.json --file coreos/example:1.0.0
+	--version 1.0.0 --file coreos/example:1.0.0
 $ updatectl channel update --app-id e96281a6-d1af-4bde-9a0a-97b76e56dc57 --channel master 1.0.0
 ```
 
@@ -96,7 +95,7 @@ Create a new package pointing to the 2.0.0 tag of the container:
 
 ```
 updatectl package create --app-id e96281a6-d1af-4bde-9a0a-97b76e56dc57 \
-	--version 2.0.0 --file coreos/example:2.0.0  --meta metadata.json
+	--version 2.0.0 --file coreos/example:2.0.0
 ```
 
 ### Start the Update

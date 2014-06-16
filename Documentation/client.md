@@ -100,13 +100,11 @@ This will create a new package with version 1.0.5 from the file `update.gz`.
 
 ```
 ./bin/updatectl package create --app-id e96281a6-d1af-4bde-9a0a-97b76e56dc57 \
-	--version 1.0.5 \
-	--file update.gz \
-    --meta update_metadata.json
+	--version 1.0.5 --file update.gz \
 ```
 
 The `--meta` option allows you to specify a cryptographic signature
-and file size for verification purposes. It hould look like this:
+and file size for verification purposes. It should look like this:
 
 ```
 {"metadata_size":"1024", "metadata_signature_rsa":"<insert hash here>"}
