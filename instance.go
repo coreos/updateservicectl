@@ -90,16 +90,15 @@ func init() {
 }
 
 func instanceListUpdates(args []string, service *update.Service, out *tabwriter.Writer) int {
-	if instanceFlags.appId.Get() == nil ||
-		instanceFlags.groupId.Get() == nil {
-		return ERROR_USAGE
-	}
-
 	call := service.Clientupdate.List()
 	call.DateStart(instanceFlags.start)
 	call.DateEnd(instanceFlags.end)
-	call.GroupId(instanceFlags.groupId.String())
-	call.AppId(instanceFlags.appId.String())
+	if instanceFlags.groupId.Get() != nil {
+		call.GroupId(instanceFlags.groupId.String())
+	}
+	if instanceFlags.groupId.Get() != nil {
+		call.AppId(instanceFlags.appId.String())
+	}
 	list, err := call.Do()
 
 	if err != nil {
@@ -117,16 +116,14 @@ func instanceListUpdates(args []string, service *update.Service, out *tabwriter.
 }
 
 func instanceListAppVersions(args []string, service *update.Service, out *tabwriter.Writer) int {
-	if instanceFlags.appId.Get() == nil ||
-		instanceFlags.groupId.Get() == nil {
-		return ERROR_USAGE
-	}
-
 	call := service.Appversion.List()
 
-	call.GroupId(instanceFlags.groupId.String())
-	call.AppId(instanceFlags.appId.String())
-
+	if instanceFlags.groupId.Get() != nil {
+		call.GroupId(instanceFlags.groupId.String())
+	}
+	if instanceFlags.appId.Get() != nil {
+		call.AppId(instanceFlags.appId.String())
+	}
 	if instanceFlags.start != 0 {
 		call.DateStart(instanceFlags.start)
 	}
