@@ -1,9 +1,15 @@
 #!/bin/bash -e
+
+bucket=$1
+if [ -z $bucket ]; then
+    echo "usage: $0 <bucket-name>"
+    exit 1
+fi
+
 dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 tmpfile=`mktemp -t "roller-backup"`
 $dir/../bin/updatectl database backup $tmpfile
 
-bucket=roller-backups
 resource="/${bucket}/backup.tar.gz"
 contentType="application/x-compressed-tar"
 dateValue=`date -ju +"%a, %d %b %Y %H:%M:%S GMT"`
