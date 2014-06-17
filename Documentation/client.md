@@ -61,12 +61,13 @@ The commands below will all have a prefix like this:
 ./bin/updatectl --user admin --key d3b07384d113edec49eaa6238ad5ff00 --server https://example.update.core-os.net
 ```
 
-If you do not wish to specifiy `--user` and `--key` every time, they
+If you do not wish to specifiy these every time, they
 can also be exported as environment variables like this:
 
 ```
 export UPDATECTL_USER=admin
-export UPDATECTK_KEY=d3b07384d113edec49eaa6238ad5ff00
+export UPDATECTL_KEY=d3b07384d113edec49eaa6238ad5ff00
+export UPDATECTL_SERVER=http://localhost:8000
 ```
 
 ## Application Management

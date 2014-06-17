@@ -82,6 +82,10 @@ func init() {
 	globalFlagSet.StringVar(&globalFlags.User, "user", os.Getenv("UPDATECTL_USER"), "API Username")
 	globalFlagSet.StringVar(&globalFlags.Key, "key", os.Getenv("UPDATECTL_KEY"), "API Key")
 
+	if server := os.Getenv("UPDATECTL_SERVER"); server != "" {
+		globalFlags.Server = server
+	}
+
 	commands = []*Command{
 		// admin.go
 		cmdAdminUser,

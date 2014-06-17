@@ -23,8 +23,8 @@ Since you'll have to provide these flags each time, it's recommended that you se
 ```
 alias updatectl="/bin/updatectl -user user@example.com -key d3b07384d113edec49eaa6238ad5ff00 -server https://example.update.core-os.net"
 ```
-You may also specify the user and key via the `UPDATECTL_USER` and
-`UPDATECTL_KEY` environment variables.
+You may also specify these via the `UPDATECTL_USER`, `UPDATECTL_KEY`,
+and `UPDATECTL_SERVER` environment variables.
 
 
 ## Anatomy of an Update
