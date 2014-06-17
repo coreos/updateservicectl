@@ -14,14 +14,14 @@ import (
 )
 
 const (
-	cliName        = "updatectl"
-	cliDescription = "updatectl is a command line driven interface to the roller."
-
 	OK = iota
 	// Error Codes
 	ERROR_API
 	ERROR_USAGE
 	ERROR_NO_COMMAND
+
+	cliName        = "updatectl"
+	cliDescription = "updatectl is a command line driven interface to the roller."
 )
 
 type StringFlag struct {
@@ -52,6 +52,7 @@ type Command struct {
 	Description string       // Detailed description of command
 	Flags       flag.FlagSet // Set of flags associated with this command
 	Run         handlerFunc  // Run a command with the given arguments
+	Subcommands []*Command   // Subcommands for this command.
 }
 
 var (
@@ -81,39 +82,27 @@ func init() {
 	globalFlagSet.StringVar(&globalFlags.User, "user", os.Getenv("UPDATECTL_USER"), "API Username")
 	globalFlagSet.StringVar(&globalFlags.Key, "key", os.Getenv("UPDATECTL_KEY"), "API Key")
 
+	if server := os.Getenv("UPDATECTL_SERVER"); server != "" {
+		globalFlags.Server = server
+	}
+
 	commands = []*Command{
 		// admin.go
-		cmdAdminInit,
-		cmdAdminCreateUser,
-		cmdAdminDeleteUser,
-		cmdAdminListUsers,
+		cmdAdminUser,
 		// app.go
-		cmdListApps,
-		cmdCreateApp,
-		cmdUpdateApp,
-		cmdDeleteApp,
+		cmdApp,
 		// channel.go
-		cmdListChannels,
-		cmdUpdateChannel,
-		// client_update.go
-		cmdListClientUpdates,
-		cmdListAppVersions,
-		// fakeclients.go
-		cmdFakeClients,
+		cmdChannel,
+		// database.go
+		cmdDatabase,
 		// group.go
-		cmdListGroups,
-		cmdNewGroup,
-		cmdDeleteGroup,
-		cmdUpdateGroup,
-		cmdPauseGroup,
-		cmdUnpauseGroup,
-		cmdRollupGroupVersions,
-		cmdRollupGroupEvents,
+		cmdGroup,
 		// help.go
 		cmdHelp,
+		// instance.go
+		cmdInstance,
 		// pkg.go
-		cmdListPackages,
-		cmdNewPackage,
+		cmdPackage,
 		// watch.go
 		cmdWatch,
 	}
@@ -159,6 +148,38 @@ func getFlags(flagset *flag.FlagSet) (flags []*flag.Flag) {
 	return
 }
 
+// determine which Command should be run
+func findCommand(search string, args []string, commands []*Command) (cmd *Command, name string) {
+	if len(args) < 1 {
+		return
+	}
+	if search == "" {
+		search = args[0]
+	} else {
+		search = fmt.Sprintf("%s %s", search, args[0])
+	}
+	name = search
+	for _, c := range commands {
+		if c.Name == search {
+			cmd = c
+			if errHelp := c.Flags.Parse(args[1:]); errHelp != nil {
+				printCommandUsage(cmd)
+				os.Exit(ERROR_USAGE)
+			}
+			if len(cmd.Subcommands) != 0 {
+				subArgs := cmd.Flags.Args()
+				var subCmd *Command
+				subCmd, name = findCommand(search, subArgs, cmd.Subcommands)
+				if subCmd != nil {
+					cmd = subCmd
+				}
+			}
+			break
+		}
+	}
+	return
+}
+
 func main() {
 	globalFlagSet.Parse(os.Args[1:])
 	var args = globalFlagSet.Args()
@@ -178,30 +199,22 @@ func main() {
 		args = append(args, "help")
 	}
 
-	var cmd *Command
-
-	// determine which Command should be run
-	for _, c := range commands {
-		if c.Name == args[0] {
-			cmd = c
-			if err := c.Flags.Parse(args[1:]); err != nil {
-				fmt.Println(err.Error())
-				os.Exit(ERROR_USAGE)
-			}
-			break
-		}
-	}
+	cmd, name := findCommand("", args, commands)
 
 	if cmd == nil {
-		fmt.Printf("%v: unknown subcommand: %q\n", cliName, args[0])
+		fmt.Printf("%v: unknown subcommand: %q\n", cliName, name)
 		fmt.Printf("Run '%v help' for usage.\n", cliName)
 		os.Exit(ERROR_NO_COMMAND)
 	}
 
-	exit := handle(cmd.Run)(&cmd.Flags)
-
-	if exit == ERROR_USAGE {
+	if cmd.Run == nil {
 		printCommandUsage(cmd)
+		os.Exit(ERROR_USAGE)
+	} else {
+		exit := handle(cmd.Run)(&cmd.Flags)
+		if exit == ERROR_USAGE {
+			printCommandUsage(cmd)
+		}
+		os.Exit(exit)
 	}
-	os.Exit(exit)
 }

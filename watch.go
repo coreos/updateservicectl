@@ -32,7 +32,7 @@ var (
 	cmdWatch = &Command{
 		Name:        "watch",
 		Usage:       "[OPTION]... <cmd> <args>",
-		Description: `Watch for app versions and exec a script with provided args.`,
+		Summary: `Watch for app versions and exec a given command.`,
 		Run:         watch,
 	}
 )

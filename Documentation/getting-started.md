@@ -15,14 +15,17 @@ The update service is an optional hosted service provided by CoreOS and is not i
 Authentication for `updatectl` is done with a username and API key combination. Additional users and API keys can be provisioned by an existing user. Substitute the server address you were given during the activation process:
 
 ```
-updatectl -u user@example.com -k d3b07384d113edec49eaa6238ad5ff00 -s https://example.update.core-os.net <command>
+updatectl -user user@example.com -key d3b07384d113edec49eaa6238ad5ff00 -server https://example.update.core-os.net <command>
 ```
 
 Since you'll have to provide these flags each time, it's recommended that you set up an alias in your bash profile. We'll assume that you've done this for the rest of this document:
 
 ```
-alias updatectl="/bin/updatectl -u user@example.com -k d3b07384d113edec49eaa6238ad5ff00 -s https://example.update.core-os.net"
+alias updatectl="/bin/updatectl -user user@example.com -key d3b07384d113edec49eaa6238ad5ff00 -server https://example.update.core-os.net"
 ```
+You may also specify these via the `UPDATECTL_USER`, `UPDATECTL_KEY`,
+and `UPDATECTL_SERVER` environment variables.
+
 
 ## Anatomy of an Update
 
@@ -32,10 +35,10 @@ Let's walk through the different parts of an update then use `updatectl` to simu
 
 You can use the update service to facilitate the roll-out of a new version of any application. An application is made up of group of instances. Each instance reports a unique identifier, version, group ID and status to the application via an updater.
 
-You can view the current list of applications with `updatectl list-apps`:
+You can view the current list of applications with `updatectl app list`:
 
 ```
-$ updatectl list-apps
+$ updatectl app list
 ```
 
 ### Group
@@ -47,7 +50,7 @@ quickly a new version is rolled out based on their specific needs. Updates can a
 if a team doesn't want any updates.
 
 ```
-updatectl list-groups <appid>
+updatectl group list --app-id <app-id>
 ```
 
 ### Channel
@@ -55,7 +58,7 @@ updatectl list-groups <appid>
 Each application can specify channels, such as alpha or beta, that can be updated to refer to different packages. Channels allow you to upload a new beta package and have it rolled out to all groups that track the beta channel, with one command.
 
 ```
-updatectl list-channels <appid>
+updatectl channel list --app-id <appid>
 ```
 
 ### Updater
@@ -93,16 +96,17 @@ The easiest way to illustrate how these concepts work together is to trigger an 
 
 ### Create an Application, Channel and Group
 
-First set up a new application with a unique identifier, name and description:
+First set up a new application with a unique identifier, label, and description:
 
 ```
-updatectl update-app e96281a6-d1af-4bde-9a0a-97b76e56dc57 "FakeApp" "Fake app for testing"
+updatectl app create --app-id e96281a6-d1af-4bde-9a0a-97b76e56dc57 \
+	--label "FakeApp" --description "Fake app for testing"
 ```
 
 You should now see it in the list of apps:
 
 ```
-$updatectl list-apps
+$updatectl app list
 Id                                    Label     Description
 e96281a6-d1af-4bde-9a0a-97b76e56dc56  FakeApp   Fake app for testing
 f217d8ba-76e6-4b07-8136-049c54b30f21  CoreOS    Linux for Servers
@@ -111,13 +115,16 @@ f217d8ba-76e6-4b07-8136-049c54b30f21  CoreOS    Linux for Servers
 Next, create a channel that our group of fake clients will track. Let's call it `master` and start it out on version `1.0.0`:
 
 ```
-updatectl update-channel e96281a6-d1af-4bde-9a0a-97b76e56dc57 master 1.0.0
+updatectl channel update --app-id e96281a6-d1af-4bde-9a0a-97b76e56dc57 \
+	--channel master 1.0.0
 ```
 
-Next, create a group that we'll associate our fake clients with. Be sure to include the app id, the `master` channel, a name and a friendly label. 
+Next, create a group that we'll associate our fake clients with. Be
+sure to include the app id, the `master` channel, an ID and a friendly label.
 
 ```
-$ updatectl new-group e96281a6-d1af-4bde-9a0a-97b76e56dc57 master fake1 "Fake Clients"
+$ updatectl group create --app-id e96281a6-d1af-4bde-9a0a-97b76e56dc57
+	--channel master --group-id fake1 --label "Fake Clients"
 ```
 
 ### Uploading and Signing a Package
@@ -133,7 +140,7 @@ touch update-1.1.0.gz
 You can now use the `new-package` command to publish this fake package as version `1.1.0` (with a fake URL):
 
 ```
-updatectl new-package e96281a6-d1af-4bde-9a0a-97b76e56dc57 \
+updatectl package create --app-id e96281a6-d1af-4bde-9a0a-97b76e56dc57 \
     --version 1.1.0 \
     --file update-1.1.0.gz \
     --url https://fakepackage.local/update-1.1.0.gz
@@ -146,7 +153,9 @@ updatectl new-package e96281a6-d1af-4bde-9a0a-97b76e56dc57 \
 When we start the fake clients, we don't expect them to do anything since we're already on version `1.0.0`. In another terminal window, start the clients:
 
 ```
-$ updatectl fakeclients -c 10 -m 30 -M 60 e96281a6-d1af-4bde-9a0a-97b76e56dc57 master 1.0.0
+$ updatectl instance fake --clients-per-app 10 --min-sleep 30 \
+	--max-sleep 60 --app-id e96281a6-d1af-4bde-9a0a-97b76e56dc57 \
+	--group-id fake1 --version 1.0.0
 {fake-client-000}: noupdate
 {fake-client-002}: noupdate
 {fake-client-001}: noupdate
@@ -158,14 +167,15 @@ $ updatectl fakeclients -c 10 -m 30 -M 60 e96281a6-d1af-4bde-9a0a-97b76e56dc57 m
 Now let's see how the fake clients react when we promote the new package `1.1.0` to the master channel. First, let's set the rate limit of the group to slow down the roll-out. This will make it easier to see what's going on. Since we only have 10 clients, 2 updates per 60 seconds should be slow enough:
 
 ```
-$ updatectl update-group e96281a6-d1af-4bde-9a0a-97b76e56dc57 aca12080-0e1c-4baa-82eb-945b7416d6cd --channel master --updateCount 2 --updateInterval 60
-Fake Clients	e96281a6-d1af-4bde-9a0a-97b76e56dc57	master	aca12080-0e1c-4baa-82eb-945b7416d6cd	false	2	60
+$ updatectl group update --app-id e96281a6-d1af-4bde-9a0a-97b76e56dc57 \
+--group-id fake1 --channel master --update-count 2 --update-interval 60
+Fake Clients	e96281a6-d1af-4bde-9a0a-97b76e56dc57	master	fake1	false	2	60
 ```
 
 Next, promote our `1.1.0` release on the `master` channel:
 
 ```
-$ updatectl update-channel e96281a6-d1af-4bde-9a0a-97b76e56dc57 master 1.1.0
+$ updatectl channel update --app-id e96281a6-d1af-4bde-9a0a-97b76e56dc57 --channel master 1.1.0
 1.1.0
 ```
 
