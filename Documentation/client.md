@@ -1,7 +1,7 @@
 # Using the Client
 
 `updatectl` lets you control and test the CoreOS update service. Subcommands
-let you manage apoplications, users, groups, packages and write a very simple client that gets
+let you manage applications, users, groups, packages and write a very simple client that gets
 its state via environment variables.
 
 ## Update Clients
@@ -25,7 +25,7 @@ starting at version 1.0.0.
 
 ### Update Watcher
 
-`instance fake` is useful for generating traffic but if you want a fast way to
+Real clients should implement the Omaha protocol but if you want a fast way to
 create your own client you can use `watch`. This will exec a program of your
 choosing every time a new update is available.
 
@@ -72,8 +72,9 @@ export UPDATECTK_KEY=d3b07384d113edec49eaa6238ad5ff00
 ## Application Management
 
 Applications have three pieces of data: a universal unique identifier
-(UUID), a label (name) and a description. The UUID is used by all of
-the updaters to tell the service what application they belong to.
+(UUID), a label and a description. During a request to the update
+service, the UUID is submitted in order to retrieve the details of the
+currently available version.
 
 ### Add an Application
 
