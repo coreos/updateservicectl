@@ -74,17 +74,18 @@ func init() {
 	out = new(tabwriter.Writer)
 	out.Init(os.Stdout, 0, 8, 1, '\t', 0)
 
+	server := "http://localhost:8000" // default server
+	if serverEnv := os.Getenv("UPDATECTL_SERVER"); serverEnv != "" {
+		server = serverEnv
+	}
+
 	globalFlagSet = flag.NewFlagSet(cliName, flag.ExitOnError)
-	globalFlagSet.StringVar(&globalFlags.Server, "server", "http://localhost:8000", "Update server to connect to")
+	globalFlagSet.StringVar(&globalFlags.Server, "server", server, "Update server to connect to")
 	globalFlagSet.BoolVar(&globalFlags.Debug, "debug", false, "Output debugging info to stderr")
 	globalFlagSet.BoolVar(&globalFlags.Version, "version", false, "Print version information and exit.")
 	globalFlagSet.BoolVar(&globalFlags.Help, "help", false, "Print usage information and exit.")
 	globalFlagSet.StringVar(&globalFlags.User, "user", os.Getenv("UPDATECTL_USER"), "API Username")
 	globalFlagSet.StringVar(&globalFlags.Key, "key", os.Getenv("UPDATECTL_KEY"), "API Key")
-
-	if server := os.Getenv("UPDATECTL_SERVER"); server != "" {
-		globalFlags.Server = server
-	}
 
 	commands = []*Command{
 		// admin.go
