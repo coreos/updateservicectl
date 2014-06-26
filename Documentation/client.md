@@ -4,6 +4,29 @@
 let you manage applications, users, groups, packages and write a very simple client that gets
 its state via environment variables.
 
+## Administative Flags
+
+There are a few flags that you must provide to the administrative commands below.
+
+- `--user` is your username, usually this is an email address or `admin`
+- `--key` is your API key
+- `--server` is the URL to your update service instance
+
+The commands below will all have a prefix like this:
+
+```
+./bin/updatectl --user admin --key d3b07384d113edec49eaa6238ad5ff00 --server https://example.update.core-os.net
+```
+
+If you do not wish to specify these every time, they
+can also be exported as environment variables like this:
+
+```
+export UPDATECTL_USER=admin
+export UPDATECTL_KEY=d3b07384d113edec49eaa6238ad5ff00
+export UPDATECTL_SERVER=http://localhost:8000
+```
+
 ## Update Clients
 
 There are two tools to test out the update service: `instance fake` and `watch`.
@@ -46,29 +69,6 @@ Next we will generate a random client id with and start watching for changes to 
 
 If you change the version of the beta group's channel then your script will be
 re-executed and you will see the UPDATE_SERVICE environment variables change.
-
-## Administative Flags
-
-There are a few flags that you must provide to the administrative commands below.
-
-- `--user` is your username, usually this is an email address or `admin`
-- `--key` is your API key
-- `--server` is the URL to your update service instance
-
-The commands below will all have a prefix like this:
-
-```
-./bin/updatectl --user admin --key d3b07384d113edec49eaa6238ad5ff00 --server https://example.update.core-os.net
-```
-
-If you do not wish to specifiy these every time, they
-can also be exported as environment variables like this:
-
-```
-export UPDATECTL_USER=admin
-export UPDATECTL_KEY=d3b07384d113edec49eaa6238ad5ff00
-export UPDATECTL_SERVER=http://localhost:8000
-```
 
 ## Application Management
 
