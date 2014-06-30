@@ -1,4 +1,4 @@
 /updatectl
 /bin/
 /release/
-Godeps/_workspace/src/github.com/coreos-inc/updatectl
+Godeps/_workspace/src/github.com/coreos/updatectl

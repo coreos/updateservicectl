@@ -3,9 +3,9 @@
 export GOPATH=${PWD}/Godeps/_workspace
 export GOBIN=${PWD}/bin
 
-if [ ! -h $GOPATH/src/github.com/coreos-inc/updatectl ]; then
-    mkdir -p $GOPATH/src/github.com/coreos-inc/
-    ln -s ${PWD} $GOPATH/src/github.com/coreos-inc/updatectl
+if [ ! -h $GOPATH/src/github.com/coreos/updatectl ]; then
+    mkdir -p $GOPATH/src/github.com/coreos/
+    ln -s ${PWD} $GOPATH/src/github.com/coreos/updatectl
 fi
 
 eval $(go env)
