@@ -4,7 +4,7 @@
 let you manage applications, users, groups, packages and write a very simple client that gets
 its state via environment variables.
 
-## Administative Flags
+## Administrative Flags
 
 There are a few flags that you must provide to the administrative commands below.
 
@@ -60,7 +60,7 @@ the watcher will pass in. Call the script `updater.sh`.
 env | grep UPDATE_SERVICE
 ```
 
-Next we will generate a random client id with and start watching for changes to the given app:
+Next we will generate a random client UUID and start watching for changes to the given app:
 
 ```
 ./bin/updatectl watch --app-id e96281a6-d1af-4bde-9a0a-97b76e56dc57 \
