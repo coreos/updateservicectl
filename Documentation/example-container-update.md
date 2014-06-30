@@ -2,7 +2,7 @@
 
 Getting a distributed application running across a CoreOS cluster is [easy with fleet]({{site.url}}/docs/launching-containers/launching/fleet-example-deployment/). The hard part is deploying an update to the containers that make up the system, without having any downtime. The update service provides the tools we need to make this happen in a graceful and transparent way.
 
-This orchestration happens through an updater which is responsible for reporting the progress of the update ([via the Omaha protocol](https://github.com/coreos-inc/updatectl/blob/master/Documentation/protocol.md)) and executing the commands that actually verify and apply the update. Each application can have their own updater to execute app-specific commands or you can share the same update logic across the applications that you run. This guide will implement an extremly simple updater that uses the `updatectl watch` command to be notified of an update. It's important to note that using this scheme shouldn't be used for any production system.
+This orchestration happens through an updater which is responsible for reporting the progress of the update ([via the Omaha protocol](https://github.com/coreos-inc/updatectl/blob/master/Documentation/protocol.md)) and executing the commands that actually verify and apply the update. Each application can have their own updater to execute app-specific commands or you can share the same update logic across the applications that you run. This guide will implement an extremely simple updater that uses the `updatectl watch` command to be notified of an update. It's important to note that using this scheme shouldn't be used for any production system.
 
 To orchestrate the update, we need to run a "sidekick" for each of the app containers, which will check for an update and run a few [fleetctl]({{site.url}}/docs/launching-containers/launching/fleet-using-the-client/) commands if there is a new version.
 
@@ -110,4 +110,4 @@ We've successfully updated one of our containers! In your web browser, refresh t
 
 ## Further Reading
 
-If you're interested in writing a more robust updater with customized logic for your applicaiton, check out the [protocol]() documentation.
+If you're interested in writing a more robust updater with customized logic for your application, check out the [protocol]() documentation.

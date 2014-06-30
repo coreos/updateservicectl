@@ -43,7 +43,7 @@ $ updatectl app list
 
 ### Group
 
-Applications contain groups of instances that are related. Groups are designed to be flexible and can reflect your company's preferred organizational scheme. Common eamples include groups by business unit, team, location, or environment. Each group has separate settings such as the ability to roll-out updates at a specific rate, be paused or unpaused and track a specific channel of the application.
+Applications contain groups of instances that are related. Groups are designed to be flexible and can reflect your company's preferred organizational scheme. Common examples include groups by business unit, team, location, or environment. Each group has separate settings such as the ability to roll-out updates at a specific rate, be paused or unpaused and track a specific channel of the application.
 
 For example, if multiple teams have deployed a distributed database, each team can control how
 quickly a new version is rolled out based on their specific needs. Updates can also be paused per group
@@ -76,7 +76,7 @@ All of the logic that controls how the release is rolled-out lives in the update
 | Execute Update | Install the package and verify that it installed correctly. |
 | Execute Healthcheck | Carry out a health check on the application to make sure it was installed and initialized correctly. |
 | Send Update Complete | Once a package is successfully installed, tell the update service that everything was successful. |
-| Send Update Error | If an error occurs during the package download or verification, or during update eexecution or health check, report an error. |
+| Send Update Error | If an error occurs during the package download or verification, or during update execution or health check, report an error. |
 
 ### Package
 
@@ -148,7 +148,7 @@ updatectl package create --app-id e96281a6-d1af-4bde-9a0a-97b76e56dc57 \
 
 ### Start Fake Clients
 
-`updatectl` contains a tool to help you simulate many fake clients running your applcation. We're going to start 10 fake clients that are checking for updates every 30-60 seconds. This is much much faster than usual but it will allow us to see our changes take place quickly.
+`updatectl` contains a tool to help you simulate many fake clients running your application. We're going to start 10 fake clients that are checking for updates every 30-60 seconds. This is much much faster than usual but it will allow us to see our changes take place quickly.
 
 When we start the fake clients, we don't expect them to do anything since we're already on version `1.0.0`. In another terminal window, start the clients:
 
