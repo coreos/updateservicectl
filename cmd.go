@@ -8,9 +8,9 @@ import (
 	"os"
 	"text/tabwriter"
 
-	"github.com/coreos-inc/updatectl/auth"
-	"github.com/coreos-inc/updatectl/client/update/v1"
-	"github.com/coreos-inc/updatectl/version"
+	"github.com/coreos/updatectl/auth"
+	"github.com/coreos/updatectl/client/update/v1"
+	"github.com/coreos/updatectl/version"
 )
 
 const (

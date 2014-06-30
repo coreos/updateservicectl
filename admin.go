@@ -5,7 +5,7 @@ import (
 	"log"
 	"text/tabwriter"
 
-	"github.com/coreos-inc/updatectl/client/update/v1"
+	"github.com/coreos/updatectl/client/update/v1"
 )
 
 var (

@@ -5,7 +5,7 @@ import (
 	"code.google.com/p/go-uuid/uuid"
 	"encoding/xml"
 	"fmt"
-	update "github.com/coreos-inc/updatectl/client/update/v1"
+	update "github.com/coreos/updatectl/client/update/v1"
 	"github.com/coreos/go-omaha/omaha"
 	"log"
 	"math/rand"

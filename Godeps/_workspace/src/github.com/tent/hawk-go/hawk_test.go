@@ -4,7 +4,7 @@ import (
 	"crypto/sha1"
 	"crypto/sha256"
 	"encoding/base64"
-	"github.com/coreos-inc/updatectl/Godeps/_workspace/src/github.com/tent/hawk-go"
+	"github.com/coreos/updatectl/Godeps/_workspace/src/github.com/tent/hawk-go"
 	"hash"
 	"net/http"
 	"net/url"

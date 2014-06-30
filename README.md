@@ -18,7 +18,7 @@ Once you have gained access to your update service installation, check out the [
 
 ## Building the Client
 
-Major releases for all platforms are listed under the [Releases tab](https://github.com/coreos-inc/updatectl/releases) on this repository. If you'd like to build your own client:
+Major releases for all platforms are listed under the [Releases tab](https://github.com/coreos/updatectl/releases) on this repository. If you'd like to build your own client:
 
 1. `./build`
 2. The client is now built. Use it with `./updatectl <command>`
