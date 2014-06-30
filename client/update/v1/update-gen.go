@@ -270,9 +270,13 @@ type ClientCountResp struct {
 type ClientHistoryItem struct {
 	DateTime int64 `json:"dateTime,omitempty,string"`
 
+	ErrorCode string `json:"errorCode,omitempty"`
+
 	EventResult string `json:"eventResult,omitempty"`
 
 	EventType string `json:"eventType,omitempty"`
+
+	GroupId string `json:"groupId,omitempty"`
 
 	Version string `json:"version,omitempty"`
 }
@@ -314,7 +318,17 @@ type GenerateUuidResp struct {
 type Group struct {
 	AppId string `json:"appId,omitempty"`
 
+	AutoPause bool `json:"autoPause,omitempty"`
+
 	ChannelId string `json:"channelId,omitempty"`
+
+	DropInterval int64 `json:"dropInterval,omitempty"`
+
+	DropThreshold int64 `json:"dropThreshold,omitempty"`
+
+	ErrorInterval int64 `json:"errorInterval,omitempty"`
+
+	ErrorThreshold int64 `json:"errorThreshold,omitempty"`
 
 	Id string `json:"id,omitempty"`
 
@@ -375,6 +389,8 @@ type Package struct {
 
 type PackageList struct {
 	Items []*Package `json:"items,omitempty"`
+
+	Total int64 `json:"total,omitempty"`
 }
 
 // method id "update.admin.createUser":
@@ -1242,46 +1258,15 @@ func (r *AppPackageService) List(appId string) *AppPackageListCall {
 	return c
 }
 
-// MetadataSignatureRsa sets the optional parameter
-// "metadataSignatureRsa":
-func (c *AppPackageListCall) MetadataSignatureRsa(metadataSignatureRsa string) *AppPackageListCall {
-	c.opt_["metadataSignatureRsa"] = metadataSignatureRsa
+// Limit sets the optional parameter "limit":
+func (c *AppPackageListCall) Limit(limit int64) *AppPackageListCall {
+	c.opt_["limit"] = limit
 	return c
 }
 
-// MetadataSize sets the optional parameter "metadataSize":
-func (c *AppPackageListCall) MetadataSize(metadataSize string) *AppPackageListCall {
-	c.opt_["metadataSize"] = metadataSize
-	return c
-}
-
-// Required sets the optional parameter "required":
-func (c *AppPackageListCall) Required(required bool) *AppPackageListCall {
-	c.opt_["required"] = required
-	return c
-}
-
-// Sha1Sum sets the optional parameter "sha1Sum":
-func (c *AppPackageListCall) Sha1Sum(sha1Sum string) *AppPackageListCall {
-	c.opt_["sha1Sum"] = sha1Sum
-	return c
-}
-
-// Sha256Sum sets the optional parameter "sha256Sum":
-func (c *AppPackageListCall) Sha256Sum(sha256Sum string) *AppPackageListCall {
-	c.opt_["sha256Sum"] = sha256Sum
-	return c
-}
-
-// Size sets the optional parameter "size":
-func (c *AppPackageListCall) Size(size string) *AppPackageListCall {
-	c.opt_["size"] = size
-	return c
-}
-
-// Url sets the optional parameter "url":
-func (c *AppPackageListCall) Url(url string) *AppPackageListCall {
-	c.opt_["url"] = url
+// Skip sets the optional parameter "skip":
+func (c *AppPackageListCall) Skip(skip int64) *AppPackageListCall {
+	c.opt_["skip"] = skip
 	return c
 }
 
@@ -1295,26 +1280,11 @@ func (c *AppPackageListCall) Do() (*PackageList, error) {
 	var body io.Reader = nil
 	params := make(url.Values)
 	params.Set("alt", "json")
-	if v, ok := c.opt_["metadataSignatureRsa"]; ok {
-		params.Set("metadataSignatureRsa", fmt.Sprintf("%v", v))
+	if v, ok := c.opt_["limit"]; ok {
+		params.Set("limit", fmt.Sprintf("%v", v))
 	}
-	if v, ok := c.opt_["metadataSize"]; ok {
-		params.Set("metadataSize", fmt.Sprintf("%v", v))
-	}
-	if v, ok := c.opt_["required"]; ok {
-		params.Set("required", fmt.Sprintf("%v", v))
-	}
-	if v, ok := c.opt_["sha1Sum"]; ok {
-		params.Set("sha1Sum", fmt.Sprintf("%v", v))
-	}
-	if v, ok := c.opt_["sha256Sum"]; ok {
-		params.Set("sha256Sum", fmt.Sprintf("%v", v))
-	}
-	if v, ok := c.opt_["size"]; ok {
-		params.Set("size", fmt.Sprintf("%v", v))
-	}
-	if v, ok := c.opt_["url"]; ok {
-		params.Set("url", fmt.Sprintf("%v", v))
+	if v, ok := c.opt_["skip"]; ok {
+		params.Set("skip", fmt.Sprintf("%v", v))
 	}
 	if v, ok := c.opt_["version"]; ok {
 		params.Set("version", fmt.Sprintf("%v", v))
@@ -1351,33 +1321,15 @@ func (c *AppPackageListCall) Do() (*PackageList, error) {
 	//       "required": true,
 	//       "type": "string"
 	//     },
-	//     "metadataSignatureRsa": {
+	//     "limit": {
+	//       "format": "int32",
 	//       "location": "query",
-	//       "type": "string"
+	//       "type": "integer"
 	//     },
-	//     "metadataSize": {
+	//     "skip": {
+	//       "format": "int32",
 	//       "location": "query",
-	//       "type": "string"
-	//     },
-	//     "required": {
-	//       "location": "query",
-	//       "type": "boolean"
-	//     },
-	//     "sha1Sum": {
-	//       "location": "query",
-	//       "type": "string"
-	//     },
-	//     "sha256Sum": {
-	//       "location": "query",
-	//       "type": "string"
-	//     },
-	//     "size": {
-	//       "location": "query",
-	//       "type": "string"
-	//     },
-	//     "url": {
-	//       "location": "query",
-	//       "type": "string"
+	//       "type": "integer"
 	//     },
 	//     "version": {
 	//       "location": "query",
@@ -2198,9 +2150,39 @@ func (r *GroupService) Delete(appId string, id string) *GroupDeleteCall {
 	return c
 }
 
+// AutoPause sets the optional parameter "autoPause":
+func (c *GroupDeleteCall) AutoPause(autoPause bool) *GroupDeleteCall {
+	c.opt_["autoPause"] = autoPause
+	return c
+}
+
 // ChannelId sets the optional parameter "channelId":
 func (c *GroupDeleteCall) ChannelId(channelId string) *GroupDeleteCall {
 	c.opt_["channelId"] = channelId
+	return c
+}
+
+// DropInterval sets the optional parameter "dropInterval":
+func (c *GroupDeleteCall) DropInterval(dropInterval int64) *GroupDeleteCall {
+	c.opt_["dropInterval"] = dropInterval
+	return c
+}
+
+// DropThreshold sets the optional parameter "dropThreshold":
+func (c *GroupDeleteCall) DropThreshold(dropThreshold int64) *GroupDeleteCall {
+	c.opt_["dropThreshold"] = dropThreshold
+	return c
+}
+
+// ErrorInterval sets the optional parameter "errorInterval":
+func (c *GroupDeleteCall) ErrorInterval(errorInterval int64) *GroupDeleteCall {
+	c.opt_["errorInterval"] = errorInterval
+	return c
+}
+
+// ErrorThreshold sets the optional parameter "errorThreshold":
+func (c *GroupDeleteCall) ErrorThreshold(errorThreshold int64) *GroupDeleteCall {
+	c.opt_["errorThreshold"] = errorThreshold
 	return c
 }
 
@@ -2238,8 +2220,23 @@ func (c *GroupDeleteCall) Do() (*Group, error) {
 	var body io.Reader = nil
 	params := make(url.Values)
 	params.Set("alt", "json")
+	if v, ok := c.opt_["autoPause"]; ok {
+		params.Set("autoPause", fmt.Sprintf("%v", v))
+	}
 	if v, ok := c.opt_["channelId"]; ok {
 		params.Set("channelId", fmt.Sprintf("%v", v))
+	}
+	if v, ok := c.opt_["dropInterval"]; ok {
+		params.Set("dropInterval", fmt.Sprintf("%v", v))
+	}
+	if v, ok := c.opt_["dropThreshold"]; ok {
+		params.Set("dropThreshold", fmt.Sprintf("%v", v))
+	}
+	if v, ok := c.opt_["errorInterval"]; ok {
+		params.Set("errorInterval", fmt.Sprintf("%v", v))
+	}
+	if v, ok := c.opt_["errorThreshold"]; ok {
+		params.Set("errorThreshold", fmt.Sprintf("%v", v))
 	}
 	if v, ok := c.opt_["label"]; ok {
 		params.Set("label", fmt.Sprintf("%v", v))
@@ -2290,9 +2287,33 @@ func (c *GroupDeleteCall) Do() (*Group, error) {
 	//       "required": true,
 	//       "type": "string"
 	//     },
+	//     "autoPause": {
+	//       "location": "query",
+	//       "type": "boolean"
+	//     },
 	//     "channelId": {
 	//       "location": "query",
 	//       "type": "string"
+	//     },
+	//     "dropInterval": {
+	//       "format": "int32",
+	//       "location": "query",
+	//       "type": "integer"
+	//     },
+	//     "dropThreshold": {
+	//       "format": "int32",
+	//       "location": "query",
+	//       "type": "integer"
+	//     },
+	//     "errorInterval": {
+	//       "format": "int32",
+	//       "location": "query",
+	//       "type": "integer"
+	//     },
+	//     "errorThreshold": {
+	//       "format": "int32",
+	//       "location": "query",
+	//       "type": "integer"
 	//     },
 	//     "id": {
 	//       "location": "path",
@@ -2347,9 +2368,39 @@ func (r *GroupService) Get(appId string, id string) *GroupGetCall {
 	return c
 }
 
+// AutoPause sets the optional parameter "autoPause":
+func (c *GroupGetCall) AutoPause(autoPause bool) *GroupGetCall {
+	c.opt_["autoPause"] = autoPause
+	return c
+}
+
 // ChannelId sets the optional parameter "channelId":
 func (c *GroupGetCall) ChannelId(channelId string) *GroupGetCall {
 	c.opt_["channelId"] = channelId
+	return c
+}
+
+// DropInterval sets the optional parameter "dropInterval":
+func (c *GroupGetCall) DropInterval(dropInterval int64) *GroupGetCall {
+	c.opt_["dropInterval"] = dropInterval
+	return c
+}
+
+// DropThreshold sets the optional parameter "dropThreshold":
+func (c *GroupGetCall) DropThreshold(dropThreshold int64) *GroupGetCall {
+	c.opt_["dropThreshold"] = dropThreshold
+	return c
+}
+
+// ErrorInterval sets the optional parameter "errorInterval":
+func (c *GroupGetCall) ErrorInterval(errorInterval int64) *GroupGetCall {
+	c.opt_["errorInterval"] = errorInterval
+	return c
+}
+
+// ErrorThreshold sets the optional parameter "errorThreshold":
+func (c *GroupGetCall) ErrorThreshold(errorThreshold int64) *GroupGetCall {
+	c.opt_["errorThreshold"] = errorThreshold
 	return c
 }
 
@@ -2387,8 +2438,23 @@ func (c *GroupGetCall) Do() (*Group, error) {
 	var body io.Reader = nil
 	params := make(url.Values)
 	params.Set("alt", "json")
+	if v, ok := c.opt_["autoPause"]; ok {
+		params.Set("autoPause", fmt.Sprintf("%v", v))
+	}
 	if v, ok := c.opt_["channelId"]; ok {
 		params.Set("channelId", fmt.Sprintf("%v", v))
+	}
+	if v, ok := c.opt_["dropInterval"]; ok {
+		params.Set("dropInterval", fmt.Sprintf("%v", v))
+	}
+	if v, ok := c.opt_["dropThreshold"]; ok {
+		params.Set("dropThreshold", fmt.Sprintf("%v", v))
+	}
+	if v, ok := c.opt_["errorInterval"]; ok {
+		params.Set("errorInterval", fmt.Sprintf("%v", v))
+	}
+	if v, ok := c.opt_["errorThreshold"]; ok {
+		params.Set("errorThreshold", fmt.Sprintf("%v", v))
 	}
 	if v, ok := c.opt_["label"]; ok {
 		params.Set("label", fmt.Sprintf("%v", v))
@@ -2439,9 +2505,33 @@ func (c *GroupGetCall) Do() (*Group, error) {
 	//       "required": true,
 	//       "type": "string"
 	//     },
+	//     "autoPause": {
+	//       "location": "query",
+	//       "type": "boolean"
+	//     },
 	//     "channelId": {
 	//       "location": "query",
 	//       "type": "string"
+	//     },
+	//     "dropInterval": {
+	//       "format": "int32",
+	//       "location": "query",
+	//       "type": "integer"
+	//     },
+	//     "dropThreshold": {
+	//       "format": "int32",
+	//       "location": "query",
+	//       "type": "integer"
+	//     },
+	//     "errorInterval": {
+	//       "format": "int32",
+	//       "location": "query",
+	//       "type": "integer"
+	//     },
+	//     "errorThreshold": {
+	//       "format": "int32",
+	//       "location": "query",
+	//       "type": "integer"
 	//     },
 	//     "id": {
 	//       "location": "path",

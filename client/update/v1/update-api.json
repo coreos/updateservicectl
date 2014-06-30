@@ -1,6 +1,6 @@
 {
  "kind": "discovery#restDescription",
- "etag": "\"0NZZm4UuLZgEQBhMTwnFS1XIMrM/Fmga-qhdaVomBW_uFFYezuzC5Y4\"",
+ "etag": "\"p_qcyFV0KQVqSB1Aq3pqmPu-2MY/sxVuCk0cig6HOjfIwkKL2NEXdow\"",
  "discoveryVersion": "v1",
  "id": "update:v1",
  "name": "update",
@@ -228,10 +228,16 @@
      "type": "string",
      "format": "int64"
     },
+    "errorCode": {
+     "type": "string"
+    },
     "eventResult": {
      "type": "string"
     },
     "eventType": {
+     "type": "string"
+    },
+    "groupId": {
      "type": "string"
     },
     "version": {
@@ -316,8 +322,27 @@
     "appId": {
      "type": "string"
     },
+    "autoPause": {
+     "type": "boolean"
+    },
     "channelId": {
      "type": "string"
+    },
+    "dropInterval": {
+     "type": "integer",
+     "format": "int32"
+    },
+    "dropThreshold": {
+     "type": "integer",
+     "format": "int32"
+    },
+    "errorInterval": {
+     "type": "integer",
+     "format": "int32"
+    },
+    "errorThreshold": {
+     "type": "integer",
+     "format": "int32"
     },
     "id": {
      "type": "string"
@@ -442,6 +467,10 @@
      "items": {
       "$ref": "Package"
      }
+    },
+    "total": {
+     "type": "integer",
+     "format": "int32"
     }
    }
   }
@@ -725,32 +754,14 @@
          "required": true,
          "location": "path"
         },
-        "metadataSignatureRsa": {
-         "type": "string",
+        "limit": {
+         "type": "integer",
+         "format": "int32",
          "location": "query"
         },
-        "metadataSize": {
-         "type": "string",
-         "location": "query"
-        },
-        "required": {
-         "type": "boolean",
-         "location": "query"
-        },
-        "sha1Sum": {
-         "type": "string",
-         "location": "query"
-        },
-        "sha256Sum": {
-         "type": "string",
-         "location": "query"
-        },
-        "size": {
-         "type": "string",
-         "location": "query"
-        },
-        "url": {
-         "type": "string",
+        "skip": {
+         "type": "integer",
+         "format": "int32",
          "location": "query"
         },
         "version": {
@@ -1043,8 +1054,32 @@
        "required": true,
        "location": "path"
       },
+      "autoPause": {
+       "type": "boolean",
+       "location": "query"
+      },
       "channelId": {
        "type": "string",
+       "location": "query"
+      },
+      "dropInterval": {
+       "type": "integer",
+       "format": "int32",
+       "location": "query"
+      },
+      "dropThreshold": {
+       "type": "integer",
+       "format": "int32",
+       "location": "query"
+      },
+      "errorInterval": {
+       "type": "integer",
+       "format": "int32",
+       "location": "query"
+      },
+      "errorThreshold": {
+       "type": "integer",
+       "format": "int32",
        "location": "query"
       },
       "id": {
@@ -1094,8 +1129,32 @@
        "required": true,
        "location": "path"
       },
+      "autoPause": {
+       "type": "boolean",
+       "location": "query"
+      },
       "channelId": {
        "type": "string",
+       "location": "query"
+      },
+      "dropInterval": {
+       "type": "integer",
+       "format": "int32",
+       "location": "query"
+      },
+      "dropThreshold": {
+       "type": "integer",
+       "format": "int32",
+       "location": "query"
+      },
+      "errorInterval": {
+       "type": "integer",
+       "format": "int32",
+       "location": "query"
+      },
+      "errorThreshold": {
+       "type": "integer",
+       "format": "int32",
        "location": "query"
       },
       "id": {

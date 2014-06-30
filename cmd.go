@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"os"
 	"text/tabwriter"
+	"strconv"
 
 	"github.com/coreos/updatectl/auth"
 	"github.com/coreos/updatectl/client/update/v1"
@@ -41,6 +42,41 @@ func (f *StringFlag) Get() *string {
 func (f *StringFlag) String() string {
 	if f.value != nil {
 		return *f.value
+	}
+	return ""
+}
+
+type BoolFlag struct {
+	value    *bool
+}
+
+func (f *BoolFlag) Set(value string) error {
+	falseVals := []string{"0", "f", "false", "FALSE", "False"}
+	truthVals := []string{"1", "t", "true", "TRUE", "True"}
+	for _, val := range falseVals {
+		if val == value {
+			*f.value = false
+		}
+	}
+	for _, val := range truthVals {
+		if val == value {
+			f.value = new(bool)
+			*f.value = true
+		}
+	}
+	if f.value == nil {
+		return fmt.Errorf("value must be one of %v, %v", truthVals, falseVals)
+	}
+	return nil
+}
+
+func (f *BoolFlag) Get() *bool {
+	return f.value
+}
+
+func (f *BoolFlag) String() string {
+	if f.value != nil {
+		return strconv.FormatBool(*f.value)
 	}
 	return ""
 }
