@@ -110,4 +110,4 @@ We've successfully updated one of our containers! In your web browser, refresh t
 
 ## Further Reading
 
-If you're interested in writing a more robust updater with customized logic for your application, check out the [protocol]() documentation.
+If you're interested in writing a more robust updater with customized logic for your application, check out the [protocol](protocol.md) documentation.
