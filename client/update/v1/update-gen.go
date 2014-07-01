@@ -9,6 +9,7 @@ package update
 
 import (
 	"bytes"
+	"code.google.com/p/google-api-go-client/googleapi"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -17,8 +18,6 @@ import (
 	"net/url"
 	"strconv"
 	"strings"
-
-	"code.google.com/p/google-api-go-client/googleapi"
 )
 
 // Always reference these packages, just in case the auto-generated code
@@ -50,13 +49,14 @@ func New(client *http.Client) (*Service, error) {
 	s.Client = NewClientService(s)
 	s.Clientupdate = NewClientupdateService(s)
 	s.Group = NewGroupService(s)
+	s.Upstream = NewUpstreamService(s)
 	s.Util = NewUtilService(s)
 	return s, nil
 }
 
 type Service struct {
 	client   *http.Client
-	BasePath string
+	BasePath string // API endpoint base URL
 
 	Admin *AdminService
 
@@ -71,6 +71,8 @@ type Service struct {
 	Clientupdate *ClientupdateService
 
 	Group *GroupService
+
+	Upstream *UpstreamService
 
 	Util *UtilService
 }
@@ -186,6 +188,15 @@ type GroupRequestsVersionsService struct {
 	s *Service
 }
 
+func NewUpstreamService(s *Service) *UpstreamService {
+	rs := &UpstreamService{s: s}
+	return rs
+}
+
+type UpstreamService struct {
+	s *Service
+}
+
 func NewUtilService(s *Service) *UtilService {
 	rs := &UtilService{s: s}
 	return rs
@@ -221,6 +232,10 @@ type AppChannel struct {
 	AppId string `json:"appId,omitempty"`
 
 	Label string `json:"label,omitempty"`
+
+	Publish bool `json:"publish,omitempty"`
+
+	Upstream string `json:"upstream,omitempty"`
 
 	Version string `json:"version,omitempty"`
 }
@@ -260,6 +275,8 @@ type ChannelRequest struct {
 
 	Label string `json:"label,omitempty"`
 
+	Publish bool `json:"publish,omitempty"`
+
 	Version string `json:"version,omitempty"`
 }
 
@@ -270,9 +287,13 @@ type ClientCountResp struct {
 type ClientHistoryItem struct {
 	DateTime int64 `json:"dateTime,omitempty,string"`
 
+	ErrorCode string `json:"errorCode,omitempty"`
+
 	EventResult string `json:"eventResult,omitempty"`
 
 	EventType string `json:"eventType,omitempty"`
+
+	GroupId string `json:"groupId,omitempty"`
 
 	Version string `json:"version,omitempty"`
 }
@@ -375,6 +396,40 @@ type Package struct {
 
 type PackageList struct {
 	Items []*Package `json:"items,omitempty"`
+
+	Total int64 `json:"total,omitempty"`
+}
+
+type PublicPackageItem struct {
+	AppId string `json:"AppId,omitempty"`
+
+	Packages []*Package `json:"packages,omitempty"`
+}
+
+type PublicPackageList struct {
+	Items []*PublicPackageItem `json:"items,omitempty"`
+}
+
+type Upstream struct {
+	Id string `json:"id,omitempty"`
+
+	Label string `json:"label,omitempty"`
+
+	Url string `json:"url,omitempty"`
+}
+
+type UpstreamListResp struct {
+	Items []*Upstream `json:"items,omitempty"`
+}
+
+type UpstreamSyncReq struct {
+	Block bool `json:"block,omitempty"`
+}
+
+type UpstreamSyncResp struct {
+	Detail string `json:"detail,omitempty"`
+
+	Status string `json:"status,omitempty"`
 }
 
 // method id "update.admin.createUser":
@@ -411,7 +466,7 @@ func (c *AdminCreateUserCall) Do() (*AdminUser, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer res.Body.Close()
+	defer googleapi.CloseBody(res)
 	if err := googleapi.CheckResponse(res); err != nil {
 		return nil, err
 	}
@@ -465,7 +520,7 @@ func (c *AdminDeleteUserCall) Do() (*AdminUser, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer res.Body.Close()
+	defer googleapi.CloseBody(res)
 	if err := googleapi.CheckResponse(res); err != nil {
 		return nil, err
 	}
@@ -533,7 +588,7 @@ func (c *AdminGenTokenCall) Do() (*AdminUser, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer res.Body.Close()
+	defer googleapi.CloseBody(res)
 	if err := googleapi.CheckResponse(res); err != nil {
 		return nil, err
 	}
@@ -597,7 +652,7 @@ func (c *AdminGetUserCall) Do() (*AdminUser, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer res.Body.Close()
+	defer googleapi.CloseBody(res)
 	if err := googleapi.CheckResponse(res); err != nil {
 		return nil, err
 	}
@@ -654,7 +709,7 @@ func (c *AdminListUsersCall) Do() (*AdminListUsersResp, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer res.Body.Close()
+	defer googleapi.CloseBody(res)
 	if err := googleapi.CheckResponse(res); err != nil {
 		return nil, err
 	}
@@ -704,7 +759,7 @@ func (c *AppDeleteCall) Do() (*App, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer res.Body.Close()
+	defer googleapi.CloseBody(res)
 	if err := googleapi.CheckResponse(res); err != nil {
 		return nil, err
 	}
@@ -764,7 +819,7 @@ func (c *AppGetCall) Do() (*App, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer res.Body.Close()
+	defer googleapi.CloseBody(res)
 	if err := googleapi.CheckResponse(res); err != nil {
 		return nil, err
 	}
@@ -821,7 +876,7 @@ func (c *AppListCall) Do() (*AppListResp, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer res.Body.Close()
+	defer googleapi.CloseBody(res)
 	if err := googleapi.CheckResponse(res); err != nil {
 		return nil, err
 	}
@@ -879,7 +934,7 @@ func (c *AppPatchCall) Do() (*App, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer res.Body.Close()
+	defer googleapi.CloseBody(res)
 	if err := googleapi.CheckResponse(res); err != nil {
 		return nil, err
 	}
@@ -950,7 +1005,7 @@ func (c *AppUpdateCall) Do() (*App, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer res.Body.Close()
+	defer googleapi.CloseBody(res)
 	if err := googleapi.CheckResponse(res); err != nil {
 		return nil, err
 	}
@@ -1081,7 +1136,7 @@ func (c *AppPackageDeleteCall) Do() (*Package, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer res.Body.Close()
+	defer googleapi.CloseBody(res)
 	if err := googleapi.CheckResponse(res); err != nil {
 		return nil, err
 	}
@@ -1186,7 +1241,7 @@ func (c *AppPackageInsertCall) Do() (*Package, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer res.Body.Close()
+	defer googleapi.CloseBody(res)
 	if err := googleapi.CheckResponse(res); err != nil {
 		return nil, err
 	}
@@ -1242,46 +1297,15 @@ func (r *AppPackageService) List(appId string) *AppPackageListCall {
 	return c
 }
 
-// MetadataSignatureRsa sets the optional parameter
-// "metadataSignatureRsa":
-func (c *AppPackageListCall) MetadataSignatureRsa(metadataSignatureRsa string) *AppPackageListCall {
-	c.opt_["metadataSignatureRsa"] = metadataSignatureRsa
+// Limit sets the optional parameter "limit":
+func (c *AppPackageListCall) Limit(limit int64) *AppPackageListCall {
+	c.opt_["limit"] = limit
 	return c
 }
 
-// MetadataSize sets the optional parameter "metadataSize":
-func (c *AppPackageListCall) MetadataSize(metadataSize string) *AppPackageListCall {
-	c.opt_["metadataSize"] = metadataSize
-	return c
-}
-
-// Required sets the optional parameter "required":
-func (c *AppPackageListCall) Required(required bool) *AppPackageListCall {
-	c.opt_["required"] = required
-	return c
-}
-
-// Sha1Sum sets the optional parameter "sha1Sum":
-func (c *AppPackageListCall) Sha1Sum(sha1Sum string) *AppPackageListCall {
-	c.opt_["sha1Sum"] = sha1Sum
-	return c
-}
-
-// Sha256Sum sets the optional parameter "sha256Sum":
-func (c *AppPackageListCall) Sha256Sum(sha256Sum string) *AppPackageListCall {
-	c.opt_["sha256Sum"] = sha256Sum
-	return c
-}
-
-// Size sets the optional parameter "size":
-func (c *AppPackageListCall) Size(size string) *AppPackageListCall {
-	c.opt_["size"] = size
-	return c
-}
-
-// Url sets the optional parameter "url":
-func (c *AppPackageListCall) Url(url string) *AppPackageListCall {
-	c.opt_["url"] = url
+// Skip sets the optional parameter "skip":
+func (c *AppPackageListCall) Skip(skip int64) *AppPackageListCall {
+	c.opt_["skip"] = skip
 	return c
 }
 
@@ -1295,26 +1319,11 @@ func (c *AppPackageListCall) Do() (*PackageList, error) {
 	var body io.Reader = nil
 	params := make(url.Values)
 	params.Set("alt", "json")
-	if v, ok := c.opt_["metadataSignatureRsa"]; ok {
-		params.Set("metadataSignatureRsa", fmt.Sprintf("%v", v))
+	if v, ok := c.opt_["limit"]; ok {
+		params.Set("limit", fmt.Sprintf("%v", v))
 	}
-	if v, ok := c.opt_["metadataSize"]; ok {
-		params.Set("metadataSize", fmt.Sprintf("%v", v))
-	}
-	if v, ok := c.opt_["required"]; ok {
-		params.Set("required", fmt.Sprintf("%v", v))
-	}
-	if v, ok := c.opt_["sha1Sum"]; ok {
-		params.Set("sha1Sum", fmt.Sprintf("%v", v))
-	}
-	if v, ok := c.opt_["sha256Sum"]; ok {
-		params.Set("sha256Sum", fmt.Sprintf("%v", v))
-	}
-	if v, ok := c.opt_["size"]; ok {
-		params.Set("size", fmt.Sprintf("%v", v))
-	}
-	if v, ok := c.opt_["url"]; ok {
-		params.Set("url", fmt.Sprintf("%v", v))
+	if v, ok := c.opt_["skip"]; ok {
+		params.Set("skip", fmt.Sprintf("%v", v))
 	}
 	if v, ok := c.opt_["version"]; ok {
 		params.Set("version", fmt.Sprintf("%v", v))
@@ -1329,7 +1338,7 @@ func (c *AppPackageListCall) Do() (*PackageList, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer res.Body.Close()
+	defer googleapi.CloseBody(res)
 	if err := googleapi.CheckResponse(res); err != nil {
 		return nil, err
 	}
@@ -1351,33 +1360,15 @@ func (c *AppPackageListCall) Do() (*PackageList, error) {
 	//       "required": true,
 	//       "type": "string"
 	//     },
-	//     "metadataSignatureRsa": {
+	//     "limit": {
+	//       "format": "int32",
 	//       "location": "query",
-	//       "type": "string"
+	//       "type": "integer"
 	//     },
-	//     "metadataSize": {
+	//     "skip": {
+	//       "format": "int32",
 	//       "location": "query",
-	//       "type": "string"
-	//     },
-	//     "required": {
-	//       "location": "query",
-	//       "type": "boolean"
-	//     },
-	//     "sha1Sum": {
-	//       "location": "query",
-	//       "type": "string"
-	//     },
-	//     "sha256Sum": {
-	//       "location": "query",
-	//       "type": "string"
-	//     },
-	//     "size": {
-	//       "location": "query",
-	//       "type": "string"
-	//     },
-	//     "url": {
-	//       "location": "query",
-	//       "type": "string"
+	//       "type": "integer"
 	//     },
 	//     "version": {
 	//       "location": "query",
@@ -1387,6 +1378,53 @@ func (c *AppPackageListCall) Do() (*PackageList, error) {
 	//   "path": "apps/{appId}/packages",
 	//   "response": {
 	//     "$ref": "PackageList"
+	//   }
+	// }
+
+}
+
+// method id "update.app.package.publicList":
+
+type AppPackagePublicListCall struct {
+	s    *Service
+	opt_ map[string]interface{}
+}
+
+// PublicList: List all of the publicly available published packages.
+func (r *AppPackageService) PublicList() *AppPackagePublicListCall {
+	c := &AppPackagePublicListCall{s: r.s, opt_: make(map[string]interface{})}
+	return c
+}
+
+func (c *AppPackagePublicListCall) Do() (*PublicPackageList, error) {
+	var body io.Reader = nil
+	params := make(url.Values)
+	params.Set("alt", "json")
+	urls := googleapi.ResolveRelative(c.s.BasePath, "public/packages")
+	urls += "?" + params.Encode()
+	req, _ := http.NewRequest("GET", urls, body)
+	googleapi.SetOpaque(req.URL)
+	req.Header.Set("User-Agent", "google-api-go-client/0.5")
+	res, err := c.s.client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer googleapi.CloseBody(res)
+	if err := googleapi.CheckResponse(res); err != nil {
+		return nil, err
+	}
+	ret := new(PublicPackageList)
+	if err := json.NewDecoder(res.Body).Decode(ret); err != nil {
+		return nil, err
+	}
+	return ret, nil
+	// {
+	//   "description": "List all of the publicly available published packages.",
+	//   "httpMethod": "GET",
+	//   "id": "update.app.package.publicList",
+	//   "path": "public/packages",
+	//   "response": {
+	//     "$ref": "PublicPackageList"
 	//   }
 	// }
 
@@ -1490,7 +1528,7 @@ func (c *AppversionListCall) Do() (*AppVersionList, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer res.Body.Close()
+	defer googleapi.CloseBody(res)
 	if err := googleapi.CheckResponse(res); err != nil {
 		return nil, err
 	}
@@ -1564,6 +1602,12 @@ func (r *ChannelService) Delete(appId string, label string) *ChannelDeleteCall {
 	return c
 }
 
+// Publish sets the optional parameter "publish":
+func (c *ChannelDeleteCall) Publish(publish bool) *ChannelDeleteCall {
+	c.opt_["publish"] = publish
+	return c
+}
+
 // Version sets the optional parameter "version":
 func (c *ChannelDeleteCall) Version(version string) *ChannelDeleteCall {
 	c.opt_["version"] = version
@@ -1574,6 +1618,9 @@ func (c *ChannelDeleteCall) Do() (*ChannelRequest, error) {
 	var body io.Reader = nil
 	params := make(url.Values)
 	params.Set("alt", "json")
+	if v, ok := c.opt_["publish"]; ok {
+		params.Set("publish", fmt.Sprintf("%v", v))
+	}
 	if v, ok := c.opt_["version"]; ok {
 		params.Set("version", fmt.Sprintf("%v", v))
 	}
@@ -1588,7 +1635,7 @@ func (c *ChannelDeleteCall) Do() (*ChannelRequest, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer res.Body.Close()
+	defer googleapi.CloseBody(res)
 	if err := googleapi.CheckResponse(res); err != nil {
 		return nil, err
 	}
@@ -1615,6 +1662,10 @@ func (c *ChannelDeleteCall) Do() (*ChannelRequest, error) {
 	//       "location": "path",
 	//       "required": true,
 	//       "type": "string"
+	//     },
+	//     "publish": {
+	//       "location": "query",
+	//       "type": "boolean"
 	//     },
 	//     "version": {
 	//       "location": "query",
@@ -1658,7 +1709,7 @@ func (c *ChannelListCall) Do() (*ChannelListResp, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer res.Body.Close()
+	defer googleapi.CloseBody(res)
 	if err := googleapi.CheckResponse(res); err != nil {
 		return nil, err
 	}
@@ -1682,6 +1733,53 @@ func (c *ChannelListCall) Do() (*ChannelListResp, error) {
 	//     }
 	//   },
 	//   "path": "apps/{appId}/channels",
+	//   "response": {
+	//     "$ref": "ChannelListResp"
+	//   }
+	// }
+
+}
+
+// method id "update.channel.publicList":
+
+type ChannelPublicListCall struct {
+	s    *Service
+	opt_ map[string]interface{}
+}
+
+// PublicList: List all publicly available published channels.
+func (r *ChannelService) PublicList() *ChannelPublicListCall {
+	c := &ChannelPublicListCall{s: r.s, opt_: make(map[string]interface{})}
+	return c
+}
+
+func (c *ChannelPublicListCall) Do() (*ChannelListResp, error) {
+	var body io.Reader = nil
+	params := make(url.Values)
+	params.Set("alt", "json")
+	urls := googleapi.ResolveRelative(c.s.BasePath, "public/channels")
+	urls += "?" + params.Encode()
+	req, _ := http.NewRequest("GET", urls, body)
+	googleapi.SetOpaque(req.URL)
+	req.Header.Set("User-Agent", "google-api-go-client/0.5")
+	res, err := c.s.client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer googleapi.CloseBody(res)
+	if err := googleapi.CheckResponse(res); err != nil {
+		return nil, err
+	}
+	ret := new(ChannelListResp)
+	if err := json.NewDecoder(res.Body).Decode(ret); err != nil {
+		return nil, err
+	}
+	return ret, nil
+	// {
+	//   "description": "List all publicly available published channels.",
+	//   "httpMethod": "GET",
+	//   "id": "update.channel.publicList",
+	//   "path": "public/channels",
 	//   "response": {
 	//     "$ref": "ChannelListResp"
 	//   }
@@ -1729,7 +1827,7 @@ func (c *ChannelUpdateCall) Do() (*AppChannel, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer res.Body.Close()
+	defer googleapi.CloseBody(res)
 	if err := googleapi.CheckResponse(res); err != nil {
 		return nil, err
 	}
@@ -1799,7 +1897,7 @@ func (c *ClientHistoryCall) Do() (*ClientHistoryResp, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer res.Body.Close()
+	defer googleapi.CloseBody(res)
 	if err := googleapi.CheckResponse(res); err != nil {
 		return nil, err
 	}
@@ -1928,7 +2026,7 @@ func (c *ClientupdateCountCall) Do() (*ClientCountResp, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer res.Body.Close()
+	defer googleapi.CloseBody(res)
 	if err := googleapi.CheckResponse(res); err != nil {
 		return nil, err
 	}
@@ -2110,7 +2208,7 @@ func (c *ClientupdateListCall) Do() (*ClientUpdateList, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer res.Body.Close()
+	defer googleapi.CloseBody(res)
 	if err := googleapi.CheckResponse(res); err != nil {
 		return nil, err
 	}
@@ -2267,7 +2365,7 @@ func (c *GroupDeleteCall) Do() (*Group, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer res.Body.Close()
+	defer googleapi.CloseBody(res)
 	if err := googleapi.CheckResponse(res); err != nil {
 		return nil, err
 	}
@@ -2416,7 +2514,7 @@ func (c *GroupGetCall) Do() (*Group, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer res.Body.Close()
+	defer googleapi.CloseBody(res)
 	if err := googleapi.CheckResponse(res); err != nil {
 		return nil, err
 	}
@@ -2516,7 +2614,7 @@ func (c *GroupInsertCall) Do() (*Group, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer res.Body.Close()
+	defer googleapi.CloseBody(res)
 	if err := googleapi.CheckResponse(res); err != nil {
 		return nil, err
 	}
@@ -2589,7 +2687,7 @@ func (c *GroupListCall) Do() (*GroupList, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer res.Body.Close()
+	defer googleapi.CloseBody(res)
 	if err := googleapi.CheckResponse(res); err != nil {
 		return nil, err
 	}
@@ -2666,7 +2764,7 @@ func (c *GroupPatchCall) Do() (*Group, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer res.Body.Close()
+	defer googleapi.CloseBody(res)
 	if err := googleapi.CheckResponse(res); err != nil {
 		return nil, err
 	}
@@ -2763,7 +2861,7 @@ func (c *GroupRequestsEventsRollupCall) Do() (*GroupRequestsRollup, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer res.Body.Close()
+	defer googleapi.CloseBody(res)
 	if err := googleapi.CheckResponse(res); err != nil {
 		return nil, err
 	}
@@ -2879,7 +2977,7 @@ func (c *GroupRequestsVersionsRollupCall) Do() (*GroupRequestsRollup, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer res.Body.Close()
+	defer googleapi.CloseBody(res)
 	if err := googleapi.CheckResponse(res); err != nil {
 		return nil, err
 	}
@@ -2939,6 +3037,270 @@ func (c *GroupRequestsVersionsRollupCall) Do() (*GroupRequestsRollup, error) {
 
 }
 
+// method id "update.upstream.delete":
+
+type UpstreamDeleteCall struct {
+	s    *Service
+	id   string
+	opt_ map[string]interface{}
+}
+
+// Delete: Delete an upstream.
+func (r *UpstreamService) Delete(id string) *UpstreamDeleteCall {
+	c := &UpstreamDeleteCall{s: r.s, opt_: make(map[string]interface{})}
+	c.id = id
+	return c
+}
+
+// Label sets the optional parameter "label":
+func (c *UpstreamDeleteCall) Label(label string) *UpstreamDeleteCall {
+	c.opt_["label"] = label
+	return c
+}
+
+// Url sets the optional parameter "url":
+func (c *UpstreamDeleteCall) Url(url string) *UpstreamDeleteCall {
+	c.opt_["url"] = url
+	return c
+}
+
+func (c *UpstreamDeleteCall) Do() (*Upstream, error) {
+	var body io.Reader = nil
+	params := make(url.Values)
+	params.Set("alt", "json")
+	if v, ok := c.opt_["label"]; ok {
+		params.Set("label", fmt.Sprintf("%v", v))
+	}
+	if v, ok := c.opt_["url"]; ok {
+		params.Set("url", fmt.Sprintf("%v", v))
+	}
+	urls := googleapi.ResolveRelative(c.s.BasePath, "upstream/{id}")
+	urls += "?" + params.Encode()
+	req, _ := http.NewRequest("DELETE", urls, body)
+	req.URL.Path = strings.Replace(req.URL.Path, "{id}", url.QueryEscape(c.id), 1)
+	googleapi.SetOpaque(req.URL)
+	req.Header.Set("User-Agent", "google-api-go-client/0.5")
+	res, err := c.s.client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer googleapi.CloseBody(res)
+	if err := googleapi.CheckResponse(res); err != nil {
+		return nil, err
+	}
+	ret := new(Upstream)
+	if err := json.NewDecoder(res.Body).Decode(ret); err != nil {
+		return nil, err
+	}
+	return ret, nil
+	// {
+	//   "description": "Delete an upstream.",
+	//   "httpMethod": "DELETE",
+	//   "id": "update.upstream.delete",
+	//   "parameterOrder": [
+	//     "id"
+	//   ],
+	//   "parameters": {
+	//     "id": {
+	//       "location": "path",
+	//       "required": true,
+	//       "type": "string"
+	//     },
+	//     "label": {
+	//       "location": "query",
+	//       "type": "string"
+	//     },
+	//     "url": {
+	//       "location": "query",
+	//       "type": "string"
+	//     }
+	//   },
+	//   "path": "upstream/{id}",
+	//   "response": {
+	//     "$ref": "Upstream"
+	//   }
+	// }
+
+}
+
+// method id "update.upstream.list":
+
+type UpstreamListCall struct {
+	s    *Service
+	opt_ map[string]interface{}
+}
+
+// List: List all upstreams.
+func (r *UpstreamService) List() *UpstreamListCall {
+	c := &UpstreamListCall{s: r.s, opt_: make(map[string]interface{})}
+	return c
+}
+
+func (c *UpstreamListCall) Do() (*UpstreamListResp, error) {
+	var body io.Reader = nil
+	params := make(url.Values)
+	params.Set("alt", "json")
+	urls := googleapi.ResolveRelative(c.s.BasePath, "upstream")
+	urls += "?" + params.Encode()
+	req, _ := http.NewRequest("GET", urls, body)
+	googleapi.SetOpaque(req.URL)
+	req.Header.Set("User-Agent", "google-api-go-client/0.5")
+	res, err := c.s.client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer googleapi.CloseBody(res)
+	if err := googleapi.CheckResponse(res); err != nil {
+		return nil, err
+	}
+	ret := new(UpstreamListResp)
+	if err := json.NewDecoder(res.Body).Decode(ret); err != nil {
+		return nil, err
+	}
+	return ret, nil
+	// {
+	//   "description": "List all upstreams.",
+	//   "httpMethod": "GET",
+	//   "id": "update.upstream.list",
+	//   "path": "upstream",
+	//   "response": {
+	//     "$ref": "UpstreamListResp"
+	//   }
+	// }
+
+}
+
+// method id "update.upstream.sync":
+
+type UpstreamSyncCall struct {
+	s               *Service
+	upstreamsyncreq *UpstreamSyncReq
+	opt_            map[string]interface{}
+}
+
+// Sync: Synchronize all upstreams.
+func (r *UpstreamService) Sync(upstreamsyncreq *UpstreamSyncReq) *UpstreamSyncCall {
+	c := &UpstreamSyncCall{s: r.s, opt_: make(map[string]interface{})}
+	c.upstreamsyncreq = upstreamsyncreq
+	return c
+}
+
+func (c *UpstreamSyncCall) Do() (*UpstreamSyncResp, error) {
+	var body io.Reader = nil
+	body, err := googleapi.WithoutDataWrapper.JSONReader(c.upstreamsyncreq)
+	if err != nil {
+		return nil, err
+	}
+	ctype := "application/json"
+	params := make(url.Values)
+	params.Set("alt", "json")
+	urls := googleapi.ResolveRelative(c.s.BasePath, "upstream/sync")
+	urls += "?" + params.Encode()
+	req, _ := http.NewRequest("POST", urls, body)
+	googleapi.SetOpaque(req.URL)
+	req.Header.Set("Content-Type", ctype)
+	req.Header.Set("User-Agent", "google-api-go-client/0.5")
+	res, err := c.s.client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer googleapi.CloseBody(res)
+	if err := googleapi.CheckResponse(res); err != nil {
+		return nil, err
+	}
+	ret := new(UpstreamSyncResp)
+	if err := json.NewDecoder(res.Body).Decode(ret); err != nil {
+		return nil, err
+	}
+	return ret, nil
+	// {
+	//   "description": "Synchronize all upstreams.",
+	//   "httpMethod": "POST",
+	//   "id": "update.upstream.sync",
+	//   "path": "upstream/sync",
+	//   "request": {
+	//     "$ref": "UpstreamSyncReq",
+	//     "parameterName": "resource"
+	//   },
+	//   "response": {
+	//     "$ref": "UpstreamSyncResp"
+	//   }
+	// }
+
+}
+
+// method id "update.upstream.update":
+
+type UpstreamUpdateCall struct {
+	s        *Service
+	id       string
+	upstream *Upstream
+	opt_     map[string]interface{}
+}
+
+// Update: Update an upstream.
+func (r *UpstreamService) Update(id string, upstream *Upstream) *UpstreamUpdateCall {
+	c := &UpstreamUpdateCall{s: r.s, opt_: make(map[string]interface{})}
+	c.id = id
+	c.upstream = upstream
+	return c
+}
+
+func (c *UpstreamUpdateCall) Do() (*Upstream, error) {
+	var body io.Reader = nil
+	body, err := googleapi.WithoutDataWrapper.JSONReader(c.upstream)
+	if err != nil {
+		return nil, err
+	}
+	ctype := "application/json"
+	params := make(url.Values)
+	params.Set("alt", "json")
+	urls := googleapi.ResolveRelative(c.s.BasePath, "upstream/{id}")
+	urls += "?" + params.Encode()
+	req, _ := http.NewRequest("POST", urls, body)
+	req.URL.Path = strings.Replace(req.URL.Path, "{id}", url.QueryEscape(c.id), 1)
+	googleapi.SetOpaque(req.URL)
+	req.Header.Set("Content-Type", ctype)
+	req.Header.Set("User-Agent", "google-api-go-client/0.5")
+	res, err := c.s.client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer googleapi.CloseBody(res)
+	if err := googleapi.CheckResponse(res); err != nil {
+		return nil, err
+	}
+	ret := new(Upstream)
+	if err := json.NewDecoder(res.Body).Decode(ret); err != nil {
+		return nil, err
+	}
+	return ret, nil
+	// {
+	//   "description": "Update an upstream.",
+	//   "httpMethod": "POST",
+	//   "id": "update.upstream.update",
+	//   "parameterOrder": [
+	//     "id"
+	//   ],
+	//   "parameters": {
+	//     "id": {
+	//       "location": "path",
+	//       "required": true,
+	//       "type": "string"
+	//     }
+	//   },
+	//   "path": "upstream/{id}",
+	//   "request": {
+	//     "$ref": "Upstream",
+	//     "parameterName": "resource"
+	//   },
+	//   "response": {
+	//     "$ref": "Upstream"
+	//   }
+	// }
+
+}
+
 // method id "update.util.uuid":
 
 type UtilUuidCall struct {
@@ -2965,7 +3327,7 @@ func (c *UtilUuidCall) Do() (*GenerateUuidResp, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer res.Body.Close()
+	defer googleapi.CloseBody(res)
 	if err := googleapi.CheckResponse(res); err != nil {
 		return nil, err
 	}
