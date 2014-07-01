@@ -1,6 +1,6 @@
 {
  "kind": "discovery#restDescription",
- "etag": "\"0NZZm4UuLZgEQBhMTwnFS1XIMrM/Fmga-qhdaVomBW_uFFYezuzC5Y4\"",
+ "etag": "\"p_qcyFV0KQVqSB1Aq3pqmPu-2MY/HBP_exz_y49nOrIhuSJa22zlFVs\"",
  "discoveryVersion": "v1",
  "id": "update:v1",
  "name": "update",
@@ -120,6 +120,12 @@
     "label": {
      "type": "string"
     },
+    "publish": {
+     "type": "boolean"
+    },
+    "upstream": {
+     "type": "string"
+    },
     "version": {
      "type": "string"
     }
@@ -205,6 +211,9 @@
     "label": {
      "type": "string"
     },
+    "publish": {
+     "type": "boolean"
+    },
     "version": {
      "type": "string"
     }
@@ -228,10 +237,16 @@
      "type": "string",
      "format": "int64"
     },
+    "errorCode": {
+     "type": "string"
+    },
     "eventResult": {
      "type": "string"
     },
     "eventType": {
+     "type": "string"
+    },
+    "groupId": {
      "type": "string"
     },
     "version": {
@@ -442,6 +457,85 @@
      "items": {
       "$ref": "Package"
      }
+    },
+    "total": {
+     "type": "integer",
+     "format": "int32"
+    }
+   }
+  },
+  "PublicPackageItem": {
+   "id": "PublicPackageItem",
+   "type": "object",
+   "properties": {
+    "AppId": {
+     "type": "string"
+    },
+    "packages": {
+     "type": "array",
+     "items": {
+      "$ref": "Package"
+     }
+    }
+   }
+  },
+  "PublicPackageList": {
+   "id": "PublicPackageList",
+   "type": "object",
+   "properties": {
+    "items": {
+     "type": "array",
+     "items": {
+      "$ref": "PublicPackageItem"
+     }
+    }
+   }
+  },
+  "Upstream": {
+   "id": "Upstream",
+   "type": "object",
+   "properties": {
+    "id": {
+     "type": "string"
+    },
+    "label": {
+     "type": "string"
+    },
+    "url": {
+     "type": "string"
+    }
+   }
+  },
+  "UpstreamListResp": {
+   "id": "UpstreamListResp",
+   "type": "object",
+   "properties": {
+    "items": {
+     "type": "array",
+     "items": {
+      "$ref": "Upstream"
+     }
+    }
+   }
+  },
+  "UpstreamSyncReq": {
+   "id": "UpstreamSyncReq",
+   "type": "object",
+   "properties": {
+    "block": {
+     "type": "boolean"
+    }
+   }
+  },
+  "UpstreamSyncResp": {
+   "id": "UpstreamSyncResp",
+   "type": "object",
+   "properties": {
+    "detail": {
+     "type": "string"
+    },
+    "status": {
+     "type": "string"
     }
    }
   }
@@ -725,32 +819,14 @@
          "required": true,
          "location": "path"
         },
-        "metadataSignatureRsa": {
-         "type": "string",
+        "limit": {
+         "type": "integer",
+         "format": "int32",
          "location": "query"
         },
-        "metadataSize": {
-         "type": "string",
-         "location": "query"
-        },
-        "required": {
-         "type": "boolean",
-         "location": "query"
-        },
-        "sha1Sum": {
-         "type": "string",
-         "location": "query"
-        },
-        "sha256Sum": {
-         "type": "string",
-         "location": "query"
-        },
-        "size": {
-         "type": "string",
-         "location": "query"
-        },
-        "url": {
-         "type": "string",
+        "skip": {
+         "type": "integer",
+         "format": "int32",
          "location": "query"
         },
         "version": {
@@ -763,6 +839,15 @@
        ],
        "response": {
         "$ref": "PackageList"
+       }
+      },
+      "publicList": {
+       "id": "update.app.package.publicList",
+       "path": "public/packages",
+       "httpMethod": "GET",
+       "description": "List all of the publicly available published packages.",
+       "response": {
+        "$ref": "PublicPackageList"
        }
       }
      }
@@ -836,6 +921,10 @@
        "required": true,
        "location": "path"
       },
+      "publish": {
+       "type": "boolean",
+       "location": "query"
+      },
       "version": {
        "type": "string",
        "location": "query"
@@ -864,6 +953,15 @@
      "parameterOrder": [
       "appId"
      ],
+     "response": {
+      "$ref": "ChannelListResp"
+     }
+    },
+    "publicList": {
+     "id": "update.channel.publicList",
+     "path": "public/channels",
+     "httpMethod": "GET",
+     "description": "List all publicly available published channels.",
      "response": {
       "$ref": "ChannelListResp"
      }
@@ -1319,6 +1417,82 @@
         }
        }
       }
+     }
+    }
+   }
+  },
+  "upstream": {
+   "methods": {
+    "delete": {
+     "id": "update.upstream.delete",
+     "path": "upstream/{id}",
+     "httpMethod": "DELETE",
+     "description": "Delete an upstream.",
+     "parameters": {
+      "id": {
+       "type": "string",
+       "required": true,
+       "location": "path"
+      },
+      "label": {
+       "type": "string",
+       "location": "query"
+      },
+      "url": {
+       "type": "string",
+       "location": "query"
+      }
+     },
+     "parameterOrder": [
+      "id"
+     ],
+     "response": {
+      "$ref": "Upstream"
+     }
+    },
+    "list": {
+     "id": "update.upstream.list",
+     "path": "upstream",
+     "httpMethod": "GET",
+     "description": "List all upstreams.",
+     "response": {
+      "$ref": "UpstreamListResp"
+     }
+    },
+    "sync": {
+     "id": "update.upstream.sync",
+     "path": "upstream/sync",
+     "httpMethod": "POST",
+     "description": "Synchronize all upstreams.",
+     "request": {
+      "$ref": "UpstreamSyncReq",
+      "parameterName": "resource"
+     },
+     "response": {
+      "$ref": "UpstreamSyncResp"
+     }
+    },
+    "update": {
+     "id": "update.upstream.update",
+     "path": "upstream/{id}",
+     "httpMethod": "POST",
+     "description": "Update an upstream.",
+     "parameters": {
+      "id": {
+       "type": "string",
+       "required": true,
+       "location": "path"
+      }
+     },
+     "parameterOrder": [
+      "id"
+     ],
+     "request": {
+      "$ref": "Upstream",
+      "parameterName": "resource"
+     },
+     "response": {
+      "$ref": "Upstream"
      }
     }
    }

@@ -106,6 +106,8 @@ func init() {
 		cmdPackage,
 		// watch.go
 		cmdWatch,
+		// upstream.go
+		cmdUpstream,
 	}
 }
 
