@@ -12,7 +12,7 @@ New servers can be configured to communicate with your CoreUpdate installation b
 coreos:
   update:
     group: 0a809ab1-c01c-4a6b-8ac8-6b17cb9bae09
-    server: https://customer.update.core-os.net
+    server: https://customer.update.core-os.net/v1/update/
 ```
 
 More information can be found in the [cloud-config guide](http://coreos.com/docs/cluster-management/setup/cloudinit-cloud-config/#coreos).
@@ -23,7 +23,7 @@ To change the update of existing machines, edit `/etc/coreos/update.conf` with y
 
 ```
 GROUP=0a809ab1-c01c-4a6b-8ac8-6b17cb9bae09
-SERVER=https://customer.update.core-os.net
+SERVER=https://customer.update.core-os.net/v1/update/
 ```
 
 To apply the changes, run:
