@@ -1,0 +1,13 @@
+[docker]
+
+build_opts = ["--rm", "--no-cache"]
+tag_opts = ["--force"]
+
+[containers]
+
+  [containers.app]
+    Dockerfile = "Dockerfile"
+    registry = "registry.core-os.net"
+    project = "updatectl"
+    tags = ["git:rev", "git:short"]
+    skip_push = false
