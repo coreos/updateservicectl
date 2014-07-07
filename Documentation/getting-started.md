@@ -50,7 +50,7 @@ quickly a new version is rolled out based on their specific needs. Updates can a
 if a team doesn't want any updates.
 
 ```
-updatectl group list --app-id <app-id>
+updatectl group list --app-id=<app-id>
 ```
 
 ### Channel
@@ -58,7 +58,7 @@ updatectl group list --app-id <app-id>
 Each application can specify channels, such as alpha or beta, that can be updated to refer to different packages. Channels allow you to upload a new beta package and have it rolled out to all groups that track the beta channel, with one command.
 
 ```
-updatectl channel list --app-id <appid>
+updatectl channel list --app-id=<appid>
 ```
 
 ### Updater
@@ -99,8 +99,8 @@ The easiest way to illustrate how these concepts work together is to trigger an 
 First set up a new application with a unique identifier, label, and description:
 
 ```
-updatectl app create --app-id e96281a6-d1af-4bde-9a0a-97b76e56dc57 \
-	--label "FakeApp" --description "Fake app for testing"
+updatectl app create --app-id=e96281a6-d1af-4bde-9a0a-97b76e56dc57 \
+	--label="FakeApp" --description="Fake app for testing"
 ```
 
 You should now see it in the list of apps:
@@ -123,8 +123,8 @@ Next, create a group that we'll associate our fake clients with. Be
 sure to include the app id, the `master` channel, an ID and a friendly label.
 
 ```
-$ updatectl group create --app-id e96281a6-d1af-4bde-9a0a-97b76e56dc57
-	--channel master --group-id fake1 --label "Fake Clients"
+$ updatectl group create --app-id=e96281a6-d1af-4bde-9a0a-97b76e56dc57
+	--channel=master --group-id=fake1 --label="Fake Clients"
 ```
 
 ### Uploading and Signing a Package
@@ -140,10 +140,10 @@ touch update-1.1.0.gz
 You can now use the `new-package` command to publish this fake package as version `1.1.0` (with a fake URL):
 
 ```
-updatectl package create --app-id e96281a6-d1af-4bde-9a0a-97b76e56dc57 \
-    --version 1.1.0 \
-    --file update-1.1.0.gz \
-    --url https://fakepackage.local/update-1.1.0.gz
+updatectl package create --app-id=e96281a6-d1af-4bde-9a0a-97b76e56dc57 \
+    --version=1.1.0 \
+    --file=update-1.1.0.gz \
+    --url=https://fakepackage.local/update-1.1.0.gz
 ```
 
 ### Start Fake Clients
@@ -153,9 +153,9 @@ updatectl package create --app-id e96281a6-d1af-4bde-9a0a-97b76e56dc57 \
 When we start the fake clients, we don't expect them to do anything since we're already on version `1.0.0`. In another terminal window, start the clients:
 
 ```
-$ updatectl instance fake --clients-per-app 10 --min-sleep 30 \
-	--max-sleep 60 --app-id e96281a6-d1af-4bde-9a0a-97b76e56dc57 \
-	--group-id fake1 --version 1.0.0
+$ updatectl instance fake --clients-per-app=10 --min-sleep=30 \
+	--max-sleep=60 --app-id=e96281a6-d1af-4bde-9a0a-97b76e56dc57 \
+	--group-id=fake1 --version=1.0.0
 {fake-client-000}: noupdate
 {fake-client-002}: noupdate
 {fake-client-001}: noupdate
@@ -167,16 +167,15 @@ $ updatectl instance fake --clients-per-app 10 --min-sleep 30 \
 Now let's see how the fake clients react when we promote the new package `1.1.0` to the master channel. First, let's set the rate limit of the group to slow down the roll-out. This will make it easier to see what's going on. Since we only have 10 clients, 2 updates per 60 seconds should be slow enough:
 
 ```
-$ updatectl group update --app-id e96281a6-d1af-4bde-9a0a-97b76e56dc57 \
---group-id fake1 --channel master --update-count 2 --update-interval 60
+$ updatectl group update --app-id=e96281a6-d1af-4bde-9a0a-97b76e56dc57 \
+--group-id=fake1 --channel=master --update-count=2 --update-interval=60
 Fake Clients	e96281a6-d1af-4bde-9a0a-97b76e56dc57	master	fake1	false	2	60
 ```
 
 Next, promote our `1.1.0` release on the `master` channel:
 
 ```
-$ updatectl channel update --app-id e96281a6-d1af-4bde-9a0a-97b76e56dc57 --channel master 1.1.0
-1.1.0
+$ updatectl channel update --app-id=e96281a6-d1af-4bde-9a0a-97b76e56dc57 --channel=master --version=1.1.0
 ```
 
 In the terminal window running the fake clients, you should see a few of them start to upgrade. The output looks like:
