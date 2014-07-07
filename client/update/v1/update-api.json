@@ -1,6 +1,6 @@
 {
  "kind": "discovery#restDescription",
- "etag": "\"p_qcyFV0KQVqSB1Aq3pqmPu-2MY/HBP_exz_y49nOrIhuSJa22zlFVs\"",
+ "etag": "\"p_qcyFV0KQVqSB1Aq3pqmPu-2MY/4zuoLO81nRji-q8sOOE96-aK4F4\"",
  "discoveryVersion": "v1",
  "id": "update:v1",
  "name": "update",
@@ -515,15 +515,6 @@
      "items": {
       "$ref": "Upstream"
      }
-    }
-   }
-  },
-  "UpstreamSyncReq": {
-   "id": "UpstreamSyncReq",
-   "type": "object",
-   "properties": {
-    "block": {
-     "type": "boolean"
     }
    }
   },
@@ -1464,10 +1455,6 @@
      "path": "upstream/sync",
      "httpMethod": "POST",
      "description": "Synchronize all upstreams.",
-     "request": {
-      "$ref": "UpstreamSyncReq",
-      "parameterName": "resource"
-     },
      "response": {
       "$ref": "UpstreamSyncResp"
      }

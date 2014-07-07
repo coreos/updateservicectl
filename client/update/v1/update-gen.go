@@ -422,10 +422,6 @@ type UpstreamListResp struct {
 	Items []*Upstream `json:"items,omitempty"`
 }
 
-type UpstreamSyncReq struct {
-	Block bool `json:"block,omitempty"`
-}
-
 type UpstreamSyncResp struct {
 	Detail string `json:"detail,omitempty"`
 
@@ -3173,32 +3169,24 @@ func (c *UpstreamListCall) Do() (*UpstreamListResp, error) {
 // method id "update.upstream.sync":
 
 type UpstreamSyncCall struct {
-	s               *Service
-	upstreamsyncreq *UpstreamSyncReq
-	opt_            map[string]interface{}
+	s    *Service
+	opt_ map[string]interface{}
 }
 
 // Sync: Synchronize all upstreams.
-func (r *UpstreamService) Sync(upstreamsyncreq *UpstreamSyncReq) *UpstreamSyncCall {
+func (r *UpstreamService) Sync() *UpstreamSyncCall {
 	c := &UpstreamSyncCall{s: r.s, opt_: make(map[string]interface{})}
-	c.upstreamsyncreq = upstreamsyncreq
 	return c
 }
 
 func (c *UpstreamSyncCall) Do() (*UpstreamSyncResp, error) {
 	var body io.Reader = nil
-	body, err := googleapi.WithoutDataWrapper.JSONReader(c.upstreamsyncreq)
-	if err != nil {
-		return nil, err
-	}
-	ctype := "application/json"
 	params := make(url.Values)
 	params.Set("alt", "json")
 	urls := googleapi.ResolveRelative(c.s.BasePath, "upstream/sync")
 	urls += "?" + params.Encode()
 	req, _ := http.NewRequest("POST", urls, body)
 	googleapi.SetOpaque(req.URL)
-	req.Header.Set("Content-Type", ctype)
 	req.Header.Set("User-Agent", "google-api-go-client/0.5")
 	res, err := c.s.client.Do(req)
 	if err != nil {
@@ -3218,10 +3206,6 @@ func (c *UpstreamSyncCall) Do() (*UpstreamSyncResp, error) {
 	//   "httpMethod": "POST",
 	//   "id": "update.upstream.sync",
 	//   "path": "upstream/sync",
-	//   "request": {
-	//     "$ref": "UpstreamSyncReq",
-	//     "parameterName": "resource"
-	//   },
 	//   "response": {
 	//     "$ref": "UpstreamSyncResp"
 	//   }
