@@ -127,10 +127,10 @@ channel. Think of channels as a DNS name for a package.
 
 A channel has a version of individual applications. To change the version of an
 application specify the app id, channel and the version that channel
-should present.
+should present. Additionally you can publish a channel by setting the `--publish` flag, if not specified publish will always be set to `false`.
 
 ```
-./bin/updatectl channel update --app-id e96281a6-d1af-4bde-9a0a-97b76e56dc57 --channel master 1.0.1
+./bin/updatectl channel update --app-id=e96281a6-d1af-4bde-9a0a-97b76e56dc57 --channel=master --version=1.0.1 --publish=true
 ```
 
 ## Group Management

@@ -115,8 +115,8 @@ f217d8ba-76e6-4b07-8136-049c54b30f21  CoreOS    Linux for Servers
 Next, create a channel that our group of fake clients will track. Let's call it `master` and start it out on version `1.0.0`:
 
 ```
-updatectl channel update --app-id e96281a6-d1af-4bde-9a0a-97b76e56dc57 \
-	--channel master 1.0.0
+updatectl channel update --app-id=e96281a6-d1af-4bde-9a0a-97b76e56dc57 \
+	--channel=master --version=1.0.0
 ```
 
 Next, create a group that we'll associate our fake clients with. Be
