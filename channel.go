@@ -30,12 +30,12 @@ var (
 		Run:         channelList,
 	}
 	cmdChannelUpdate = &Command{
-		Name:        "channel update",
-		Usage:       "[OPTION]... <version>",
+		Name:    "channel update",
+		Usage:   "[OPTION]... <version>",
 		Summary: `Update a channel for an application to a new version.`,
 		Description: `Given an application ID (--app-id) and channel (--channel),
 you can change the channel to a new version (<version>).`,
-		Run:         channelUpdate,
+		Run: channelUpdate,
 	}
 )
 
@@ -47,7 +47,7 @@ func init() {
 }
 
 func formatChannel(channel *update.AppChannel) string {
-	return fmt.Sprintf("%s\t%s\n", channel.Label, channel.Version)
+	return fmt.Sprintf("%s\t%s\t%t\t%s\n", channel.Label, channel.Version, channel.Publish, channel.Upstream)
 }
 
 func channelList(args []string, service *update.Service, out *tabwriter.Writer) int {
@@ -60,7 +60,7 @@ func channelList(args []string, service *update.Service, out *tabwriter.Writer) 
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Fprint(out, "Label\tVersion\n")
+	fmt.Fprint(out, "Label\tVersion\tPublish\tUpstream\n")
 	for _, channel := range list.Items {
 		fmt.Fprintf(out, "%s", formatChannel(channel))
 	}
@@ -70,7 +70,7 @@ func channelList(args []string, service *update.Service, out *tabwriter.Writer) 
 
 func channelUpdate(args []string, service *update.Service, out *tabwriter.Writer) int {
 	if len(args) != 1 || channelFlags.appId.Get() == nil ||
-		channelFlags.channel.Get() == nil{
+		channelFlags.channel.Get() == nil {
 		return ERROR_USAGE
 	}
 
