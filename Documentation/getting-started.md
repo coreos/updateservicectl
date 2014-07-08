@@ -6,7 +6,7 @@ The update service is a tool that helps you manage large-scale rolling upgrades 
 2. `updatectl` a CLI interface to the service
 3. Communication specification for your applications to report their current status and receive notifications of an available update.
 
-The update service is based on [Omaha](https://code.google.com/p/omaha/), an open protocol from Google. This protocol powers updates for the Chrome browser, ChromeOS, Google Earth and more.
+The update service is based on an open protocol from Google. This protocol powers updates for the Chrome browser, ChromeOS, Google Earth and more.
 
 ## Accessing the Update Service
 
