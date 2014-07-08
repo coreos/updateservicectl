@@ -14,7 +14,6 @@ var (
 		id    StringFlag
 		url   StringFlag
 		label StringFlag
-		block bool
 	}
 
 	cmdUpstream = &Command{
@@ -68,8 +67,6 @@ func init() {
 	cmdUpstreamUpdate.Flags.Var(&upstreamFlags.label, "label", "The label of the upstream Update Service.")
 
 	cmdUpstreamDelete.Flags.Var(&upstreamFlags.id, "id", "The uuid of the upstream to delete.")
-
-	cmdUpstreamSync.Flags.BoolVar(&upstreamFlags.block, "block", false, "Wait for sync to complete before returning.")
 }
 
 func writeUpstreamHeading(out *tabwriter.Writer) {
@@ -155,8 +152,7 @@ func upstreamList(args []string, service *update.Service, out *tabwriter.Writer)
 }
 
 func upstreamSync(args []string, service *update.Service, out *tabwriter.Writer) int {
-	req := &update.UpstreamSyncReq{Block: upstreamFlags.block}
-	call := service.Upstream.Sync(req)
+	call := service.Upstream.Sync()
 	resp, err := call.Do()
 	if err != nil {
 		log.Fatal(err)
