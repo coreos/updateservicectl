@@ -2,6 +2,7 @@ package auth
 
 import (
 	"crypto/sha256"
+	"crypto/tls"
 	"net/http"
 
 	"github.com/tent/hawk-go"
@@ -10,8 +11,9 @@ import (
 var DefaultHawkHasher = sha256.New
 
 type HawkRoundTripper struct {
-	User  string
-	Token string
+	User          string
+	Token         string
+	SkipSSLVerify bool
 }
 
 func (t *HawkRoundTripper) RoundTrip(req *http.Request) (*http.Response, error) {
@@ -22,7 +24,10 @@ func (t *HawkRoundTripper) RoundTrip(req *http.Request) (*http.Response, error) 
 	}
 
 	auth := hawk.NewRequestAuth(req, creds, 0)
-
 	req.Header.Set("Authorization", auth.RequestHeader())
-	return http.DefaultTransport.RoundTrip(req)
+
+	transport := &http.Transport{
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: t.SkipSSLVerify},
+	}
+	return transport.RoundTrip(req)
 }

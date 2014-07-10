@@ -61,12 +61,13 @@ var (
 	commands      []*Command
 
 	globalFlags struct {
-		Server  string
-		User    string
-		Key     string
-		Debug   bool
-		Version bool
-		Help    bool
+		Server        string
+		User          string
+		Key           string
+		Debug         bool
+		Version       bool
+		Help          bool
+		SkipSSLVerify bool
 	}
 )
 
@@ -84,6 +85,7 @@ func init() {
 	globalFlagSet.BoolVar(&globalFlags.Debug, "debug", false, "Output debugging info to stderr")
 	globalFlagSet.BoolVar(&globalFlags.Version, "version", false, "Print version information and exit.")
 	globalFlagSet.BoolVar(&globalFlags.Help, "help", false, "Print usage information and exit.")
+	globalFlagSet.BoolVar(&globalFlags.SkipSSLVerify, "skip-ssl-verify", false, "Don't check SSL certificates.")
 	globalFlagSet.StringVar(&globalFlags.User, "user", os.Getenv("UPDATECTL_USER"), "API Username")
 	globalFlagSet.StringVar(&globalFlags.Key, "key", os.Getenv("UPDATECTL_KEY"), "API Key")
 
@@ -114,7 +116,13 @@ func init() {
 type handlerFunc func([]string, *update.Service, *tabwriter.Writer) int
 
 func getHawkClient(user string, key string) *http.Client {
-	return &http.Client{Transport: &auth.HawkRoundTripper{user, key}}
+	return &http.Client{
+		Transport: &auth.HawkRoundTripper{
+			User:          user,
+			Token:         key,
+			SkipSSLVerify: globalFlags.SkipSSLVerify,
+		},
+	}
 }
 
 func handle(fn handlerFunc) func(f *flag.FlagSet) int {
