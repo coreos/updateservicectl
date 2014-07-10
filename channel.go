@@ -12,6 +12,8 @@ var (
 	channelFlags struct {
 		appId   StringFlag
 		channel StringFlag
+		version StringFlag
+		publish bool
 	}
 
 	cmdChannel = &Command{
@@ -30,12 +32,12 @@ var (
 		Run:         channelList,
 	}
 	cmdChannelUpdate = &Command{
-		Name:        "channel update",
-		Usage:       "[OPTION]... <version>",
-		Summary: `Update a channel for an application to a new version.`,
+		Name:    "channel update",
+		Usage:   "[OPTION]...",
+		Summary: `Update the version and publish state for an application channel.`,
 		Description: `Given an application ID (--app-id) and channel (--channel),
-you can change the channel to a new version (<version>).`,
-		Run:         channelUpdate,
+you can change the channel to a new version (--version), or set the publish state (--publish).`,
+		Run: channelUpdate,
 	}
 )
 
@@ -44,10 +46,12 @@ func init() {
 
 	cmdChannelUpdate.Flags.Var(&channelFlags.appId, "app-id", "The application ID that the channel belongs to.")
 	cmdChannelUpdate.Flags.Var(&channelFlags.channel, "channel", "The channel to update.")
+	cmdChannelUpdate.Flags.BoolVar(&channelFlags.publish, "publish", false, "Publish or unpublish the channel.")
+	cmdChannelUpdate.Flags.Var(&channelFlags.version, "version", "The version to update the channel to.")
 }
 
 func formatChannel(channel *update.AppChannel) string {
-	return fmt.Sprintf("%s\t%s\n", channel.Label, channel.Version)
+	return fmt.Sprintf("%s\t%s\t%t\t%s\n", channel.Label, channel.Version, channel.Publish, channel.Upstream)
 }
 
 func channelList(args []string, service *update.Service, out *tabwriter.Writer) int {
@@ -60,7 +64,7 @@ func channelList(args []string, service *update.Service, out *tabwriter.Writer) 
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Fprint(out, "Label\tVersion\n")
+	fmt.Fprint(out, "Label\tVersion\tPublish\tUpstream\n")
 	for _, channel := range list.Items {
 		fmt.Fprintf(out, "%s", formatChannel(channel))
 	}
@@ -69,12 +73,11 @@ func channelList(args []string, service *update.Service, out *tabwriter.Writer) 
 }
 
 func channelUpdate(args []string, service *update.Service, out *tabwriter.Writer) int {
-	if len(args) != 1 || channelFlags.appId.Get() == nil ||
-		channelFlags.channel.Get() == nil{
+	if channelFlags.version.Get() == nil || channelFlags.appId.Get() == nil || channelFlags.channel.Get() == nil {
 		return ERROR_USAGE
 	}
 
-	channelReq := &update.ChannelRequest{Version: args[0]}
+	channelReq := &update.ChannelRequest{Version: *channelFlags.version.Get(), Publish: channelFlags.publish}
 
 	call := service.Channel.Update(channelFlags.appId.String(), channelFlags.channel.String(), channelReq)
 	channel, err := call.Do()
@@ -82,7 +85,7 @@ func channelUpdate(args []string, service *update.Service, out *tabwriter.Writer
 		log.Fatal(err)
 	}
 
-	fmt.Fprintf(out, "%s\n", channel.Version)
+	fmt.Fprintf(out, "%s", formatChannel(channel))
 	out.Flush()
 	return OK
 }
