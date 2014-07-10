@@ -13,14 +13,14 @@ We're going to build off the example described in the [Zero Downtime Frontend De
 Before we can update the example application, we need to set it up in the update service. You can read the detailed information in the [Getting Started]() guide, or quickly execute these commands:
 
 ```
-$ updatectl app update --app-id e96281a6-d1af-4bde-9a0a-97b76e56dc57 \
-	--label "Example App" --description "Sample application to test container updates"
-$ updatectl group create --app-id e96281a6-d1af-4bde-9a0a-97b76e56dc57 \
-	--channel master --group-id 13DEFFFC-90C2-4B94-B3C2-1322BE8DC4E3 \
-	--label "Example Group"
-$ updatectl package create --app-id e96281a6-d1af-4bde-9a0a-97b76e56dc57 \
-	--version 1.0.0 --file coreos/example:1.0.0
-$ updatectl channel update --app-id e96281a6-d1af-4bde-9a0a-97b76e56dc57 --channel master 1.0.0
+$ updatectl app update --app-id=e96281a6-d1af-4bde-9a0a-97b76e56dc57 \
+	--label="Example App" --description="Sample application to test container updates"
+$ updatectl group create --app-id=e96281a6-d1af-4bde-9a0a-97b76e56dc57 \
+	--channel=master --group-id=13DEFFFC-90C2-4B94-B3C2-1322BE8DC4E3 \
+	--label="Example Group"
+$ updatectl package create --app-id=e96281a6-d1af-4bde-9a0a-97b76e56dc57 \
+	--version=1.0.0 --file=coreos/example:1.0.0
+$ updatectl channel update --app-id=e96281a6-d1af-4bde-9a0a-97b76e56dc57 --channel=master --version=1.0.0
 ```
 
 In the web interface, you should see everything that you just created:
@@ -94,8 +94,8 @@ Now that we know everything is running, let's load a new package into the update
 Create a new package pointing to the 2.0.0 tag of the container:
 
 ```
-updatectl package create --app-id e96281a6-d1af-4bde-9a0a-97b76e56dc57 \
-	--version 2.0.0 --file coreos/example:2.0.0
+updatectl package create --app-id=e96281a6-d1af-4bde-9a0a-97b76e56dc57 \
+	--version=2.0.0 --file=coreos/example:2.0.0
 ```
 
 ### Start the Update

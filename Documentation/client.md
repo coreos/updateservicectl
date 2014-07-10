@@ -15,7 +15,7 @@ There are a few flags that you must provide to the administrative commands below
 The commands below will all have a prefix like this:
 
 ```
-./bin/updatectl --user admin --key d3b07384d113edec49eaa6238ad5ff00 --server https://example.update.core-os.net
+./bin/updatectl --user=admin --key=d3b07384d113edec49eaa6238ad5ff00 --server=https://example.update.core-os.net
 ```
 
 If you do not wish to specify these every time, they
@@ -41,9 +41,9 @@ This example will start 132 fake instances pinging the update service every 1 to
 starting at version 1.0.0.
 
 ```
-./bin/updatectl instance fake --clients-per-app 132 --min-sleep 1 \
-	--max-sleep 50 --app-id e96281a6-d1af-4bde-9a0a-97b76e56dc57 \
-	--group-id beta --version 1.0.0
+./bin/updatectl instance fake --clients-per-app=132 --min-sleep=1 \
+	--max-sleep=50 --app-id=e96281a6-d1af-4bde-9a0a-97b76e56dc57 \
+	--group-id=beta --version=1.0.0
 ```
 
 ### Update Watcher
@@ -63,8 +63,8 @@ env | grep UPDATE_SERVICE
 Next we will generate a random client UUID and start watching for changes to the given app:
 
 ```
-./bin/updatectl watch --app-id e96281a6-d1af-4bde-9a0a-97b76e56dc57 \
-	--group-id beta ./updater.sh
+./bin/updatectl watch --app-id=e96281a6-d1af-4bde-9a0a-97b76e56dc57 \
+	--group-id=beta ./updater.sh
 ```
 
 If you change the version of the beta group's channel then your script will be
@@ -101,8 +101,8 @@ associated with it.
 This will create a new package with version 1.0.5 from the file `update.gz`.
 
 ```
-./bin/updatectl package create --app-id e96281a6-d1af-4bde-9a0a-97b76e56dc57 \
-	--version 1.0.5 --file update.gz \
+./bin/updatectl package create --app-id=e96281a6-d1af-4bde-9a0a-97b76e56dc57 \
+	--version=1.0.5 --file=update.gz \
 ```
 
 The `--meta` option allows you to specify a cryptographic signature
@@ -115,7 +115,7 @@ and file size for verification purposes. It should look like this:
 ### List Application Versions
 
 ```
-./bin/updatectl package list --app-id e96281a6-d1af-4bde-9a0a-97b76e56dc57
+./bin/updatectl package list --app-id=e96281a6-d1af-4bde-9a0a-97b76e56dc57
 ```
 
 ## Channel Management
@@ -145,14 +145,14 @@ Create a group for the CoreOS application pointing at the master channel called
 testing. This group might be used in your test environment.
 
 ```
-./bin/updatectl group create --app-ide96281a6-d1af-4bde-9a0a-97b76e56dc57 \
-	--channel  master --group-id testing --label "Testing Group"
+./bin/updatectl group create --app-id=e96281a6-d1af-4bde-9a0a-97b76e56dc57 \
+	--channel=master --group-id=testing --label="Testing Group"
 ```
 
 ### Pausing Updates on a Group
 
 ```
-./bin/updatectl group pause --app-id e96281a6-d1af-4bde-9a0a-97b76e56dc57 --group-id testing
+./bin/updatectl group pause --app-id=e96281a6-d1af-4bde-9a0a-97b76e56dc57 --group-id=testing
 ```
 
 ### List Groups
@@ -174,13 +174,13 @@ but you can use them from `updatectl` too.
 This will list all instances that have been seen since the given timestamp.
 
 ```
-./bin/updatectl instance list-updates --start 1392401442
+./bin/updatectl instance list-updates --start=1392401442
 ```
 
 This will list the instances grouped by AppId and Version
 
 ```
-./bin/updatectl instance list-app-versions --start 1392401442
+./bin/updatectl instance list-app-versions --start=1392401442
 ```
 
 ## User management
