@@ -84,12 +84,28 @@ func appList(args []string, service *update.Service, out *tabwriter.Writer) int 
 	return OK
 }
 
-
 func appCreate(args []string, service *update.Service, out *tabwriter.Writer) int {
 	if appFlags.appId.Get() == nil {
 		appFlags.appId.Set(uuid.New())
 	}
-	return updateAppHelper(service, out)
+
+	appReq := &update.AppInsertReq{
+		Id:          appFlags.appId.String(),
+		Label:       appFlags.label.String(),
+		Description: appFlags.description.String(),
+	}
+	call := service.App.Insert(appReq)
+	app, err := call.Do()
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	fmt.Fprintf(out, "%s", formatApp(app))
+
+	out.Flush()
+	return OK
+
 }
 
 func appUpdate(args []string, service *update.Service, out *tabwriter.Writer) int {
@@ -97,10 +113,6 @@ func appUpdate(args []string, service *update.Service, out *tabwriter.Writer) in
 		return ERROR_USAGE
 	}
 
-	return updateAppHelper(service, out)
-}
-
-func updateAppHelper(service *update.Service, out *tabwriter.Writer) int {
 	appReq := &update.AppUpdateReq{Label: appFlags.label.String(), Description: appFlags.description.String()}
 	call := service.App.Update(appFlags.appId.String(), appReq)
 	app, err := call.Do()
@@ -113,6 +125,7 @@ func updateAppHelper(service *update.Service, out *tabwriter.Writer) int {
 
 	out.Flush()
 	return OK
+
 }
 
 func appDelete(args []string, service *update.Service, out *tabwriter.Writer) int {
