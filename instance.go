@@ -232,7 +232,7 @@ func (c *Client) SetVersion(resp *omaha.Response) {
 	// A field can potentially be nil.
 	defer func() {
 		if err := recover(); err != nil {
-			c.Log("%s: error setting version: %v", c.Id, err)
+			c.Log("%s: error setting version: %v\n", c.Id, err)
 		}
 	}()
 
