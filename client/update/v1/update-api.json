@@ -1,6 +1,6 @@
 {
  "kind": "discovery#restDescription",
- "etag": "\"MKGA2miAJpVGF7yQTQhsoDXpye8/3KhB0DkB1kuAZxnVzgsPDgssiwc\"",
+ "etag": "\"MKGA2miAJpVGF7yQTQhsoDXpye8/BJGnysNTj81y4v2b2TED7-Nemys\"",
  "discoveryVersion": "v1",
  "id": "update:v1",
  "name": "update",
@@ -310,9 +310,6 @@
     "oem": {
      "type": "string"
     },
-    "status": {
-     "type": "string"
-    },
     "version": {
      "type": "string"
     }
@@ -511,7 +508,8 @@
    "type": "object",
    "properties": {
     "id": {
-     "type": "string"
+     "type": "integer",
+     "format": "int32"
     },
     "label": {
      "type": "string"
@@ -1472,8 +1470,9 @@
      "description": "Delete an upstream.",
      "parameters": {
       "id": {
-       "type": "string",
+       "type": "integer",
        "required": true,
+       "format": "int32",
        "location": "path"
       },
       "label": {
@@ -1488,6 +1487,19 @@
      "parameterOrder": [
       "id"
      ],
+     "response": {
+      "$ref": "Upstream"
+     }
+    },
+    "insert": {
+     "id": "update.upstream.insert",
+     "path": "upstream",
+     "httpMethod": "PUT",
+     "description": "Insert an upstream.",
+     "request": {
+      "$ref": "Upstream",
+      "parameterName": "resource"
+     },
      "response": {
       "$ref": "Upstream"
      }
@@ -1517,8 +1529,9 @@
      "description": "Update an upstream.",
      "parameters": {
       "id": {
-       "type": "string",
+       "type": "integer",
        "required": true,
+       "format": "int32",
        "location": "path"
       }
      },

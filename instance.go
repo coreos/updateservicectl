@@ -2,16 +2,17 @@ package main
 
 import (
 	"bytes"
-	"code.google.com/p/go-uuid/uuid"
 	"encoding/xml"
 	"fmt"
-	update "github.com/coreos/updatectl/client/update/v1"
-	"github.com/coreos/go-omaha/omaha"
 	"log"
 	"math/rand"
 	"net/http"
 	"text/tabwriter"
 	"time"
+
+	"code.google.com/p/go-uuid/uuid"
+	"github.com/coreos/go-omaha/omaha"
+	update "github.com/coreos/updatectl/client/update/v1"
 )
 
 var (
@@ -31,8 +32,8 @@ var (
 	}
 
 	cmdInstance = &Command{
-		Name:        "instance",
-		Usage:       "[OPTION]...",
+		Name:    "instance",
+		Usage:   "[OPTION]...",
 		Summary: "Operations to view instances.",
 		Subcommands: []*Command{
 			cmdInstanceListUpdates,
@@ -105,11 +106,10 @@ func instanceListUpdates(args []string, service *update.Service, out *tabwriter.
 		log.Fatal(err)
 	}
 
-	fmt.Fprintln(out, "AppID\tClientID\tVersion\tLastSeen\tGroup\tStatus\tOEM")
+	fmt.Fprintln(out, "AppID\tClientID\tVersion\tLastSeen\tGroup\tOEM")
 	for _, cl := range list.Items {
-		fmt.Fprintf(out, "%s\t%s\t%s\t%s\t%s\t%s\t%s\n", cl.AppId,
-			cl.ClientId, cl.Version, cl.LastSeen, cl.GroupId,
-			cl.Status, cl.Oem)
+		fmt.Fprintf(out, "%s\t%s\t%s\t%s\t%s\t%s\n", cl.AppId,
+			cl.ClientId, cl.Version, cl.LastSeen, cl.GroupId, cl.Oem)
 	}
 	out.Flush()
 	return OK
