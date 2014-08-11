@@ -14,7 +14,7 @@ import (
 	"strconv"
 	"text/tabwriter"
 
-	"github.com/coreos/updatectl/client/update/v1"
+	update "github.com/coreos/updatectl/client/update/v1"
 )
 
 type MetadataFile struct {
@@ -37,6 +37,7 @@ var (
 		Subcommands: []*Command{
 			cmdPackageList,
 			cmdPackageCreate,
+			cmdPackageDelete,
 		},
 	}
 
@@ -52,6 +53,12 @@ var (
 		Description: `Create a new package for an application.`,
 		Run:         packageCreate,
 	}
+	cmdPackageDelete = &Command{
+		Name:        "package delete",
+		Usage:       "[OPTION]...",
+		Description: `Delete a package for an application.`,
+		Run:         packageDelete,
+	}
 )
 
 func init() {
@@ -62,6 +69,15 @@ func init() {
 	cmdPackageCreate.Flags.StringVar(&packageFlags.url, "url", "", "Package URL.")
 	cmdPackageCreate.Flags.StringVar(&packageFlags.file, "file", "update.gz", "Package file.")
 	cmdPackageCreate.Flags.StringVar(&packageFlags.meta, "meta", "", "JSON file containing metadata.")
+
+	cmdPackageDelete.Flags.Var(&packageFlags.appId, "app-id",
+		"Application with package to delete.")
+	cmdPackageDelete.Flags.Var(&packageFlags.version, "version",
+		"Version of package to delete.")
+}
+
+func formatPackage(pkg *update.Package) string {
+	return fmt.Sprintf("%s\t%s\t%s\n", pkg.Version, pkg.Url, pkg.Size)
 }
 
 func packageCreate(args []string, service *update.Service, out *tabwriter.Writer) int {
@@ -151,4 +167,24 @@ func packageList(args []string, service *update.Service, out *tabwriter.Writer) 
 
 	out.Flush()
 	return OK
+}
+
+func packageDelete(args []string, service *update.Service, out *tabwriter.Writer) int {
+	if packageFlags.appId.Get() == nil ||
+		packageFlags.version.Get() == nil {
+		return ERROR_USAGE
+	}
+
+	call := service.App.Package.Delete(packageFlags.appId.String(), packageFlags.version.String())
+	pkg, err := call.Do()
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	fmt.Fprintf(out, "%s", formatPackage(pkg))
+
+	out.Flush()
+	return OK
+
 }
