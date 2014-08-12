@@ -22,6 +22,7 @@ var (
 		Subcommands: []*Command{
 			cmdChannelList,
 			cmdChannelUpdate,
+			cmdChannelCreate,
 		},
 	}
 
@@ -31,6 +32,15 @@ var (
 		Description: `List all channels for an application.`,
 		Run:         channelList,
 	}
+
+	cmdChannelCreate = &Command{
+		Name:  "channel create",
+		Usage: "[OPTION]...",
+		Description: `Given an application ID (--app-id) and channel (--channel),
+you can create a new channel.`,
+		Run: channelCreate,
+	}
+
 	cmdChannelUpdate = &Command{
 		Name:    "channel update",
 		Usage:   "[OPTION]...",
@@ -43,6 +53,11 @@ you can change the channel to a new version (--version), or set the publish stat
 
 func init() {
 	cmdChannelList.Flags.Var(&channelFlags.appId, "app-id", "The application ID to list the channels of.")
+
+	cmdChannelCreate.Flags.Var(&channelFlags.appId, "app-id", "The application ID that the channel belongs to.")
+	cmdChannelCreate.Flags.Var(&channelFlags.channel, "channel", "The channel to create.")
+	cmdChannelCreate.Flags.BoolVar(&channelFlags.publish, "publish", false, "Publish or unpublish the channel.")
+	cmdChannelCreate.Flags.Var(&channelFlags.version, "version", "The version to create the channel to.")
 
 	cmdChannelUpdate.Flags.Var(&channelFlags.appId, "app-id", "The application ID that the channel belongs to.")
 	cmdChannelUpdate.Flags.Var(&channelFlags.channel, "channel", "The channel to update.")
@@ -68,6 +83,29 @@ func channelList(args []string, service *update.Service, out *tabwriter.Writer) 
 	for _, channel := range list.Items {
 		fmt.Fprintf(out, "%s", formatChannel(channel))
 	}
+	out.Flush()
+	return OK
+}
+
+func channelCreate(args []string, service *update.Service, out *tabwriter.Writer) int {
+	if channelFlags.version.Get() == nil || channelFlags.appId.Get() == nil || channelFlags.channel.Get() == nil {
+		return ERROR_USAGE
+	}
+
+	channelReq := &update.ChannelRequest{
+		Version: *channelFlags.version.Get(),
+		Publish: channelFlags.publish,
+		Label:   *channelFlags.channel.Get(),
+		AppId:   *channelFlags.appId.Get(),
+	}
+
+	call := service.Channel.Insert(*channelFlags.channel.Get(), channelReq)
+	channel, err := call.Do()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	fmt.Fprintf(out, "%s", formatChannel(channel))
 	out.Flush()
 	return OK
 }

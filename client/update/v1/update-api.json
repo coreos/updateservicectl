@@ -1,6 +1,6 @@
 {
  "kind": "discovery#restDescription",
- "etag": "\"p_qcyFV0KQVqSB1Aq3pqmPu-2MY/4zuoLO81nRji-q8sOOE96-aK4F4\"",
+ "etag": "\"MKGA2miAJpVGF7yQTQhsoDXpye8/BJGnysNTj81y4v2b2TED7-Nemys\"",
  "discoveryVersion": "v1",
  "id": "update:v1",
  "name": "update",
@@ -127,6 +127,21 @@
      "type": "string"
     },
     "version": {
+     "type": "string"
+    }
+   }
+  },
+  "AppInsertReq": {
+   "id": "AppInsertReq",
+   "type": "object",
+   "properties": {
+    "description": {
+     "type": "string"
+    },
+    "id": {
+     "type": "string"
+    },
+    "label": {
      "type": "string"
     }
    }
@@ -293,9 +308,6 @@
      "format": "date-time"
     },
     "oem": {
-     "type": "string"
-    },
-    "status": {
      "type": "string"
     },
     "version": {
@@ -496,7 +508,8 @@
    "type": "object",
    "properties": {
     "id": {
-     "type": "string"
+     "type": "integer",
+     "format": "int32"
     },
     "label": {
      "type": "string"
@@ -659,6 +672,19 @@
       "$ref": "App"
      }
     },
+    "insert": {
+     "id": "update.app.insert",
+     "path": "apps",
+     "httpMethod": "PUT",
+     "description": "Insert an application.",
+     "request": {
+      "$ref": "AppInsertReq",
+      "parameterName": "resource"
+     },
+     "response": {
+      "$ref": "App"
+     }
+    },
     "list": {
      "id": "update.app.list",
      "path": "apps",
@@ -693,7 +719,7 @@
     "update": {
      "id": "update.app.update",
      "path": "apps/{id}",
-     "httpMethod": "PUT",
+     "httpMethod": "PATCH",
      "description": "Update an application.",
      "parameters": {
       "id": {
@@ -929,6 +955,29 @@
       "$ref": "ChannelRequest"
      }
     },
+    "insert": {
+     "id": "update.channel.insert",
+     "path": "apps/{appId}/channels",
+     "httpMethod": "PUT",
+     "description": "Insert a channel.",
+     "parameters": {
+      "appId": {
+       "type": "string",
+       "required": true,
+       "location": "path"
+      }
+     },
+     "parameterOrder": [
+      "appId"
+     ],
+     "request": {
+      "$ref": "ChannelRequest",
+      "parameterName": "resource"
+     },
+     "response": {
+      "$ref": "AppChannel"
+     }
+    },
     "list": {
      "id": "update.channel.list",
      "path": "apps/{appId}/channels",
@@ -960,7 +1009,7 @@
     "update": {
      "id": "update.channel.update",
      "path": "apps/{appId}/channels/{label}",
-     "httpMethod": "PUT",
+     "httpMethod": "PATCH",
      "description": "Update a channel.",
      "parameters": {
       "appId": {
@@ -1421,8 +1470,9 @@
      "description": "Delete an upstream.",
      "parameters": {
       "id": {
-       "type": "string",
+       "type": "integer",
        "required": true,
+       "format": "int32",
        "location": "path"
       },
       "label": {
@@ -1437,6 +1487,19 @@
      "parameterOrder": [
       "id"
      ],
+     "response": {
+      "$ref": "Upstream"
+     }
+    },
+    "insert": {
+     "id": "update.upstream.insert",
+     "path": "upstream",
+     "httpMethod": "PUT",
+     "description": "Insert an upstream.",
+     "request": {
+      "$ref": "Upstream",
+      "parameterName": "resource"
+     },
      "response": {
       "$ref": "Upstream"
      }
@@ -1466,8 +1529,9 @@
      "description": "Update an upstream.",
      "parameters": {
       "id": {
-       "type": "string",
+       "type": "integer",
        "required": true,
+       "format": "int32",
        "location": "path"
       }
      },

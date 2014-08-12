@@ -5,13 +5,12 @@ import (
 	"log"
 	"text/tabwriter"
 
-	"github.com/coreos/updatectl/Godeps/_workspace/src/code.google.com/p/go-uuid/uuid"
 	"github.com/coreos/updatectl/client/update/v1"
 )
 
 var (
 	upstreamFlags struct {
-		id    StringFlag
+		id    int64
 		url   StringFlag
 		label StringFlag
 	}
@@ -58,15 +57,14 @@ var (
 )
 
 func init() {
-	cmdUpstreamCreate.Flags.Var(&upstreamFlags.id, "id", "The uuid of the upstream to create.")
 	cmdUpstreamCreate.Flags.Var(&upstreamFlags.url, "url", "The root url of the upstream Update Service.")
 	cmdUpstreamCreate.Flags.Var(&upstreamFlags.label, "label", "The label of the upstream Update Service.")
 
-	cmdUpstreamUpdate.Flags.Var(&upstreamFlags.id, "id", "The uuid of the upstream to update.")
+	cmdUpstreamUpdate.Flags.Int64Var(&upstreamFlags.id, "id", 0, "The id of the upstream to update.")
 	cmdUpstreamUpdate.Flags.Var(&upstreamFlags.url, "url", "The root url of the upstream Update Service.")
 	cmdUpstreamUpdate.Flags.Var(&upstreamFlags.label, "label", "The label of the upstream Update Service.")
 
-	cmdUpstreamDelete.Flags.Var(&upstreamFlags.id, "id", "The uuid of the upstream to delete.")
+	cmdUpstreamDelete.Flags.Int64Var(&upstreamFlags.id, "id", 0, "The id of the upstream to delete.")
 }
 
 func writeUpstreamHeading(out *tabwriter.Writer) {
@@ -77,9 +75,36 @@ func formatUpstream(us *update.Upstream) string {
 	return fmt.Sprintf("%s\t%s\t%s\n", us.Id, us.Url, us.Label)
 }
 
-func upstreamUpdateExec(args []string, service *update.Service, out *tabwriter.Writer) int {
+func upstreamCreate(args []string, service *update.Service, out *tabwriter.Writer) int {
+	if upstreamFlags.url.Get() == nil {
+		return ERROR_USAGE
+	}
+
 	req := &update.Upstream{
-		Id:    upstreamFlags.id.String(),
+		Url:   upstreamFlags.url.String(),
+		Label: upstreamFlags.label.String(),
+	}
+	call := service.Upstream.Insert(req)
+
+	upstream, err := call.Do()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	writeUpstreamHeading(out)
+	fmt.Fprintf(out, "%s", formatUpstream(upstream))
+	out.Flush()
+
+	return OK
+}
+
+func upstreamUpdate(args []string, service *update.Service, out *tabwriter.Writer) int {
+	if upstreamFlags.url.Get() == nil || upstreamFlags.id == 0 {
+		return ERROR_USAGE
+	}
+
+	req := &update.Upstream{
+		Id:    upstreamFlags.id,
 		Url:   upstreamFlags.url.String(),
 		Label: upstreamFlags.label.String(),
 	}
@@ -97,32 +122,12 @@ func upstreamUpdateExec(args []string, service *update.Service, out *tabwriter.W
 	return OK
 }
 
-func upstreamCreate(args []string, service *update.Service, out *tabwriter.Writer) int {
-	if upstreamFlags.url.Get() == nil {
-		return ERROR_USAGE
-	}
-
-	if upstreamFlags.id.Get() == nil {
-		upstreamFlags.id.Set(uuid.New())
-	}
-
-	return upstreamUpdateExec(args, service, out)
-}
-
-func upstreamUpdate(args []string, service *update.Service, out *tabwriter.Writer) int {
-	if upstreamFlags.url.Get() == nil || upstreamFlags.id.Get() == nil {
-		return ERROR_USAGE
-	}
-
-	return upstreamUpdateExec(args, service, out)
-}
-
 func upstreamDelete(args []string, service *update.Service, out *tabwriter.Writer) int {
-	if upstreamFlags.id.Get() == nil {
+	if upstreamFlags.id == 0 {
 		return ERROR_USAGE
 	}
 
-	call := service.Upstream.Delete(upstreamFlags.id.String())
+	call := service.Upstream.Delete(upstreamFlags.id)
 	upstream, err := call.Do()
 	if err != nil {
 		log.Fatal(err)
