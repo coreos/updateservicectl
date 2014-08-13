@@ -15,10 +15,10 @@ import (
 	"text/tabwriter"
 	"time"
 
-	"github.com/coreos/updatectl/Godeps/_workspace/src/code.google.com/p/go-uuid/uuid"
-	"github.com/coreos/updatectl/Godeps/_workspace/src/github.com/coreos/go-omaha/omaha"
+	"github.com/coreos/updateservicectl/Godeps/_workspace/src/code.google.com/p/go-uuid/uuid"
+	"github.com/coreos/updateservicectl/Godeps/_workspace/src/github.com/coreos/go-omaha/omaha"
 
-	"github.com/coreos/updatectl/client/update/v1"
+	"github.com/coreos/updateservicectl/client/update/v1"
 )
 
 var (

@@ -12,7 +12,7 @@ import (
 
 	"code.google.com/p/go-uuid/uuid"
 	"github.com/coreos/go-omaha/omaha"
-	update "github.com/coreos/updatectl/client/update/v1"
+	update "github.com/coreos/updateservicectl/client/update/v1"
 )
 
 var (

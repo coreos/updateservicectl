@@ -14,7 +14,7 @@ import (
 	"strconv"
 	"text/tabwriter"
 
-	update "github.com/coreos/updatectl/client/update/v1"
+	update "github.com/coreos/updateservicectl/client/update/v1"
 )
 
 type MetadataFile struct {
