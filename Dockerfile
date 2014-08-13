@@ -1,8 +1,8 @@
 FROM google/golang
 
-WORKDIR /gopath/src/github.com/coreos/updatectl
-ADD . /gopath/src/github.com/coreos/updatectl
-RUN go get github.com/coreos/updatectl
+WORKDIR /gopath/src/github.com/coreos/updateservicectl
+ADD . /gopath/src/github.com/coreos/updateservicectl
+RUN go get github.com/coreos/updateservicectl
 
 CMD []
-ENTRYPOINT ["/gopath/bin/updatectl"]
+ENTRYPOINT ["/gopath/bin/updateservicectl"]

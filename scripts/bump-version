@@ -29,7 +29,7 @@ git commit -m "chore(version): ${VER}"
 
 # Tag the latest commit with the verison number.
 git tag v${VER} --sign -m "v${VER}"
-echo "New version tagged at v$VER. Pushing to coreos-inc/updatectl."
+echo "New version tagged at v$VER. Pushing to coreos-inc/updateservicectl."
 
-git push git@github.com:coreos-inc/updatectl v${VER}
-git push git@github.com:coreos-inc/updatectl master
+git push git@github.com:coreos-inc/updateservicectl v${VER}
+git push git@github.com:coreos-inc/updateservicectl master

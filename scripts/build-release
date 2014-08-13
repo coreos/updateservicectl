@@ -54,18 +54,18 @@ function package {
 mkdir release
 cd release
 
-checkout updatectl ${VER}
+checkout updateservicectl ${VER}
 
 for i in darwin windows linux; do
     export GOOS=${i}
     export GOARCH="amd64"
 
-    build updatectl ${VER}
+    build updateservicectl ${VER}
 
-    TARGET="updatectl-${VER}-${GOOS}-${GOARCH}"
+    TARGET="updateservicectl-${VER}-${GOOS}-${GOARCH}"
     mkdir ${TARGET}
 
-    package updatectl ${TARGET}
+    package updateservicectl ${TARGET}
 
     if [ ${GOOS} == "linux" ]; then
         tar cvvfz ${TARGET}.tar.gz ${TARGET}

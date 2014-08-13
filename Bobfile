@@ -8,6 +8,6 @@ tag_opts = ["--force"]
   [containers.app]
     Dockerfile = "Dockerfile"
     registry = "registry.core-os.net"
-    project = "updatectl"
+    project = "updateservicectl"
     tags = ["git:rev", "git:short"]
     skip_push = false

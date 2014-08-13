@@ -1,5 +1,5 @@
 {
-	"ImportPath": "github.com/coreos-inc/updatectl",
+	"ImportPath": "github.com/coreos-inc/updateservicectl",
 	"GoVersion": "go1.2.1",
 	"Deps": [
 		{

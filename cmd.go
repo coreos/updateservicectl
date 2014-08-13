@@ -20,8 +20,8 @@ const (
 	ERROR_USAGE
 	ERROR_NO_COMMAND
 
-	cliName        = "updatectl"
-	cliDescription = "updatectl is a command line driven interface to the roller."
+	cliName        = "updateservicectl"
+	cliDescription = "updateservicectl is a command line driven interface to the roller."
 )
 
 type StringFlag struct {
