@@ -1,6 +1,6 @@
 # Using the Client
 
-`updatectl` lets you control and test the CoreOS update service. Subcommands
+`updateservicectl` lets you control and test the CoreOS update service. Subcommands
 let you manage applications, users, groups, packages and write a very simple client that gets
 its state via environment variables.
 
@@ -15,7 +15,7 @@ There are a few flags that you must provide to the administrative commands below
 The commands below will all have a prefix like this:
 
 ```
-./bin/updatectl --user=admin --key=d3b07384d113edec49eaa6238ad5ff00 --server=https://example.update.core-os.net
+./bin/updateservicectl --user=admin --key=d3b07384d113edec49eaa6238ad5ff00 --server=https://example.update.core-os.net
 ```
 
 If you do not wish to specify these every time, they
@@ -41,7 +41,7 @@ This example will start 132 fake instances pinging the update service every 1 to
 starting at version 1.0.0.
 
 ```
-./bin/updatectl instance fake --clients-per-app=132 --min-sleep=1 \
+./bin/updateservicectl instance fake --clients-per-app=132 --min-sleep=1 \
 	--max-sleep=50 --app-id=e96281a6-d1af-4bde-9a0a-97b76e56dc57 \
 	--group-id=beta --version=1.0.0
 ```
@@ -63,7 +63,7 @@ env | grep UPDATE_SERVICE
 Next we will generate a random client UUID and start watching for changes to the given app:
 
 ```
-./bin/updatectl watch --app-id=e96281a6-d1af-4bde-9a0a-97b76e56dc57 \
+./bin/updateservicectl watch --app-id=e96281a6-d1af-4bde-9a0a-97b76e56dc57 \
 	--group-id=beta ./updater.sh
 ```
 
@@ -82,13 +82,13 @@ currently available version.
 Create an application called CoreOS using its UUID along with a nice description.
 
 ```
-./bin/updatectl app create --app-id=e96281a6-d1af-4bde-9a0a-97b76e56dc57 --label="CoreOS" --description="Linux for Servers"
+./bin/updateservicectl app create --app-id=e96281a6-d1af-4bde-9a0a-97b76e56dc57 --label="CoreOS" --description="Linux for Servers"
 ```
 
 ### List Applications
 
 ```
-./bin/updatectl app list
+./bin/updateservicectl app list
 ```
 
 ## Package Management
@@ -101,7 +101,7 @@ associated with it.
 This will create a new package with version 1.0.5 from the file `update.gz`.
 
 ```
-./bin/updatectl package create --app-id=e96281a6-d1af-4bde-9a0a-97b76e56dc57 \
+./bin/updateservicectl package create --app-id=e96281a6-d1af-4bde-9a0a-97b76e56dc57 \
 	--version=1.0.5 --file=update.gz \
 ```
 
@@ -115,7 +115,7 @@ and file size for verification purposes. It should look like this:
 ### List Application Versions
 
 ```
-./bin/updatectl package list --app-id=e96281a6-d1af-4bde-9a0a-97b76e56dc57
+./bin/updateservicectl package list --app-id=e96281a6-d1af-4bde-9a0a-97b76e56dc57
 ```
 
 ## Channel Management
@@ -130,7 +130,7 @@ application specify the app id, channel and the version that channel
 should present. Additionally you can publish a channel by setting the `--publish` flag, if not specified publish will always be set to `false`.
 
 ```
-./bin/updatectl channel update --app-id=e96281a6-d1af-4bde-9a0a-97b76e56dc57 --channel=master --version=1.0.1 --publish=true
+./bin/updateservicectl channel update --app-id=e96281a6-d1af-4bde-9a0a-97b76e56dc57 --channel=master --version=1.0.1 --publish=true
 ```
 
 ## Group Management
@@ -145,20 +145,20 @@ Create a group for the CoreOS application pointing at the master channel called
 testing. This group might be used in your test environment.
 
 ```
-./bin/updatectl group create --app-id=e96281a6-d1af-4bde-9a0a-97b76e56dc57 \
+./bin/updateservicectl group create --app-id=e96281a6-d1af-4bde-9a0a-97b76e56dc57 \
 	--channel=master --group-id=testing --label="Testing Group"
 ```
 
 ### Pausing Updates on a Group
 
 ```
-./bin/updatectl group pause --app-id=e96281a6-d1af-4bde-9a0a-97b76e56dc57 --group-id=testing
+./bin/updateservicectl group pause --app-id=e96281a6-d1af-4bde-9a0a-97b76e56dc57 --group-id=testing
 ```
 
 ### List Groups
 
 ```
-./bin/updatectl group list
+./bin/updateservicectl group list
 Label           Token                                   UpdatesPaused
 Default Group   default                                 false
 ```
@@ -167,20 +167,20 @@ Default Group   default                                 false
 
 The service keeps track of instances and gives you a number of tools to see their
 state. Most of these endpoints are more nicely consumed via the control panel
-but you can use them from `updatectl` too.
+but you can use them from `updateservicectl` too.
 
 ### List Instances
 
 This will list all instances that have been seen since the given timestamp.
 
 ```
-./bin/updatectl instance list-updates --start=1392401442
+./bin/updateservicectl instance list-updates --start=1392401442
 ```
 
 This will list the instances grouped by AppId and Version
 
 ```
-./bin/updatectl instance list-app-versions --start=1392401442
+./bin/updateservicectl instance list-app-versions --start=1392401442
 ```
 
 ## User management
@@ -188,17 +188,17 @@ This will list the instances grouped by AppId and Version
 ### Create a new user
 
 ```bash
-./bin/updatectl admin-user create user@coreos.net
+./bin/updateservicectl admin-user create user@coreos.net
 ```
 
 ### List users
 
 ```bash
-./bin/updatectl admin-user list
+./bin/updateservicectl admin-user list
 ```
 
 ### Delete a new user
 
 ```bash
-./bin/updatectl admin-user delete user@coreos.net
+./bin/updateservicectl admin-user delete user@coreos.net
 ```

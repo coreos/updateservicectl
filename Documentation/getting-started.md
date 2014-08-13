@@ -3,7 +3,7 @@
 The update service is a tool that helps you manage large-scale rolling upgrades of software. The service consists of three main parts:
 
 1. A distributed web application that runs on top of fleet and docker.
-2. `updatectl` a CLI interface to the service
+2. `updateservicectl` a CLI interface to the service
 3. Communication specification for your applications to report their current status and receive notifications of an available update.
 
 The update service is based on an open protocol from Google. This protocol powers updates for the Chrome browser, ChromeOS, Google Earth and more.
@@ -12,16 +12,16 @@ The update service is based on an open protocol from Google. This protocol power
 
 The update service is an optional hosted service provided by CoreOS and is not included in a standard CoreOS cluster. Head over to the [Update Service]() page for more details.
 
-Authentication for `updatectl` is done with a username and API key combination. Additional users and API keys can be provisioned by an existing user. Substitute the server address you were given during the activation process:
+Authentication for `updateservicectl` is done with a username and API key combination. Additional users and API keys can be provisioned by an existing user. Substitute the server address you were given during the activation process:
 
 ```
-updatectl -user user@example.com -key d3b07384d113edec49eaa6238ad5ff00 -server https://example.update.core-os.net <command>
+updateservicectl -user user@example.com -key d3b07384d113edec49eaa6238ad5ff00 -server https://example.update.core-os.net <command>
 ```
 
 Since you'll have to provide these flags each time, it's recommended that you set up an alias in your bash profile. We'll assume that you've done this for the rest of this document:
 
 ```
-alias updatectl="/bin/updatectl -user user@example.com -key d3b07384d113edec49eaa6238ad5ff00 -server https://example.update.core-os.net"
+alias updateservicectl="/bin/updateservicectl -user user@example.com -key d3b07384d113edec49eaa6238ad5ff00 -server https://example.update.core-os.net"
 ```
 You may also specify these via the `UPDATECTL_USER`, `UPDATECTL_KEY`,
 and `UPDATECTL_SERVER` environment variables.
@@ -29,16 +29,16 @@ and `UPDATECTL_SERVER` environment variables.
 
 ## Anatomy of an Update
 
-Let's walk through the different parts of an update then use `updatectl` to simulate the release of an update.
+Let's walk through the different parts of an update then use `updateservicectl` to simulate the release of an update.
 
 ### Application
 
 You can use the update service to facilitate the roll-out of a new version of any application. An application is made up of group of instances. Each instance reports a unique identifier, version, group ID and status to the application via an updater.
 
-You can view the current list of applications with `updatectl app list`:
+You can view the current list of applications with `updateservicectl app list`:
 
 ```
-$ updatectl app list
+$ updateservicectl app list
 ```
 
 ### Group
@@ -50,7 +50,7 @@ quickly a new version is rolled out based on their specific needs. Updates can a
 if a team doesn't want any updates.
 
 ```
-updatectl group list --app-id=<app-id>
+updateservicectl group list --app-id=<app-id>
 ```
 
 ### Channel
@@ -58,7 +58,7 @@ updatectl group list --app-id=<app-id>
 Each application can specify channels, such as alpha or beta, that can be updated to refer to different packages. Channels allow you to upload a new beta package and have it rolled out to all groups that track the beta channel, with one command.
 
 ```
-updatectl channel list --app-id=<appid>
+updateservicectl channel list --app-id=<appid>
 ```
 
 ### Updater
@@ -92,21 +92,21 @@ For example, a webapp container could be stored in a private docker registry and
 
 ## Test Update with Fake Clients
 
-The easiest way to illustrate how these concepts work together is to trigger an example with some simulated clients. You can do this with either the UI or via `updatectl`, which is what we're going to use.
+The easiest way to illustrate how these concepts work together is to trigger an example with some simulated clients. You can do this with either the UI or via `updateservicectl`, which is what we're going to use.
 
 ### Create an Application, Channel and Group
 
 First set up a new application with a unique identifier, label, and description:
 
 ```
-updatectl app create --app-id=e96281a6-d1af-4bde-9a0a-97b76e56dc57 \
+updateservicectl app create --app-id=e96281a6-d1af-4bde-9a0a-97b76e56dc57 \
 	--label="FakeApp" --description="Fake app for testing"
 ```
 
 You should now see it in the list of apps:
 
 ```
-$updatectl app list
+$updateservicectl app list
 Id                                    Label     Description
 e96281a6-d1af-4bde-9a0a-97b76e56dc56  FakeApp   Fake app for testing
 f217d8ba-76e6-4b07-8136-049c54b30f21  CoreOS    Linux for Servers
@@ -115,7 +115,7 @@ f217d8ba-76e6-4b07-8136-049c54b30f21  CoreOS    Linux for Servers
 Next, create a channel that our group of fake clients will track. Let's call it `master` and start it out on version `1.0.0`:
 
 ```
-updatectl channel update --app-id=e96281a6-d1af-4bde-9a0a-97b76e56dc57 \
+updateservicectl channel update --app-id=e96281a6-d1af-4bde-9a0a-97b76e56dc57 \
 	--channel=master --version=1.0.0
 ```
 
@@ -123,7 +123,7 @@ Next, create a group that we'll associate our fake clients with. Be
 sure to include the app id, the `master` channel, an ID and a friendly label.
 
 ```
-$ updatectl group create --app-id=e96281a6-d1af-4bde-9a0a-97b76e56dc57
+$ updateservicectl group create --app-id=e96281a6-d1af-4bde-9a0a-97b76e56dc57
 	--channel=master --group-id=fake1 --label="Fake Clients"
 ```
 
@@ -140,7 +140,7 @@ touch update-1.1.0.gz
 You can now use the `new-package` command to publish this fake package as version `1.1.0` (with a fake URL):
 
 ```
-updatectl package create --app-id=e96281a6-d1af-4bde-9a0a-97b76e56dc57 \
+updateservicectl package create --app-id=e96281a6-d1af-4bde-9a0a-97b76e56dc57 \
     --version=1.1.0 \
     --file=update-1.1.0.gz \
     --url=https://fakepackage.local/update-1.1.0.gz
@@ -148,12 +148,12 @@ updatectl package create --app-id=e96281a6-d1af-4bde-9a0a-97b76e56dc57 \
 
 ### Start Fake Clients
 
-`updatectl` contains a tool to help you simulate many fake clients running your application. We're going to start 10 fake clients that are checking for updates every 30-60 seconds. This is much much faster than usual but it will allow us to see our changes take place quickly.
+`updateservicectl` contains a tool to help you simulate many fake clients running your application. We're going to start 10 fake clients that are checking for updates every 30-60 seconds. This is much much faster than usual but it will allow us to see our changes take place quickly.
 
 When we start the fake clients, we don't expect them to do anything since we're already on version `1.0.0`. In another terminal window, start the clients:
 
 ```
-$ updatectl instance fake --clients-per-app=10 --min-sleep=30 \
+$ updateservicectl instance fake --clients-per-app=10 --min-sleep=30 \
 	--max-sleep=60 --app-id=e96281a6-d1af-4bde-9a0a-97b76e56dc57 \
 	--group-id=fake1 --version=1.0.0
 {fake-client-000}: noupdate
@@ -167,7 +167,7 @@ $ updatectl instance fake --clients-per-app=10 --min-sleep=30 \
 Now let's see how the fake clients react when we promote the new package `1.1.0` to the master channel. First, let's set the rate limit of the group to slow down the roll-out. This will make it easier to see what's going on. Since we only have 10 clients, 2 updates per 60 seconds should be slow enough:
 
 ```
-$ updatectl group update --app-id=e96281a6-d1af-4bde-9a0a-97b76e56dc57 \
+$ updateservicectl group update --app-id=e96281a6-d1af-4bde-9a0a-97b76e56dc57 \
 --group-id=fake1 --channel=master --update-count=2 --update-interval=60
 Fake Clients	e96281a6-d1af-4bde-9a0a-97b76e56dc57	master	fake1	false	2	60
 ```
@@ -175,7 +175,7 @@ Fake Clients	e96281a6-d1af-4bde-9a0a-97b76e56dc57	master	fake1	false	2	60
 Next, promote our `1.1.0` release on the `master` channel:
 
 ```
-$ updatectl channel update --app-id=e96281a6-d1af-4bde-9a0a-97b76e56dc57 --channel=master --version=1.1.0
+$ updateservicectl channel update --app-id=e96281a6-d1af-4bde-9a0a-97b76e56dc57 --channel=master --version=1.1.0
 ```
 
 In the terminal window running the fake clients, you should see a few of them start to upgrade. The output looks like:
@@ -190,4 +190,4 @@ In the UI, navigate to the app and group, then click on "View All Graphs". You s
 
 ## Further Reading
 
-Now that you've got the basics, checkout the [example update workflow](https://github.com/coreos/updatectl/blob/master/Documentation/example-container-update.md) for a practical application of the update service. If you're ready to start writing a custom update client for your application, the [Omaha protocol spec](https://github.com/coreos/updatectl/blob/master/Documentation/protocol.md) is a good place to start. The complete list of update service docs can be [found here](https://github.com/coreos/updatectl/tree/master/Documentation).
+Now that you've got the basics, checkout the [example update workflow](https://github.com/coreos/updateservicectl/blob/master/Documentation/example-container-update.md) for a practical application of the update service. If you're ready to start writing a custom update client for your application, the [Omaha protocol spec](https://github.com/coreos/updateservicectl/blob/master/Documentation/protocol.md) is a good place to start. The complete list of update service docs can be [found here](https://github.com/coreos/updateservicectl/tree/master/Documentation).
