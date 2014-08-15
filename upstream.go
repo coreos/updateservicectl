@@ -72,7 +72,7 @@ func writeUpstreamHeading(out *tabwriter.Writer) {
 }
 
 func formatUpstream(us *update.Upstream) string {
-	return fmt.Sprintf("%s\t%s\t%s\n", us.Id, us.Url, us.Label)
+	return fmt.Sprintf("%d\t%s\t%s\n", us.Id, us.Url, us.Label)
 }
 
 func upstreamCreate(args []string, service *update.Service, out *tabwriter.Writer) int {
