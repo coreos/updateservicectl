@@ -79,7 +79,7 @@ By now the updaters should have reported back to the update service. Browse the 
 If you run into problems with the updater, the best way to diagnose issues is to read the journal. Using the `-follow` flag will continually display new log lines as they are generated:
 
 ```
-fleetctl -follow updater@example-v1.0.0-A.service.service
+fleetctl journal -follow updater@example-v1.0.0-A.service.service
 ```
 
 For more journalctl information, check out the [Reading the System Log]({{site.url}}/docs/cluster-management/debugging/reading-the-system-log/) guide.
