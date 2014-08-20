@@ -1,6 +1,6 @@
 {
  "kind": "discovery#restDescription",
- "etag": "\"MKGA2miAJpVGF7yQTQhsoDXpye8/BJGnysNTj81y4v2b2TED7-Nemys\"",
+ "etag": "\"MKGA2miAJpVGF7yQTQhsoDXpye8/_1k2Dg7emB5iDaE4KRLYY51YUvU\"",
  "discoveryVersion": "v1",
  "id": "update:v1",
  "name": "update",
@@ -434,10 +434,17 @@
     "appId": {
      "type": "string"
     },
+    "dateCreated": {
+     "type": "string",
+     "format": "date-time"
+    },
     "metadataSignatureRsa": {
      "type": "string"
     },
     "metadataSize": {
+     "type": "string"
+    },
+    "releaseNotes": {
      "type": "string"
     },
     "required": {
@@ -675,7 +682,7 @@
     "insert": {
      "id": "update.app.insert",
      "path": "apps",
-     "httpMethod": "PUT",
+     "httpMethod": "POST",
      "description": "Insert an application.",
      "request": {
       "$ref": "AppInsertReq",
@@ -762,6 +769,10 @@
          "type": "string",
          "location": "query"
         },
+        "releaseNotes": {
+         "type": "string",
+         "location": "query"
+        },
         "required": {
          "type": "boolean",
          "location": "query"
@@ -799,7 +810,7 @@
       "insert": {
        "id": "update.app.package.insert",
        "path": "apps/{appId}/packages/{version}",
-       "httpMethod": "PUT",
+       "httpMethod": "POST",
        "description": "Insert a new package version.",
        "parameters": {
         "appId": {
@@ -958,7 +969,7 @@
     "insert": {
      "id": "update.channel.insert",
      "path": "apps/{appId}/channels",
-     "httpMethod": "PUT",
+     "httpMethod": "POST",
      "description": "Insert a channel.",
      "parameters": {
       "appId": {
@@ -1324,6 +1335,34 @@
      "id": "update.group.patch",
      "path": "apps/{appId}/groups/{id}",
      "httpMethod": "PATCH",
+     "description": "Patch a group. This method supports patch semantics.",
+     "parameters": {
+      "appId": {
+       "type": "string",
+       "required": true,
+       "location": "path"
+      },
+      "id": {
+       "type": "string",
+       "required": true,
+       "location": "path"
+      }
+     },
+     "parameterOrder": [
+      "appId",
+      "id"
+     ],
+     "request": {
+      "$ref": "Group"
+     },
+     "response": {
+      "$ref": "Group"
+     }
+    },
+    "update": {
+     "id": "update.group.update",
+     "path": "apps/{appId}/groups/{id}",
+     "httpMethod": "PATCH",
      "description": "Patch a group.",
      "parameters": {
       "appId": {
@@ -1494,7 +1533,7 @@
     "insert": {
      "id": "update.upstream.insert",
      "path": "upstream",
-     "httpMethod": "PUT",
+     "httpMethod": "POST",
      "description": "Insert an upstream.",
      "request": {
       "$ref": "Upstream",
@@ -1525,7 +1564,7 @@
     "update": {
      "id": "update.upstream.update",
      "path": "upstream/{id}",
-     "httpMethod": "POST",
+     "httpMethod": "PUT",
      "description": "Update an upstream.",
      "parameters": {
       "id": {
