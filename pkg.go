@@ -24,11 +24,12 @@ type MetadataFile struct {
 
 var (
 	packageFlags struct {
-		appId   StringFlag
-		version StringFlag
-		url     string
-		file    string
-		meta    string
+		appId        StringFlag
+		version      StringFlag
+		url          string
+		file         string
+		meta         string
+		releaseNotes string
 	}
 
 	cmdPackage = &Command{
@@ -69,6 +70,7 @@ func init() {
 	cmdPackageCreate.Flags.StringVar(&packageFlags.url, "url", "", "Package URL.")
 	cmdPackageCreate.Flags.StringVar(&packageFlags.file, "file", "update.gz", "Package file.")
 	cmdPackageCreate.Flags.StringVar(&packageFlags.meta, "meta", "", "JSON file containing metadata.")
+	cmdPackageCreate.Flags.StringVar(&packageFlags.releaseNotes, "release-notes", "", "File contianing release notes for package.")
 
 	cmdPackageDelete.Flags.Var(&packageFlags.appId, "app-id",
 		"Application with package to delete.")
@@ -96,16 +98,25 @@ func packageCreate(args []string, service *update.Service, out *tabwriter.Writer
 		log.Fatalf("reading %s failed: %v", file, err)
 	}
 
-	file = packageFlags.meta
+	metaFile := packageFlags.meta
 	var meta MetadataFile
-	if file != "" {
-		content, err = ioutil.ReadFile(file)
+	if metaFile != "" {
+		content, err = ioutil.ReadFile(metaFile)
 		if err != nil {
-			log.Fatalf("reading %s failed: %v", file, err)
+			log.Fatalf("reading %s failed: %v", metaFile, err)
 		}
 		err = json.Unmarshal(content, &meta)
 		if err != nil {
-			log.Fatalf("reading %s failed: %v", file, err)
+			log.Fatalf("reading %s failed: %v", metaFile, err)
+		}
+	}
+
+	releaseNotesFile := packageFlags.releaseNotes
+	var notes = make([]byte, 0)
+	if releaseNotesFile != "" {
+		notes, err = ioutil.ReadFile(releaseNotesFile)
+		if err != nil {
+			log.Fatalf("reading %s failed: %v", releaseNotesFile, err)
 		}
 	}
 
@@ -130,6 +141,7 @@ func packageCreate(args []string, service *update.Service, out *tabwriter.Writer
 		Sha256Sum:            sha256base64.String(),
 		MetadataSignatureRsa: meta.MetadataSignatureRsa,
 		MetadataSize:         meta.MetadataSize,
+		ReleaseNotes:         string(notes),
 	}
 
 	jbytes, _ := json.MarshalIndent(pkg, "", " ")
@@ -142,7 +154,7 @@ func packageCreate(args []string, service *update.Service, out *tabwriter.Writer
 		log.Fatal(err)
 	}
 
-	fmt.Fprintln(out, packageFlags.appId, packageFlags.version)
+	fmt.Fprintln(out, packageFlags.appId.String(), packageFlags.version.String())
 
 	out.Flush()
 	return OK

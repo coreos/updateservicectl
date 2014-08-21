@@ -383,9 +383,13 @@ type GroupRequestsValues struct {
 type Package struct {
 	AppId string `json:"appId,omitempty"`
 
+	DateCreated string `json:"dateCreated,omitempty"`
+
 	MetadataSignatureRsa string `json:"metadataSignatureRsa,omitempty"`
 
 	MetadataSize string `json:"metadataSize,omitempty"`
+
+	ReleaseNotes string `json:"releaseNotes,omitempty"`
 
 	Required bool `json:"required,omitempty"`
 
@@ -878,7 +882,7 @@ func (c *AppInsertCall) Do() (*App, error) {
 	params.Set("alt", "json")
 	urls := googleapi.ResolveRelative(c.s.BasePath, "apps")
 	urls += "?" + params.Encode()
-	req, _ := http.NewRequest("PUT", urls, body)
+	req, _ := http.NewRequest("POST", urls, body)
 	googleapi.SetOpaque(req.URL)
 	req.Header.Set("Content-Type", ctype)
 	req.Header.Set("User-Agent", "google-api-go-client/0.5")
@@ -897,7 +901,7 @@ func (c *AppInsertCall) Do() (*App, error) {
 	return ret, nil
 	// {
 	//   "description": "Insert an application.",
-	//   "httpMethod": "PUT",
+	//   "httpMethod": "POST",
 	//   "id": "update.app.insert",
 	//   "path": "apps",
 	//   "request": {
@@ -1131,6 +1135,12 @@ func (c *AppPackageDeleteCall) MetadataSize(metadataSize string) *AppPackageDele
 	return c
 }
 
+// ReleaseNotes sets the optional parameter "releaseNotes":
+func (c *AppPackageDeleteCall) ReleaseNotes(releaseNotes string) *AppPackageDeleteCall {
+	c.opt_["releaseNotes"] = releaseNotes
+	return c
+}
+
 // Required sets the optional parameter "required":
 func (c *AppPackageDeleteCall) Required(required bool) *AppPackageDeleteCall {
 	c.opt_["required"] = required
@@ -1170,6 +1180,9 @@ func (c *AppPackageDeleteCall) Do() (*Package, error) {
 	}
 	if v, ok := c.opt_["metadataSize"]; ok {
 		params.Set("metadataSize", fmt.Sprintf("%v", v))
+	}
+	if v, ok := c.opt_["releaseNotes"]; ok {
+		params.Set("releaseNotes", fmt.Sprintf("%v", v))
 	}
 	if v, ok := c.opt_["required"]; ok {
 		params.Set("required", fmt.Sprintf("%v", v))
@@ -1225,6 +1238,10 @@ func (c *AppPackageDeleteCall) Do() (*Package, error) {
 	//       "type": "string"
 	//     },
 	//     "metadataSize": {
+	//       "location": "query",
+	//       "type": "string"
+	//     },
+	//     "releaseNotes": {
 	//       "location": "query",
 	//       "type": "string"
 	//     },
@@ -1292,7 +1309,7 @@ func (c *AppPackageInsertCall) Do() (*Package, error) {
 	params.Set("alt", "json")
 	urls := googleapi.ResolveRelative(c.s.BasePath, "apps/{appId}/packages/{version}")
 	urls += "?" + params.Encode()
-	req, _ := http.NewRequest("PUT", urls, body)
+	req, _ := http.NewRequest("POST", urls, body)
 	req.URL.Path = strings.Replace(req.URL.Path, "{appId}", url.QueryEscape(c.appId), 1)
 	req.URL.Path = strings.Replace(req.URL.Path, "{version}", url.QueryEscape(c.version), 1)
 	googleapi.SetOpaque(req.URL)
@@ -1313,7 +1330,7 @@ func (c *AppPackageInsertCall) Do() (*Package, error) {
 	return ret, nil
 	// {
 	//   "description": "Insert a new package version.",
-	//   "httpMethod": "PUT",
+	//   "httpMethod": "POST",
 	//   "id": "update.app.package.insert",
 	//   "parameterOrder": [
 	//     "appId",
@@ -1769,7 +1786,7 @@ func (c *ChannelInsertCall) Do() (*AppChannel, error) {
 	params.Set("alt", "json")
 	urls := googleapi.ResolveRelative(c.s.BasePath, "apps/{appId}/channels")
 	urls += "?" + params.Encode()
-	req, _ := http.NewRequest("PUT", urls, body)
+	req, _ := http.NewRequest("POST", urls, body)
 	req.URL.Path = strings.Replace(req.URL.Path, "{appId}", url.QueryEscape(c.appId), 1)
 	googleapi.SetOpaque(req.URL)
 	req.Header.Set("Content-Type", ctype)
@@ -1789,7 +1806,7 @@ func (c *ChannelInsertCall) Do() (*AppChannel, error) {
 	return ret, nil
 	// {
 	//   "description": "Insert a channel.",
-	//   "httpMethod": "PUT",
+	//   "httpMethod": "POST",
 	//   "id": "update.channel.insert",
 	//   "parameterOrder": [
 	//     "appId"
@@ -2867,7 +2884,7 @@ type GroupPatchCall struct {
 	opt_  map[string]interface{}
 }
 
-// Patch: Patch a group.
+// Patch: Patch a group. This method supports patch semantics.
 func (r *GroupService) Patch(appId string, id string, group *Group) *GroupPatchCall {
 	c := &GroupPatchCall{s: r.s, opt_: make(map[string]interface{})}
 	c.appId = appId
@@ -2907,9 +2924,89 @@ func (c *GroupPatchCall) Do() (*Group, error) {
 	}
 	return ret, nil
 	// {
-	//   "description": "Patch a group.",
+	//   "description": "Patch a group. This method supports patch semantics.",
 	//   "httpMethod": "PATCH",
 	//   "id": "update.group.patch",
+	//   "parameterOrder": [
+	//     "appId",
+	//     "id"
+	//   ],
+	//   "parameters": {
+	//     "appId": {
+	//       "location": "path",
+	//       "required": true,
+	//       "type": "string"
+	//     },
+	//     "id": {
+	//       "location": "path",
+	//       "required": true,
+	//       "type": "string"
+	//     }
+	//   },
+	//   "path": "apps/{appId}/groups/{id}",
+	//   "request": {
+	//     "$ref": "Group"
+	//   },
+	//   "response": {
+	//     "$ref": "Group"
+	//   }
+	// }
+
+}
+
+// method id "update.group.update":
+
+type GroupUpdateCall struct {
+	s     *Service
+	appId string
+	id    string
+	group *Group
+	opt_  map[string]interface{}
+}
+
+// Update: Patch a group.
+func (r *GroupService) Update(appId string, id string, group *Group) *GroupUpdateCall {
+	c := &GroupUpdateCall{s: r.s, opt_: make(map[string]interface{})}
+	c.appId = appId
+	c.id = id
+	c.group = group
+	return c
+}
+
+func (c *GroupUpdateCall) Do() (*Group, error) {
+	var body io.Reader = nil
+	body, err := googleapi.WithoutDataWrapper.JSONReader(c.group)
+	if err != nil {
+		return nil, err
+	}
+	ctype := "application/json"
+	params := make(url.Values)
+	params.Set("alt", "json")
+	urls := googleapi.ResolveRelative(c.s.BasePath, "apps/{appId}/groups/{id}")
+	urls += "?" + params.Encode()
+	req, _ := http.NewRequest("PATCH", urls, body)
+	req.URL.Path = strings.Replace(req.URL.Path, "{appId}", url.QueryEscape(c.appId), 1)
+	req.URL.Path = strings.Replace(req.URL.Path, "{id}", url.QueryEscape(c.id), 1)
+	googleapi.SetOpaque(req.URL)
+	req.Header.Set("Content-Type", ctype)
+	req.Header.Set("User-Agent", "google-api-go-client/0.5")
+	res, err := c.s.client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer googleapi.CloseBody(res)
+	if err := googleapi.CheckResponse(res); err != nil {
+		return nil, err
+	}
+	ret := new(Group)
+	if err := json.NewDecoder(res.Body).Decode(ret); err != nil {
+		return nil, err
+	}
+	return ret, nil
+	// {
+	//   "description": "Patch a group.",
+	//   "httpMethod": "PATCH",
+	//   "id": "update.group.update",
 	//   "parameterOrder": [
 	//     "appId",
 	//     "id"
@@ -3283,7 +3380,7 @@ func (c *UpstreamInsertCall) Do() (*Upstream, error) {
 	params.Set("alt", "json")
 	urls := googleapi.ResolveRelative(c.s.BasePath, "upstream")
 	urls += "?" + params.Encode()
-	req, _ := http.NewRequest("PUT", urls, body)
+	req, _ := http.NewRequest("POST", urls, body)
 	googleapi.SetOpaque(req.URL)
 	req.Header.Set("Content-Type", ctype)
 	req.Header.Set("User-Agent", "google-api-go-client/0.5")
@@ -3302,7 +3399,7 @@ func (c *UpstreamInsertCall) Do() (*Upstream, error) {
 	return ret, nil
 	// {
 	//   "description": "Insert an upstream.",
-	//   "httpMethod": "PUT",
+	//   "httpMethod": "POST",
 	//   "id": "update.upstream.insert",
 	//   "path": "upstream",
 	//   "request": {
@@ -3438,7 +3535,7 @@ func (c *UpstreamUpdateCall) Do() (*Upstream, error) {
 	params.Set("alt", "json")
 	urls := googleapi.ResolveRelative(c.s.BasePath, "upstream/{id}")
 	urls += "?" + params.Encode()
-	req, _ := http.NewRequest("POST", urls, body)
+	req, _ := http.NewRequest("PUT", urls, body)
 	req.URL.Path = strings.Replace(req.URL.Path, "{id}", strconv.FormatInt(c.id, 10), 1)
 	googleapi.SetOpaque(req.URL)
 	req.Header.Set("Content-Type", ctype)
@@ -3458,7 +3555,7 @@ func (c *UpstreamUpdateCall) Do() (*Upstream, error) {
 	return ret, nil
 	// {
 	//   "description": "Update an upstream.",
-	//   "httpMethod": "POST",
+	//   "httpMethod": "PUT",
 	//   "id": "update.upstream.update",
 	//   "parameterOrder": [
 	//     "id"
