@@ -29,7 +29,8 @@ type MetadataFile struct {
 }
 
 var (
-	downloadGroup sync.WaitGroup
+	downloadGroup   sync.WaitGroup
+	createBulkGroup sync.WaitGroup
 
 	packageFlags struct {
 		appId        StringFlag
@@ -222,46 +223,65 @@ func packageCreateBulk(args []string, service *update.Service, out *tabwriter.Wr
 		return ERROR_USAGE
 	}
 
-	for _, file := range files {
-		if file.Mode().IsRegular() && strings.HasSuffix(file.Name(), "info.json") {
-			// Load metadata from package info.json into struct
-			pkg := new(update.Package)
-			jsonBody, err := ioutil.ReadFile(path.Join(bulkDir, file.Name()))
-			if err != nil {
-				log.Println(err)
-				continue
-			}
-
-			err = json.Unmarshal(jsonBody, &pkg)
-			if err != nil {
-				log.Println(err)
-				continue
-			}
-
-			log.Printf("Creating package with AppId=%s and Version=%s", pkg.AppId, pkg.Version)
-
-			// If --base-url specified, rewrite hosting URL
-			baseUrl := packageFlags.baseUrl
-			if baseUrl != "" {
-				filename := fmt.Sprintf(
-					"%s_%s_%s",
-					pkg.AppId, pkg.Version,
-					path.Base(pkg.Url),
-				)
-				pkg.Url = path.Join(baseUrl, filename)
-			}
-
-			// Add package
-			call := service.App.Package.Insert(pkg.AppId, pkg.Version, pkg)
-			pkg, err = call.Do()
-
-			if err != nil {
-				log.Println(err)
-				continue
-			}
+	errorHandler := func(err error) {
+		if err != nil {
+			log.Printf("Error while creating package. Error=%s", err)
+			createBulkGroup.Done()
 		}
 	}
+
+	for _, file := range files {
+		if file.Mode().IsRegular() && strings.HasSuffix(file.Name(), "info.json") {
+			createBulkGroup.Add(1)
+			go createPackageFromInfoFile(
+				path.Join(bulkDir, file.Name()),
+				service,
+				errorHandler,
+			)
+		}
+	}
+	createBulkGroup.Wait()
 	return OK
+}
+
+func createPackageFromInfoFile(filename string, service *update.Service, handleError func(error)) {
+	// Load metadata from package info.json into struct
+	pkg := new(update.Package)
+	jsonBody, err := ioutil.ReadFile(filename)
+	if err != nil {
+		handleError(err)
+		return
+	}
+
+	err = json.Unmarshal(jsonBody, &pkg)
+	if err != nil {
+		handleError(err)
+		return
+	}
+
+	log.Printf("Creating package with AppId=%s and Version=%s", pkg.AppId, pkg.Version)
+
+	// If --base-url specified, rewrite hosting URL
+	baseUrl := packageFlags.baseUrl
+	if baseUrl != "" {
+		filename := fmt.Sprintf(
+			"%s_%s_%s",
+			pkg.AppId, pkg.Version,
+			path.Base(pkg.Url),
+		)
+		pkg.Url = path.Join(baseUrl, filename)
+	}
+
+	// Add package
+	call := service.App.Package.Insert(pkg.AppId, pkg.Version, pkg)
+	pkg, err = call.Do()
+
+	if err != nil {
+		handleError(err)
+		return
+	}
+	createBulkGroup.Done()
+	return
 }
 
 func packageList(args []string, service *update.Service, out *tabwriter.Writer) int {
