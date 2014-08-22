@@ -15,6 +15,7 @@ import (
 	"os"
 	"path"
 	"strconv"
+	"strings"
 	"sync"
 	"text/tabwriter"
 
@@ -38,6 +39,8 @@ var (
 		meta         string
 		releaseNotes string
 		saveDir      string
+		bulkDir      string
+		baseUrl      string
 	}
 
 	cmdPackage = &Command{
@@ -62,6 +65,9 @@ var (
 		Usage:       "[OPTION]...",
 		Description: `Create a new package for an application.`,
 		Run:         packageCreate,
+		Subcommands: []*Command{
+			cmdPackageCreateBulk,
+		},
 	}
 	cmdPackageDelete = &Command{
 		Name:        "package delete",
@@ -74,6 +80,12 @@ var (
 		Usage:       "[OPTION]...",
 		Description: `Download published packages to local disk.`,
 		Run:         packageDownload,
+	}
+	cmdPackageCreateBulk = &Command{
+		Name:        "package create bulk",
+		Usage:       "[OPTION]...",
+		Description: `Upload package from a folder output by 'package donload'.`,
+		Run:         packageCreateBulk,
 	}
 )
 
@@ -94,6 +106,13 @@ func init() {
 	cmdPackageCreate.Flags.StringVar(&packageFlags.releaseNotes,
 		"release-notes", "",
 		"File contianing release notes for package.")
+
+	cmdPackageCreateBulk.Flags.StringVar(&packageFlags.bulkDir,
+		"dir", "",
+		"Directory containing files to upload.")
+	cmdPackageCreateBulk.Flags.StringVar(&packageFlags.baseUrl,
+		"base-url", "",
+		"URL base packages are stored at.")
 
 	cmdPackageDelete.Flags.Var(&packageFlags.appId, "app-id",
 		"Application with package to delete.")
@@ -183,6 +202,65 @@ func packageCreate(args []string, service *update.Service, out *tabwriter.Writer
 	fmt.Fprintln(out, packageFlags.appId.String(), packageFlags.version.String())
 
 	out.Flush()
+	return OK
+}
+
+func packageCreateBulk(args []string, service *update.Service, out *tabwriter.Writer) int {
+	bulkDir := packageFlags.bulkDir
+	if bulkDir == "" {
+		cwd, err := os.Getwd()
+		if err != nil {
+			log.Print(err)
+			return ERROR_USAGE
+		}
+		bulkDir = cwd
+	}
+
+	files, err := ioutil.ReadDir(bulkDir)
+	if err != nil {
+		log.Print(err)
+		return ERROR_USAGE
+	}
+
+	for _, file := range files {
+		if file.Mode().IsRegular() && strings.HasSuffix(file.Name(), "info.json") {
+			// Load metadata from package info.json into struct
+			pkg := new(update.Package)
+			jsonBody, err := ioutil.ReadFile(path.Join(bulkDir, file.Name()))
+			if err != nil {
+				log.Println(err)
+				continue
+			}
+
+			err = json.Unmarshal(jsonBody, &pkg)
+			if err != nil {
+				log.Println(err)
+				continue
+			}
+
+			log.Printf("Creating package with AppId=%s and Version=%s", pkg.AppId, pkg.Version)
+
+			// If --base-url specified, rewrite hosting URL
+			baseUrl := packageFlags.baseUrl
+			if baseUrl != "" {
+				filename := fmt.Sprintf(
+					"%s_%s_%s",
+					pkg.AppId, pkg.Version,
+					path.Base(pkg.Url),
+				)
+				pkg.Url = path.Join(baseUrl, filename)
+			}
+
+			// Add package
+			call := service.App.Package.Insert(pkg.AppId, pkg.Version, pkg)
+			pkg, err = call.Do()
+
+			if err != nil {
+				log.Println(err)
+				continue
+			}
+		}
+	}
 	return OK
 }
 
