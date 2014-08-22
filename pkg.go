@@ -223,8 +223,11 @@ func packageCreateBulk(args []string, service *update.Service, out *tabwriter.Wr
 		return ERROR_USAGE
 	}
 
+	var total int
+	var errors int
 	errorHandler := func(err error) {
 		if err != nil {
+			errors++
 			log.Printf("Error while creating package. Error=%s", err)
 			createBulkGroup.Done()
 		}
@@ -232,6 +235,7 @@ func packageCreateBulk(args []string, service *update.Service, out *tabwriter.Wr
 
 	for _, file := range files {
 		if file.Mode().IsRegular() && strings.HasSuffix(file.Name(), "info.json") {
+			total++
 			createBulkGroup.Add(1)
 			go createPackageFromInfoFile(
 				path.Join(bulkDir, file.Name()),
@@ -241,6 +245,10 @@ func packageCreateBulk(args []string, service *update.Service, out *tabwriter.Wr
 		}
 	}
 	createBulkGroup.Wait()
+	log.Printf("Package metadata uploaded. Total=%d Errors=%d", total, errors)
+	if packageFlags.baseUrl != "" {
+		log.Printf("Please upload payloads to %s.", packageFlags.baseUrl)
+	}
 	return OK
 }
 
