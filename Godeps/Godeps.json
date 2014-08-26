@@ -24,6 +24,10 @@
 			"Rev": "bd37826a4f37c8b94ec7241c91c2c03be13f72b7"
 		},
 		{
+			"ImportPath": "github.com/olekukonko/ts",
+			"Rev": "ecf753e7c962639ab5a1fb46f7da627d4c0a04b8"
+		},
+		{
 			"ImportPath": "github.com/tent/hawk-go",
 			"Rev": "4e63675e10dc4d456117c22910a1431a507a99ec"
 		}
