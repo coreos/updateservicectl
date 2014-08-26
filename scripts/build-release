@@ -16,7 +16,7 @@ function checkout {
     ver=${2}
 
     if [ ! -d ${proj} ]; then
-        git clone git@github.com:coreos-inc/${proj}.git
+        git clone git@github.com:coreos/${proj}.git
     fi
 
     cd ${proj}
