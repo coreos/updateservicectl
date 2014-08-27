@@ -10,10 +10,12 @@ import (
 	"io"
 	"io/ioutil"
 	"log"
+	"mime/multipart"
 	"net/http"
 	"net/url"
 	"os"
 	"path"
+	"path/filepath"
 	"strconv"
 	"strings"
 	"sync"
@@ -46,12 +48,13 @@ var (
 
 	cmdPackage = &Command{
 		Name:    "package",
-		Summary: "List or create packages for an application.",
+		Summary: "Manage packages for an application.",
 		Subcommands: []*Command{
 			cmdPackageList,
 			cmdPackageCreate,
 			cmdPackageDelete,
 			cmdPackageDownload,
+			cmdPackageUploadPayload,
 		},
 	}
 
@@ -88,6 +91,12 @@ var (
 		Description: `Upload package from a folder output by 'package donload'.`,
 		Run:         packageCreateBulk,
 	}
+	cmdPackageUploadPayload = &Command{
+		Name:        "package upload",
+		Usage:       "[OPTION]...",
+		Description: `Upload a package payload file (NOTE: feature must be enabled on server).`,
+		Run:         packageUploadPayload,
+	}
 )
 
 func init() {
@@ -100,8 +109,6 @@ func init() {
 		"Application version associated with the package.")
 	cmdPackageCreate.Flags.StringVar(&packageFlags.url, "url", "",
 		"Package URL.")
-	cmdPackageCreate.Flags.StringVar(&packageFlags.file, "file",
-		"update.gz", "Package file.")
 	cmdPackageCreate.Flags.StringVar(&packageFlags.meta, "meta", "",
 		"JSON file containing metadata.")
 	cmdPackageCreate.Flags.StringVar(&packageFlags.releaseNotes,
@@ -122,6 +129,10 @@ func init() {
 
 	cmdPackageDownload.Flags.StringVar(&packageFlags.saveDir, "dir",
 		"", "Directory to save downloaded packages in.")
+
+	cmdPackageUploadPayload.Flags.StringVar(&packageFlags.file,
+		"file", "",
+		"Path to payload file to upload.")
 }
 
 func formatPackage(pkg *update.Package) string {
@@ -203,6 +214,73 @@ func packageCreate(args []string, service *update.Service, out *tabwriter.Writer
 	fmt.Fprintln(out, packageFlags.appId.String(), packageFlags.version.String())
 
 	out.Flush()
+	return OK
+}
+
+func packageUploadPayload(args []string, service *update.Service, out *tabwriter.Writer) int {
+	if packageFlags.file == "" {
+		return ERROR_USAGE
+	}
+
+	fpath, err := filepath.Abs(packageFlags.file)
+	if err != nil {
+		fmt.Print(err)
+		return ERROR_USAGE
+	}
+
+	file, err := os.Open(fpath)
+	if err != nil {
+		fmt.Print(err)
+		return ERROR_USAGE
+	}
+	defer file.Close()
+
+	body := &bytes.Buffer{}
+	writer := multipart.NewWriter(body)
+
+	filename := filepath.Base(fpath)
+	part, err := writer.CreateFormFile("file", filename)
+	if err != nil {
+		fmt.Print(err)
+		return ERROR_USAGE
+	}
+
+	_, err = io.Copy(part, file)
+	if err = writer.Close(); err != nil {
+		fmt.Print(err)
+		return ERROR_USAGE
+	}
+
+	req, err := http.NewRequest("POST", globalFlags.Server+"/package-upload", body)
+	if err != nil {
+		fmt.Print(err)
+		return ERROR_USAGE
+	}
+
+	req.Header.Add("Content-Type", writer.FormDataContentType())
+
+	client := getHawkClient(globalFlags.User, globalFlags.Key)
+
+	resp, err := client.Do(req)
+	if err != nil {
+		fmt.Print(err)
+		return ERROR_USAGE
+	}
+
+	if resp == nil || resp.Body == nil {
+		fmt.Print("server did not respond")
+		return ERROR_USAGE
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		respBody, _ := ioutil.ReadAll(resp.Body)
+		fmt.Println("error uploading file")
+		fmt.Print(string(respBody))
+		resp.Body.Close()
+		return ERROR_USAGE
+	}
+
+	fmt.Printf("uploaded file %s\n", filename)
 	return OK
 }
 
