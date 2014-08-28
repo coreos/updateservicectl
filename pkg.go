@@ -247,21 +247,21 @@ func uploadPayload(service *update.Service, file string) error {
 	}
 	defer f.Close()
 
-	body := &bytes.Buffer{}
-	writer := multipart.NewWriter(body)
+	pipeOut, pipeIn := io.Pipe()
 
-	fname := filepath.Base(fpath)
-	part, err := writer.CreateFormFile("file", fname)
-	if err != nil {
-		return err
-	}
+	writer := multipart.NewWriter(pipeIn)
+	errChan := make(chan error, 1)
+	go func() {
+		defer pipeIn.Close()
+		part, _ := writer.CreateFormFile("file", filepath.Base(fpath))
+		if _, err := io.Copy(part, f); err != nil {
+			errChan <- err
+			return
+		}
+		errChan <- writer.Close()
+	}()
 
-	_, err = io.Copy(part, f)
-	if err = writer.Close(); err != nil {
-		return err
-	}
-
-	req, err := http.NewRequest("POST", globalFlags.Server+"/package-upload", body)
+	req, err := http.NewRequest("POST", globalFlags.Server+"/package-upload", pipeOut)
 	if err != nil {
 		return err
 	}
@@ -289,7 +289,7 @@ func uploadPayload(service *update.Service, file string) error {
 		return fmt.Errorf("error uploading file %s", string(respBody))
 	}
 
-	return nil
+	return <-errChan
 }
 
 func packageUploadPayload(args []string, service *update.Service, out *tabwriter.Writer) int {
@@ -322,34 +322,18 @@ func packageUploadPayloadBulk(args []string, service *update.Service, out *tabwr
 		return ERROR_USAGE
 	}
 
-	var wg sync.WaitGroup
-	var total, errorCount, totalSize int64
-	var bar *pb.ProgressBar
-	ready := make(chan struct{})
+	var total, errorCount int
 	for _, file := range files {
 		if file.Mode().IsRegular() {
 			total++
-			totalSize += file.Size()
-			wg.Add(1)
-			go func(file string, size int64) {
-				// block until ready (wati for progress bar to initialize)
-				<-ready
-				err := uploadPayload(service, file)
-				if err != nil {
-					errorCount++
-					fmt.Print(err)
-				}
-				bar.Add(int(size))
-				wg.Done()
-			}(path.Join(absDir, file.Name()), file.Size())
+			err := uploadPayload(service, path.Join(absDir, file.Name()))
+			if err != nil {
+				errorCount++
+				fmt.Print(err)
+			}
+			fmt.Printf("uploaded %s\n", file.Name())
 		}
 	}
-
-	bar = pb.New64(totalSize).SetUnits(pb.U_BYTES)
-	bar.Start()
-	close(ready)
-	wg.Wait()
-	bar.Finish()
 
 	log.Printf("Package payloads uploaded. Total=%d Errors=%d", total, errorCount)
 	return OK
