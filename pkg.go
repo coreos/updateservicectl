@@ -6,6 +6,7 @@ import (
 	"crypto/sha256"
 	"encoding/base64"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -96,6 +97,15 @@ var (
 		Usage:       "[OPTION]...",
 		Description: `Upload a package payload file (NOTE: feature must be enabled on server).`,
 		Run:         packageUploadPayload,
+		Subcommands: []*Command{
+			cmdPackageUploadPayloadBulk,
+		},
+	}
+	cmdPackageUploadPayloadBulk = &Command{
+		Name:        "package upload bulk",
+		Usage:       "[OPTION]...",
+		Description: `Upload a directory of package payload files (NOTE: feature must be enabled on server).`,
+		Run:         packageUploadPayloadBulk,
 	}
 )
 
@@ -117,7 +127,7 @@ func init() {
 
 	cmdPackageCreateBulk.Flags.StringVar(&packageFlags.bulkDir,
 		"dir", "",
-		"Directory containing files to upload.")
+		"Directory containing json files of packages to upload.")
 	cmdPackageCreateBulk.Flags.StringVar(&packageFlags.baseUrl,
 		"base-url", "",
 		"URL base packages are stored at.")
@@ -133,6 +143,10 @@ func init() {
 	cmdPackageUploadPayload.Flags.StringVar(&packageFlags.file,
 		"file", "",
 		"Path to payload file to upload.")
+
+	cmdPackageUploadPayloadBulk.Flags.StringVar(&packageFlags.bulkDir,
+		"dir", "",
+		"Directory containing files to upload.")
 }
 
 func formatPackage(pkg *update.Package) string {
@@ -217,44 +231,39 @@ func packageCreate(args []string, service *update.Service, out *tabwriter.Writer
 	return OK
 }
 
-func packageUploadPayload(args []string, service *update.Service, out *tabwriter.Writer) int {
-	if packageFlags.file == "" {
-		return ERROR_USAGE
+func uploadPayload(service *update.Service, file string) error {
+	if file == "" {
+		return errors.New("missing file argument")
 	}
 
-	fpath, err := filepath.Abs(packageFlags.file)
+	fpath, err := filepath.Abs(file)
 	if err != nil {
-		fmt.Print(err)
-		return ERROR_USAGE
+		return err
 	}
 
-	file, err := os.Open(fpath)
+	f, err := os.Open(fpath)
 	if err != nil {
-		fmt.Print(err)
-		return ERROR_USAGE
+		return err
 	}
-	defer file.Close()
+	defer f.Close()
 
 	body := &bytes.Buffer{}
 	writer := multipart.NewWriter(body)
 
-	filename := filepath.Base(fpath)
-	part, err := writer.CreateFormFile("file", filename)
+	fname := filepath.Base(fpath)
+	part, err := writer.CreateFormFile("file", fname)
 	if err != nil {
-		fmt.Print(err)
-		return ERROR_USAGE
+		return err
 	}
 
-	_, err = io.Copy(part, file)
+	_, err = io.Copy(part, f)
 	if err = writer.Close(); err != nil {
-		fmt.Print(err)
-		return ERROR_USAGE
+		return err
 	}
 
 	req, err := http.NewRequest("POST", globalFlags.Server+"/package-upload", body)
 	if err != nil {
-		fmt.Print(err)
-		return ERROR_USAGE
+		return err
 	}
 
 	req.Header.Add("Content-Type", writer.FormDataContentType())
@@ -263,24 +272,86 @@ func packageUploadPayload(args []string, service *update.Service, out *tabwriter
 
 	resp, err := client.Do(req)
 	if err != nil {
+		return err
+	}
+
+	if resp == nil || resp.Body == nil {
+		return errors.New("server did not respond")
+	}
+	defer func() {
+		if resp.Body != nil {
+			resp.Body.Close()
+		}
+	}()
+
+	if resp.StatusCode != http.StatusOK {
+		respBody, _ := ioutil.ReadAll(resp.Body)
+		return fmt.Errorf("error uploading file %s", string(respBody))
+	}
+
+	return nil
+}
+
+func packageUploadPayload(args []string, service *update.Service, out *tabwriter.Writer) int {
+	err := uploadPayload(service, packageFlags.file)
+	if err != nil {
+		fmt.Println("error uploading file")
 		fmt.Print(err)
 		return ERROR_USAGE
 	}
 
-	if resp == nil || resp.Body == nil {
-		fmt.Print("server did not respond")
+	fmt.Printf("uploaded file %s\n", packageFlags.file)
+	return OK
+}
+
+func packageUploadPayloadBulk(args []string, service *update.Service, out *tabwriter.Writer) int {
+	bulkDir := packageFlags.bulkDir
+	if bulkDir == "" {
 		return ERROR_USAGE
 	}
 
-	if resp.StatusCode != http.StatusOK {
-		respBody, _ := ioutil.ReadAll(resp.Body)
-		fmt.Println("error uploading file")
-		fmt.Print(string(respBody))
-		resp.Body.Close()
+	absDir, err := filepath.Abs(bulkDir)
+	if err != nil {
+		log.Print(err)
 		return ERROR_USAGE
 	}
 
-	fmt.Printf("uploaded file %s\n", filename)
+	files, err := ioutil.ReadDir(absDir)
+	if err != nil {
+		log.Print(err)
+		return ERROR_USAGE
+	}
+
+	var wg sync.WaitGroup
+	var total, errorCount, totalSize int64
+	var bar *pb.ProgressBar
+	ready := make(chan struct{})
+	for _, file := range files {
+		if file.Mode().IsRegular() {
+			total++
+			totalSize += file.Size()
+			wg.Add(1)
+			go func(file string, size int64) {
+				// block until ready (wati for progress bar to initialize)
+				<-ready
+				err := uploadPayload(service, file)
+				if err != nil {
+					errorCount++
+					fmt.Print(err)
+				}
+				bar.Add(int(size))
+				wg.Done()
+			}(path.Join(absDir, file.Name()), file.Size())
+		}
+	}
+
+	bar = pb.New64(totalSize).SetUnits(pb.U_BYTES)
+	bar.Start()
+	close(ready)
+	wg.Wait()
+	bar.Finish()
+
+	log.Printf("Package payloads uploaded. Total=%d Errors=%d", total, errorCount)
 	return OK
 }
 
