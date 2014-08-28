@@ -6,14 +6,17 @@ import (
 	"crypto/sha256"
 	"encoding/base64"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"io/ioutil"
 	"log"
+	"mime/multipart"
 	"net/http"
 	"net/url"
 	"os"
 	"path"
+	"path/filepath"
 	"strconv"
 	"strings"
 	"sync"
@@ -46,12 +49,13 @@ var (
 
 	cmdPackage = &Command{
 		Name:    "package",
-		Summary: "List or create packages for an application.",
+		Summary: "Manage packages for an application.",
 		Subcommands: []*Command{
 			cmdPackageList,
 			cmdPackageCreate,
 			cmdPackageDelete,
 			cmdPackageDownload,
+			cmdPackageUploadPayload,
 		},
 	}
 
@@ -88,6 +92,21 @@ var (
 		Description: `Upload package from a folder output by 'package donload'.`,
 		Run:         packageCreateBulk,
 	}
+	cmdPackageUploadPayload = &Command{
+		Name:        "package upload",
+		Usage:       "[OPTION]...",
+		Description: `Upload a package payload file (NOTE: feature must be enabled on server).`,
+		Run:         packageUploadPayload,
+		Subcommands: []*Command{
+			cmdPackageUploadPayloadBulk,
+		},
+	}
+	cmdPackageUploadPayloadBulk = &Command{
+		Name:        "package upload bulk",
+		Usage:       "[OPTION]...",
+		Description: `Upload a directory of package payload files (NOTE: feature must be enabled on server).`,
+		Run:         packageUploadPayloadBulk,
+	}
 )
 
 func init() {
@@ -100,8 +119,6 @@ func init() {
 		"Application version associated with the package.")
 	cmdPackageCreate.Flags.StringVar(&packageFlags.url, "url", "",
 		"Package URL.")
-	cmdPackageCreate.Flags.StringVar(&packageFlags.file, "file",
-		"update.gz", "Package file.")
 	cmdPackageCreate.Flags.StringVar(&packageFlags.meta, "meta", "",
 		"JSON file containing metadata.")
 	cmdPackageCreate.Flags.StringVar(&packageFlags.releaseNotes,
@@ -110,7 +127,7 @@ func init() {
 
 	cmdPackageCreateBulk.Flags.StringVar(&packageFlags.bulkDir,
 		"dir", "",
-		"Directory containing files to upload.")
+		"Directory containing json files of packages to upload.")
 	cmdPackageCreateBulk.Flags.StringVar(&packageFlags.baseUrl,
 		"base-url", "",
 		"URL base packages are stored at.")
@@ -122,6 +139,14 @@ func init() {
 
 	cmdPackageDownload.Flags.StringVar(&packageFlags.saveDir, "dir",
 		"", "Directory to save downloaded packages in.")
+
+	cmdPackageUploadPayload.Flags.StringVar(&packageFlags.file,
+		"file", "",
+		"Path to payload file to upload.")
+
+	cmdPackageUploadPayloadBulk.Flags.StringVar(&packageFlags.bulkDir,
+		"dir", "",
+		"Directory containing files to upload.")
 }
 
 func formatPackage(pkg *update.Package) string {
@@ -203,6 +228,130 @@ func packageCreate(args []string, service *update.Service, out *tabwriter.Writer
 	fmt.Fprintln(out, packageFlags.appId.String(), packageFlags.version.String())
 
 	out.Flush()
+	return OK
+}
+
+func uploadPayload(service *update.Service, file string) error {
+	if file == "" {
+		return errors.New("missing file argument")
+	}
+
+	fpath, err := filepath.Abs(file)
+	if err != nil {
+		return err
+	}
+
+	f, err := os.Open(fpath)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+
+	body := &bytes.Buffer{}
+	writer := multipart.NewWriter(body)
+
+	fname := filepath.Base(fpath)
+	part, err := writer.CreateFormFile("file", fname)
+	if err != nil {
+		return err
+	}
+
+	_, err = io.Copy(part, f)
+	if err = writer.Close(); err != nil {
+		return err
+	}
+
+	req, err := http.NewRequest("POST", globalFlags.Server+"/package-upload", body)
+	if err != nil {
+		return err
+	}
+
+	req.Header.Add("Content-Type", writer.FormDataContentType())
+
+	client := getHawkClient(globalFlags.User, globalFlags.Key)
+
+	resp, err := client.Do(req)
+	if err != nil {
+		return err
+	}
+
+	if resp == nil || resp.Body == nil {
+		return errors.New("server did not respond")
+	}
+	defer func() {
+		if resp.Body != nil {
+			resp.Body.Close()
+		}
+	}()
+
+	if resp.StatusCode != http.StatusOK {
+		respBody, _ := ioutil.ReadAll(resp.Body)
+		return fmt.Errorf("error uploading file %s", string(respBody))
+	}
+
+	return nil
+}
+
+func packageUploadPayload(args []string, service *update.Service, out *tabwriter.Writer) int {
+	err := uploadPayload(service, packageFlags.file)
+	if err != nil {
+		fmt.Println("error uploading file")
+		fmt.Print(err)
+		return ERROR_USAGE
+	}
+
+	fmt.Printf("uploaded file %s\n", packageFlags.file)
+	return OK
+}
+
+func packageUploadPayloadBulk(args []string, service *update.Service, out *tabwriter.Writer) int {
+	bulkDir := packageFlags.bulkDir
+	if bulkDir == "" {
+		return ERROR_USAGE
+	}
+
+	absDir, err := filepath.Abs(bulkDir)
+	if err != nil {
+		log.Print(err)
+		return ERROR_USAGE
+	}
+
+	files, err := ioutil.ReadDir(absDir)
+	if err != nil {
+		log.Print(err)
+		return ERROR_USAGE
+	}
+
+	var wg sync.WaitGroup
+	var total, errorCount, totalSize int64
+	var bar *pb.ProgressBar
+	ready := make(chan struct{})
+	for _, file := range files {
+		if file.Mode().IsRegular() {
+			total++
+			totalSize += file.Size()
+			wg.Add(1)
+			go func(file string, size int64) {
+				// block until ready (wati for progress bar to initialize)
+				<-ready
+				err := uploadPayload(service, file)
+				if err != nil {
+					errorCount++
+					fmt.Print(err)
+				}
+				bar.Add(int(size))
+				wg.Done()
+			}(path.Join(absDir, file.Name()), file.Size())
+		}
+	}
+
+	bar = pb.New64(totalSize).SetUnits(pb.U_BYTES)
+	bar.Start()
+	close(ready)
+	wg.Wait()
+	bar.Finish()
+
+	log.Printf("Package payloads uploaded. Total=%d Errors=%d", total, errorCount)
 	return OK
 }
 
