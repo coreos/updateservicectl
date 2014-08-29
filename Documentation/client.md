@@ -197,7 +197,7 @@ This will list the instances grouped by AppId and Version
 ./bin/updateservicectl admin-user list
 ```
 
-### Delete a new user
+### Delete a user
 
 ```bash
 ./bin/updateservicectl admin-user delete user@coreos.net
