@@ -202,3 +202,39 @@ This will list the instances grouped by AppId and Version
 ```bash
 ./bin/updateservicectl admin-user delete user@coreos.net
 ```
+
+## Upstream management
+
+CoreUpdate supports synchronizing certain data with other "upstream" CoreUpdate instances.
+
+By default hosted instances of CoreUpdate periodically synchronize with the public instance of CoreUpdate over the internet.
+This automatically updates your instance's CoreOS application packages and channel versions.
+
+Since on-premise instances of CoreUpdate cannot access the internet [synchronization must be done manually](https://github.com/coreos/updateservicectl/blob/master/Documentation/sync-packages.md).
+If you decide to enable internet access for your on-premise instance, you can manage upstreams using these commands.
+
+### List upstreams
+
+```
+./bin/updateservicectl upstream list
+```
+
+### Create upstream
+
+```
+./bin/updateservicectl upstream create --label="Public CoreOS" --url="https://public.update.core-os.net"
+```
+
+### Delete upstream
+
+```
+./bin/updateservicectl upstream delete --id=2
+```
+
+### Sync upstream
+
+Synchronizes data of all upstreams and blocks until complete.
+
+```
+./bin/updateservicectl upstream sync
+```
