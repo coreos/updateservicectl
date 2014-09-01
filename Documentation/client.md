@@ -15,7 +15,7 @@ There are a few flags that you must provide to the administrative commands below
 The commands below will all have a prefix like this:
 
 ```
-./bin/updateservicectl --user=admin --key=d3b07384d113edec49eaa6238ad5ff00 --server=https://example.update.core-os.net
+updateservicectl --user=admin --key=d3b07384d113edec49eaa6238ad5ff00 --server=https://example.update.core-os.net
 ```
 
 If you do not wish to specify these every time, they
@@ -41,7 +41,7 @@ This example will start 132 fake instances pinging the update service every 1 to
 starting at version 1.0.0.
 
 ```
-./bin/updateservicectl instance fake --clients-per-app=132 --min-sleep=1 \
+updateservicectl instance fake --clients-per-app=132 --min-sleep=1 \
 	--max-sleep=50 --app-id=e96281a6-d1af-4bde-9a0a-97b76e56dc57 \
 	--group-id=beta --version=1.0.0
 ```
@@ -63,7 +63,7 @@ env | grep UPDATE_SERVICE
 Next we will generate a random client UUID and start watching for changes to the given app:
 
 ```
-./bin/updateservicectl watch --app-id=e96281a6-d1af-4bde-9a0a-97b76e56dc57 \
+updateservicectl watch --app-id=e96281a6-d1af-4bde-9a0a-97b76e56dc57 \
 	--group-id=beta ./updater.sh
 ```
 
@@ -82,13 +82,13 @@ currently available version.
 Create an application called CoreOS using its UUID along with a nice description.
 
 ```
-./bin/updateservicectl app create --app-id=e96281a6-d1af-4bde-9a0a-97b76e56dc57 --label="CoreOS" --description="Linux for Servers"
+updateservicectl app create --app-id=e96281a6-d1af-4bde-9a0a-97b76e56dc57 --label="CoreOS" --description="Linux for Servers"
 ```
 
 ### List Applications
 
 ```
-./bin/updateservicectl app list
+updateservicectl app list
 ```
 
 ## Package Management
@@ -101,7 +101,7 @@ associated with it.
 This will create a new package with version 1.0.5 from the file `update.gz`.
 
 ```
-./bin/updateservicectl package create --app-id=e96281a6-d1af-4bde-9a0a-97b76e56dc57 \
+updateservicectl package create --app-id=e96281a6-d1af-4bde-9a0a-97b76e56dc57 \
 	--version=1.0.5 --file=update.gz \
 ```
 
@@ -115,7 +115,7 @@ and file size for verification purposes. It should look like this:
 ### List Application Versions
 
 ```
-./bin/updateservicectl package list --app-id=e96281a6-d1af-4bde-9a0a-97b76e56dc57
+updateservicectl package list --app-id=e96281a6-d1af-4bde-9a0a-97b76e56dc57
 ```
 
 ## Channel Management
@@ -130,7 +130,7 @@ application specify the app id, channel and the version that channel
 should present. Additionally you can publish a channel by setting the `--publish` flag, if not specified publish will always be set to `false`.
 
 ```
-./bin/updateservicectl channel update --app-id=e96281a6-d1af-4bde-9a0a-97b76e56dc57 --channel=master --version=1.0.1 --publish=true
+updateservicectl channel update --app-id=e96281a6-d1af-4bde-9a0a-97b76e56dc57 --channel=master --version=1.0.1 --publish=true
 ```
 
 ## Group Management
@@ -145,20 +145,20 @@ Create a group for the CoreOS application pointing at the master channel called
 testing. This group might be used in your test environment.
 
 ```
-./bin/updateservicectl group create --app-id=e96281a6-d1af-4bde-9a0a-97b76e56dc57 \
+updateservicectl group create --app-id=e96281a6-d1af-4bde-9a0a-97b76e56dc57 \
 	--channel=master --group-id=testing --label="Testing Group"
 ```
 
 ### Pausing Updates on a Group
 
 ```
-./bin/updateservicectl group pause --app-id=e96281a6-d1af-4bde-9a0a-97b76e56dc57 --group-id=testing
+updateservicectl group pause --app-id=e96281a6-d1af-4bde-9a0a-97b76e56dc57 --group-id=testing
 ```
 
 ### List Groups
 
 ```
-./bin/updateservicectl group list
+updateservicectl group list
 Label           Token                                   UpdatesPaused
 Default Group   default                                 false
 ```
@@ -174,13 +174,13 @@ but you can use them from `updateservicectl` too.
 This will list all instances that have been seen since the given timestamp.
 
 ```
-./bin/updateservicectl instance list-updates --start=1392401442
+updateservicectl instance list-updates --start=1392401442
 ```
 
 This will list the instances grouped by AppId and Version
 
 ```
-./bin/updateservicectl instance list-app-versions --start=1392401442
+updateservicectl instance list-app-versions --start=1392401442
 ```
 
 ## User management
@@ -188,19 +188,19 @@ This will list the instances grouped by AppId and Version
 ### Create a new user
 
 ```bash
-./bin/updateservicectl admin-user create user@coreos.net
+updateservicectl admin-user create user@coreos.net
 ```
 
 ### List users
 
 ```bash
-./bin/updateservicectl admin-user list
+updateservicectl admin-user list
 ```
 
 ### Delete a user
 
 ```bash
-./bin/updateservicectl admin-user delete user@coreos.net
+updateservicectl admin-user delete user@coreos.net
 ```
 
 ## Upstream management
@@ -216,19 +216,19 @@ If you decide to enable internet access for your on-premise instance, you can ma
 ### List upstreams
 
 ```
-./bin/updateservicectl upstream list
+updateservicectl upstream list
 ```
 
 ### Create upstream
 
 ```
-./bin/updateservicectl upstream create --label="Public CoreOS" --url="https://public.update.core-os.net"
+updateservicectl upstream create --label="Public CoreOS" --url="https://public.update.core-os.net"
 ```
 
 ### Delete upstream
 
 ```
-./bin/updateservicectl upstream delete --id=2
+updateservicectl upstream delete --id=2
 ```
 
 ### Sync upstream
@@ -236,5 +236,5 @@ If you decide to enable internet access for your on-premise instance, you can ma
 Synchronizes data of all upstreams and blocks until complete.
 
 ```
-./bin/updateservicectl upstream sync
+updateservicectl upstream sync
 ```

@@ -176,7 +176,7 @@ updateservicectl --server=http://localhost:8000 database init
 
 Create the first control panel user:  
 ```bash
-./updateservicectl --server=http://localhost:8000 --user=admin --key=<previously-generated-key> admin-user create google.apps.email@example.com
+updateservicectl --server=http://localhost:8000 --user=admin --key=<previously-generated-key> admin-user create google.apps.email@example.com
 ```
 
 #### Create the "CoreOS" Application
