@@ -153,13 +153,15 @@ WantedBy=multi-user.target
 X-Conflicts=coreupdate@*
 ```
 
-Start the service by running:  
+Start the service by running:
+
 ```bash
 sudo cp coreupdate@.service /etc/systemd/system
 sudo systemctl start coreupdate@.service
 ```
 
-View the logs and verify it is running:  
+View the logs and verify it is running:
+
 ```bash
 sudo journalctl -u coreupdate@.service -f
 ```
@@ -169,12 +171,14 @@ sudo journalctl -u coreupdate@.service -f
 Now that the server is running the first user must be initialization.
 Do this using the `updateservicectl` tool.
 
-This will generate an `admin` user and an api `key`, make note of the key for subsequent use of `updateservicectl`.  
+This will generate an `admin` user and an api `key`, make note of the key for subsequent use of `updateservicectl`.
+
 ```bash
 updateservicectl --server=http://localhost:8000 database init
 ```
 
-Create the first control panel user:  
+Create the first control panel user:
+
 ```bash
 updateservicectl --server=http://localhost:8000 --user=admin --key=<previously-generated-key> admin-user create google.apps.email@example.com
 ```
@@ -182,7 +186,8 @@ updateservicectl --server=http://localhost:8000 --user=admin --key=<previously-g
 #### Create the "CoreOS" Application
 
 To sync the "CoreOS" application it must exist and have the same application id as the public CoreUpdate instance.
-NOTE: the application id must match exactly what is listed here:  
+NOTE: the application id must match exactly what is listed here:
+
 ```bash
 updateservicectl --server=http://localhost:8000 --user=admin --key=<previously-generated-key> app create --label=CoreOS --app-id=e96281a6-d1af-4bde-9a0a-97b76e56dc57
 ```
