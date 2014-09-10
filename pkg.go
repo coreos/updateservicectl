@@ -124,6 +124,9 @@ func init() {
 	cmdPackageCreate.Flags.StringVar(&packageFlags.releaseNotes,
 		"release-notes", "",
 		"File contianing release notes for package.")
+	cmdPackageCreate.Flags.StringVar(&packageFlags.file,
+		"file", "",
+		"Path to package file (does not upload file).")
 
 	cmdPackageCreateBulk.Flags.StringVar(&packageFlags.bulkDir,
 		"dir", "",
