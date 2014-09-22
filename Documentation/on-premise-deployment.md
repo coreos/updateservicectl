@@ -81,7 +81,7 @@ DISABLE_AUTH: true
 # Configure at https://console.developers.google.com
 #GOOGLE_OAUTH_CLIENT_ID:
 #GOOGLE_OAUTH_CLIENT_SECRET:
-#GOOGLE_OAUTH_REDIRECT_URL:
+#GOOGLE_OAUTH_REDIRECT_URL: http://localhost:8000/admin/v1/oauth/login
 
 # Address and port to listen on.
 LISTEN_ADDRESS: ":8000"
