@@ -109,4 +109,4 @@ The protocol dictates that each event should be acknowledged even if no data nee
 
 ## Further Reading
 
-Check out the [example container update workflow](example-container-update.md) to see the protocol in action. You can read more about the [Omaha tech specs](https://code.google.com/p/omaha/wiki/ServerProtocol) or visit the [project homepage](https://code.google.com/p/omaha/).
+You can read more about the [Omaha tech specs](https://code.google.com/p/omaha/wiki/ServerProtocol) or visit the [project homepage](https://code.google.com/p/omaha/).
