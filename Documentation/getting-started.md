@@ -190,4 +190,4 @@ In the UI, navigate to the app and group, then click on "View All Graphs". You s
 
 ## Further Reading
 
-Now that you've got the basics, checkout the [example update workflow](https://github.com/coreos/updateservicectl/blob/master/Documentation/example-container-update.md) for a practical application of the update service. If you're ready to start writing a custom update client for your application, the [Omaha protocol spec](https://github.com/coreos/updateservicectl/blob/master/Documentation/protocol.md) is a good place to start. The complete list of update service docs can be [found here](https://github.com/coreos/updateservicectl/tree/master/Documentation).
+If you're ready to start writing a custom update client for your application, the [Omaha protocol spec](https://github.com/coreos/updateservicectl/blob/master/Documentation/protocol.md) is a good place to start. The complete list of update service docs can be [found here](https://github.com/coreos/updateservicectl/tree/master/Documentation).
