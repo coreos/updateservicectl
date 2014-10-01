@@ -29,6 +29,7 @@ var (
 		OEM           string
 		pingOnly      int
 		version       string
+		forceUpdate   bool
 	}
 
 	cmdInstance = &Command{
@@ -88,6 +89,7 @@ func init() {
 	cmdInstanceFake.Flags.Var(&instanceFlags.groupId, "group-id", "Group ID to update.")
 	instanceFlags.groupId.required = true
 	cmdInstanceFake.Flags.StringVar(&instanceFlags.version, "version", "0.0.0", "Version to report.")
+	cmdInstanceFake.Flags.BoolVar(&instanceFlags.forceUpdate, "force-update", false, "Force updates regardless of rate limiting")
 }
 
 func instanceListUpdates(args []string, service *update.Service, out *tabwriter.Writer) int {
@@ -159,6 +161,7 @@ type Client struct {
 	config         *serverConfig
 	errorRate      int
 	pingsRemaining int
+	forceUpdate    bool
 }
 
 func (c *Client) Log(format string, v ...interface{}) {
@@ -173,6 +176,11 @@ func (c *Client) OmahaRequest(otype, result string, updateCheck, isPing bool) *o
 	app.BootId = c.SessionId
 	app.Track = c.Track
 	app.OEM = instanceFlags.OEM
+	if c.forceUpdate {
+		req.InstallSource = "ondemandupdate"
+	} else {
+		req.InstallSource = "scheduler"
+	}
 
 	if updateCheck {
 		app.AddUpdateCheck()
@@ -336,6 +344,7 @@ func instanceFake(args []string, service *update.Service, out *tabwriter.Writer)
 			config:         conf,
 			errorRate:      instanceFlags.errorRate,
 			pingsRemaining: instanceFlags.pingOnly,
+			forceUpdate:    instanceFlags.forceUpdate,
 		}
 		go c.Loop(instanceFlags.minSleep, instanceFlags.maxSleep)
 	}
