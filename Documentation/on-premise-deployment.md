@@ -4,7 +4,7 @@ An on-premise deployment of CoreUpdate is a self-administered instance that can 
 
 ## Accessing the CoreUpdate Container
 
-After signing up you will have received a `.dockercfg` file containing your credentials to the `quay.io/coreos/coreupdate` repository.
+After signing up you will receive a `.dockercfg` file containing your credentials to the `quay.io/coreos/coreupdate` repository.
 Save this file to your CoreOS machine in `/home/core/.dockercfg` and `/root/.dockercfg`.
 You should now be able to execute `docker pull quay.io/coreos/coreupdate` to download the container.
 
