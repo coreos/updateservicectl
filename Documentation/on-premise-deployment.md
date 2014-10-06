@@ -14,7 +14,8 @@ CoreUpdate requires an instance of a Postres database server.
 You can use an existing instance if you have one, or use [the official Postgres docker image](https://registry.hub.docker.com/_/postgres/).
 
 Postgres can be run on CoreOS with a systemd unit file similar to this one: 
-```
+
+```ini
 [Service]
 User=core
 ExecStartPre=-/usr/bin/docker kill postgres
@@ -33,12 +34,14 @@ It is recommended to mount a volume from your host machine for data storage.
 The above example uses `/opt/coreupdate/postgres/data`.
 
 Start the Postgres service by running:  
+
 ```bash
 sudo cp postgres.service /etc/systemd/system
 sudo systemctl start postgres.service
 ```
 
 View the logs and verify it is running:  
+
 ```bash
 sudo journalctl -u postgres.service -f
 ```
