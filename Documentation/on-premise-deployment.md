@@ -46,13 +46,12 @@ View the logs and verify it is running:
 sudo journalctl -u postgres.service -f
 ```
 
-CoreUpdate needs a database to connect to, so you may need to initialize a new database on the Postgres server.
-You can do this manually, or execute a similar command using another instance of the Postgres container:  
+CoreUpdate needs a database and user for the connection, so you may need to initialize these on the Postgres server.
+You can do this manually, or execute similar commands using another instance of the Postgres container:  
 
 ```bash
-docker run --net="host" postgres:9.4 bash -c "\
-  psql -h localhost -U postgres --command \"CREATE USER coreos WITH SUPERUSER 'coreos';\" && \
-  psql -h localhost -U postgres --command \"CREATE DATABASE coreupdate OWNER coreos;\""
+docker run --net="host" postgres:9.4 psql -h localhost -U postgres --command "CREATE USER coreos WITH SUPERUSER;"
+docker run --net="host" postgres:9.4 psql -h localhost -U postgres --command "CREATE DATABASE coreupdate OWNER coreos;"
 ```
 
 The username, password, and database name can be anything you choose as long as they match the `DB_URL` field in the config file.
@@ -132,11 +131,14 @@ ENABLE-PACKAGE-UPLOADS: true
 The CoreUpdate web service can be run with a systemd unit file such as:  
 
 ```
+[Unit]
+Description=Core Update
+
 [Service]
 User=core
 ExecStartPre=-/usr/bin/docker kill coreupdate-%i
 ExecStartPre=-/usr/bin/docker rm coreupdate-%i
-ExecStart=/usr/bin/docker run --net="host" --rm --name coreupdate-%i \
+ExecStart=/usr/bin/docker run --rm --name coreupdate-%i \
     # mount the location of the config file
     -v /etc/coreupdate:/etc/coreupdate \
     # (optional) mount the location of the package payload directory
