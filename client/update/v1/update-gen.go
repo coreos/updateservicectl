@@ -231,6 +231,8 @@ type App struct {
 type AppChannel struct {
 	AppId string `json:"appId,omitempty"`
 
+	DateCreated string `json:"dateCreated,omitempty"`
+
 	Label string `json:"label,omitempty"`
 
 	Publish bool `json:"publish,omitempty"`
@@ -346,6 +348,8 @@ type Group struct {
 	Id string `json:"id,omitempty"`
 
 	Label string `json:"label,omitempty"`
+
+	OemBlacklist string `json:"oemBlacklist,omitempty"`
 
 	UpdateCount int64 `json:"updateCount,omitempty"`
 
@@ -2458,6 +2462,12 @@ func (c *GroupDeleteCall) Label(label string) *GroupDeleteCall {
 	return c
 }
 
+// OemBlacklist sets the optional parameter "oemBlacklist":
+func (c *GroupDeleteCall) OemBlacklist(oemBlacklist string) *GroupDeleteCall {
+	c.opt_["oemBlacklist"] = oemBlacklist
+	return c
+}
+
 // UpdateCount sets the optional parameter "updateCount":
 func (c *GroupDeleteCall) UpdateCount(updateCount int64) *GroupDeleteCall {
 	c.opt_["updateCount"] = updateCount
@@ -2491,6 +2501,9 @@ func (c *GroupDeleteCall) Do() (*Group, error) {
 	}
 	if v, ok := c.opt_["label"]; ok {
 		params.Set("label", fmt.Sprintf("%v", v))
+	}
+	if v, ok := c.opt_["oemBlacklist"]; ok {
+		params.Set("oemBlacklist", fmt.Sprintf("%v", v))
 	}
 	if v, ok := c.opt_["updateCount"]; ok {
 		params.Set("updateCount", fmt.Sprintf("%v", v))
@@ -2551,6 +2564,10 @@ func (c *GroupDeleteCall) Do() (*Group, error) {
 	//       "location": "query",
 	//       "type": "string"
 	//     },
+	//     "oemBlacklist": {
+	//       "location": "query",
+	//       "type": "string"
+	//     },
 	//     "updateCount": {
 	//       "format": "int32",
 	//       "location": "query",
@@ -2607,6 +2624,12 @@ func (c *GroupGetCall) Label(label string) *GroupGetCall {
 	return c
 }
 
+// OemBlacklist sets the optional parameter "oemBlacklist":
+func (c *GroupGetCall) OemBlacklist(oemBlacklist string) *GroupGetCall {
+	c.opt_["oemBlacklist"] = oemBlacklist
+	return c
+}
+
 // UpdateCount sets the optional parameter "updateCount":
 func (c *GroupGetCall) UpdateCount(updateCount int64) *GroupGetCall {
 	c.opt_["updateCount"] = updateCount
@@ -2640,6 +2663,9 @@ func (c *GroupGetCall) Do() (*Group, error) {
 	}
 	if v, ok := c.opt_["label"]; ok {
 		params.Set("label", fmt.Sprintf("%v", v))
+	}
+	if v, ok := c.opt_["oemBlacklist"]; ok {
+		params.Set("oemBlacklist", fmt.Sprintf("%v", v))
 	}
 	if v, ok := c.opt_["updateCount"]; ok {
 		params.Set("updateCount", fmt.Sprintf("%v", v))
@@ -2697,6 +2723,10 @@ func (c *GroupGetCall) Do() (*Group, error) {
 	//       "type": "string"
 	//     },
 	//     "label": {
+	//       "location": "query",
+	//       "type": "string"
+	//     },
+	//     "oemBlacklist": {
 	//       "location": "query",
 	//       "type": "string"
 	//     },

@@ -1,6 +1,6 @@
 {
  "kind": "discovery#restDescription",
- "etag": "\"MKGA2miAJpVGF7yQTQhsoDXpye8/_1k2Dg7emB5iDaE4KRLYY51YUvU\"",
+ "etag": "\"koCc_mmAOJe4d9CoedmJUnZeEcg/xXD9YKn-mn9RGpaxAz-42hkHtkw\"",
  "discoveryVersion": "v1",
  "id": "update:v1",
  "name": "update",
@@ -116,6 +116,10 @@
    "properties": {
     "appId": {
      "type": "string"
+    },
+    "dateCreated": {
+     "type": "string",
+     "format": "date-time"
     },
     "label": {
      "type": "string"
@@ -350,6 +354,9 @@
      "type": "string"
     },
     "label": {
+     "type": "string"
+    },
+    "oemBlacklist": {
      "type": "string"
     },
     "updateCount": {
@@ -1205,6 +1212,10 @@
        "type": "string",
        "location": "query"
       },
+      "oemBlacklist": {
+       "type": "string",
+       "location": "query"
+      },
       "updateCount": {
        "type": "integer",
        "format": "int32",
@@ -1253,6 +1264,10 @@
        "location": "path"
       },
       "label": {
+       "type": "string",
+       "location": "query"
+      },
+      "oemBlacklist": {
        "type": "string",
        "location": "query"
       },
