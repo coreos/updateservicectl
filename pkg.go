@@ -140,8 +140,12 @@ func init() {
 	cmdPackageDelete.Flags.Var(&packageFlags.version, "version",
 		"Version of package to delete.")
 
+	cmdPackageDownload.Flags.Var(&packageFlags.appId, "app-id",
+		"Application to download packages of. (optional)")
 	cmdPackageDownload.Flags.StringVar(&packageFlags.saveDir, "dir",
 		"", "Directory to save downloaded packages in.")
+	cmdPackageDownload.Flags.Var(&packageFlags.version, "version",
+		"Package version to download. (optional)")
 
 	cmdPackageUploadPayload.Flags.StringVar(&packageFlags.file,
 		"file", "",
@@ -483,11 +487,29 @@ func packageDownload(args []string, service *update.Service, out *tabwriter.Writ
 		return ERROR_USAGE
 	}
 
+	appIdFilter := packageFlags.appId.Get()
+	versionFilter := packageFlags.version.Get()
+
+	selectedPackage := func(appId string, version string) bool {
+		if appIdFilter != nil && *appIdFilter != appId {
+			return false
+		}
+
+		if versionFilter != nil && *versionFilter != version {
+			return false
+		}
+
+		return true
+	}
+
 	// Setup progress bar
 	var totalSize int64
 	var totalPackages int
 	for _, item := range pkgs.Items {
 		for _, pkg := range item.Packages {
+			if !selectedPackage(item.AppId, pkg.Version) {
+				continue
+			}
 			pkgSize, err := strconv.ParseInt(pkg.Size, 10, 64)
 			if err != nil {
 				log.Println("Parse of package size failed.")
@@ -525,6 +547,9 @@ func packageDownload(args []string, service *update.Service, out *tabwriter.Writ
 	bar.Start()
 	for _, item := range pkgs.Items {
 		for _, pkg := range item.Packages {
+			if !selectedPackage(item.AppId, pkg.Version) {
+				continue
+			}
 			downloadGroup.Add(1)
 			go downloadPackagePayload(pkg, saveDir, bar, errorHandler(pkg))
 		}
