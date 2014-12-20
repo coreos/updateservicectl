@@ -22,6 +22,7 @@ import (
 	"sync"
 	"text/tabwriter"
 
+	"github.com/coreos/updateservicectl/Godeps/_workspace/src/github.com/coreos/go-semver/semver"
 	"github.com/coreos/updateservicectl/Godeps/_workspace/src/github.com/cheggaaa/pb"
 	update "github.com/coreos/updateservicectl/client/update/v1"
 )
@@ -37,6 +38,7 @@ var (
 
 	packageFlags struct {
 		appId        StringFlag
+		minVersion   StringFlag
 		version      StringFlag
 		url          string
 		file         string
@@ -142,10 +144,12 @@ func init() {
 
 	cmdPackageDownload.Flags.Var(&packageFlags.appId, "app-id",
 		"Application to download packages of. (optional)")
+	cmdPackageDownload.Flags.Var(&packageFlags.minVersion, "min-version",
+		"Minimum Package version to download. (optional, conflicts with -version)")
 	cmdPackageDownload.Flags.StringVar(&packageFlags.saveDir, "dir",
 		"", "Directory to save downloaded packages in.")
 	cmdPackageDownload.Flags.Var(&packageFlags.version, "version",
-		"Package version to download. (optional)")
+		"Package version to download. (optional, conflicts with -min-version)")
 
 	cmdPackageUploadPayload.Flags.StringVar(&packageFlags.file,
 		"file", "",
@@ -480,15 +484,30 @@ func packageDownload(args []string, service *update.Service, out *tabwriter.Writ
 		return ERROR_USAGE
 	}
 
+	appIdFilter := packageFlags.appId.Get()
+	minVersionFilter := packageFlags.minVersion.Get()
+	versionFilter := packageFlags.version.Get()
+
+	if minVersionFilter != nil && versionFilter != nil {
+		log.Print("Please use either -version or -min-version, but not both.")
+		return ERROR_USAGE
+	}
+
+	var minSemVerFilter *semver.Version
+	if minVersionFilter != nil {
+		minSemVerFilter, err = semver.NewVersion(*minVersionFilter)
+		if err != nil {
+			log.Print(err)
+			return ERROR_USAGE
+		}
+	}
+
 	call := service.App.Package.PublicList()
 	pkgs, err := call.Do()
 	if err != nil {
 		log.Print(err)
 		return ERROR_USAGE
 	}
-
-	appIdFilter := packageFlags.appId.Get()
-	versionFilter := packageFlags.version.Get()
 
 	selectedPackage := func(appId string, version string) bool {
 		if appIdFilter != nil && *appIdFilter != appId {
@@ -497,6 +516,17 @@ func packageDownload(args []string, service *update.Service, out *tabwriter.Writ
 
 		if versionFilter != nil && *versionFilter != version {
 			return false
+		}
+
+		if minSemVerFilter != nil {
+			semVer, err := semver.NewVersion(version)
+			if err != nil {
+				log.Print(err)
+				return false
+			}
+			if semVer.LessThan(*minSemVerFilter) {
+				return false
+			}
 		}
 
 		return true
