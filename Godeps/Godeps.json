@@ -24,6 +24,10 @@
 			"Rev": "bd37826a4f37c8b94ec7241c91c2c03be13f72b7"
 		},
 		{
+			"ImportPath": "github.com/coreos/go-semver/semver",
+			"Rev": "6fe83ccda8fb9b7549c9ab4ba47f47858bc950aa"
+		},
+		{
 			"ImportPath": "github.com/olekukonko/ts",
 			"Rev": "ecf753e7c962639ab5a1fb46f7da627d4c0a04b8"
 		},
