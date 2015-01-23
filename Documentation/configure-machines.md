@@ -34,9 +34,29 @@ sudo systemctl restart update-engine
 
 ## Viewing Machines in CoreUpdate
 
-Each machine should check in about 10 minutes after boot and roughly every hour after that. If you'd like to see it sooner, you can force an update check, which will skip any rate-limiting settings that are configured:
+Each machine should check in about 10 minutes after boot and roughly every hour after that. If you'd like to see it sooner, you can force an update check, which will skip any rate-limiting settings that are configured.
+
+### Force Update in Background
 
 ```
-$ sudo update-engine -check_for_update
+$ update_engine_client -check_for_update
 [0123/220706:INFO:update_engine_client.cc(245)] Initiating update check and install.
 ```
+
+### Force Update in Foreground
+
+If you want to see what's going on behind the scenes, you can watch the ouput in the foreground:
+
+```
+$ update_engine_client -update
+[0123/222449:INFO:update_engine_client.cc(245)] Initiating update check and install.
+[0123/222449:INFO:update_engine_client.cc(250)] Waiting for update to complete.
+LAST_CHECKED_TIME=0
+PROGRESS=0.000000
+CURRENT_OP=UPDATE_STATUS_IDLE
+NEW_VERSION=0.0.0.0
+NEW_SIZE=0
+[0123/222454:ERROR:update_engine_client.cc(189)] Update failed.
+```
+
+Be aware that the "failed update" means that there isn't any new version to install.
