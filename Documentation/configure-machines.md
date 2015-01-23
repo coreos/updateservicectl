@@ -31,3 +31,12 @@ To apply the changes, run:
 ```
 sudo systemctl restart update-engine
 ```
+
+## Viewing Machines in CoreUpdate
+
+Each machine should check in about 10 minutes after boot and roughly every hour after that. If you'd like to see it sooner, you can force an update check, which will skip any rate-limiting settings that are configured:
+
+```
+$ sudo update-engine -check_for_update
+[0123/220706:INFO:update_engine_client.cc(245)] Initiating update check and install.
+```
