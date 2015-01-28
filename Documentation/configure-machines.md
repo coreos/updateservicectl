@@ -59,4 +59,4 @@ NEW_SIZE=0
 [0123/222454:ERROR:update_engine_client.cc(189)] Update failed.
 ```
 
-Be aware that the "failed update" means that there isn't any new version to install.
+Be aware that the "failed update" means that there isn't a newer version to install.
