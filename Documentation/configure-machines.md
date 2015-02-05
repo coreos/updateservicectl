@@ -4,7 +4,9 @@ Configuring new or existing CoreOS machines to communicate with a [CoreUpdate](h
 
 ## New Machines
 
-New servers can be configured to communicate with your CoreUpdate installation by using [cloud-config](https://coreos.com/docs/cluster-management/setup/cloudinit-cloud-config). Set the value of `server` to the custom address of your installation and `group` to the unique identifier of your application group:
+New servers can be configured to communicate with your CoreUpdate installation by using [cloud-config](https://coreos.com/docs/cluster-management/setup/cloudinit-cloud-config). Set the value of `server` to the custom address of your installation and `group` to the unique identifier of your application group. For example, here are the settings for "NYC Production":
+
+![CoreUpdate Group](img/coreupdate-group.png)
 
 ```
 #cloud-config
