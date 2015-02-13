@@ -91,7 +91,7 @@ var (
 	cmdPackageCreateBulk = &Command{
 		Name:        "package create bulk",
 		Usage:       "[OPTION]...",
-		Description: `Upload package from a folder output by 'package donload'.`,
+		Description: `Upload package from a folder output by 'package download'.`,
 		Run:         packageCreateBulk,
 	}
 	cmdPackageUploadPayload = &Command{
