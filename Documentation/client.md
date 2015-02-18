@@ -15,7 +15,9 @@ There are a few flags that you must provide to the administrative commands below
 The commands below will all have a prefix like this:
 
 ```
-updateservicectl --user=admin --key=d3b07384d113edec49eaa6238ad5ff00 --server=https://example.update.core-os.net
+updateservicectl --user=admin \
+	--key=d3b07384d113edec49eaa6238ad5ff00 \
+	--server=https://example.update.core-os.net
 ```
 
 If you do not wish to specify these every time, they
@@ -82,7 +84,8 @@ currently available version.
 Create an application called CoreOS using its UUID along with a nice description.
 
 ```
-updateservicectl app create --app-id=e96281a6-d1af-4bde-9a0a-97b76e56dc57 --label="CoreOS" --description="Linux for Servers"
+updateservicectl app create --app-id=e96281a6-d1af-4bde-9a0a-97b76e56dc57 \
+	--label="CoreOS" --description="Linux for Servers"
 ```
 
 ### List Applications
@@ -130,7 +133,8 @@ application specify the app id, channel and the version that channel
 should present. Additionally you can publish a channel by setting the `--publish` flag, if not specified publish will always be set to `false`.
 
 ```
-updateservicectl channel update --app-id=e96281a6-d1af-4bde-9a0a-97b76e56dc57 --channel=master --version=1.0.1 --publish=true
+updateservicectl channel update --app-id=e96281a6-d1af-4bde-9a0a-97b76e56dc57 \
+	--channel=master --version=1.0.1 --publish=true
 ```
 
 ## Group Management
