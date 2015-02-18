@@ -102,7 +102,7 @@ This will create a new package with version 1.0.5 from the file `update.gz`.
 
 ```
 updateservicectl package create --app-id=e96281a6-d1af-4bde-9a0a-97b76e56dc57 \
-	--version=1.0.5 --file=update.gz \
+	--version=1.0.5 --file=update.gz
 ```
 
 The `--meta` option allows you to specify a cryptographic signature
