@@ -23,6 +23,7 @@ var (
 			cmdChannelList,
 			cmdChannelUpdate,
 			cmdChannelCreate,
+			cmdChannelDelete,
 		},
 	}
 
@@ -49,6 +50,14 @@ you can create a new channel.`,
 you can change the channel to a new version (--version), or set the publish state (--publish).`,
 		Run: channelUpdate,
 	}
+
+	cmdChannelDelete = &Command{
+		Name:        "channel delete",
+		Usage:       "[OPTION]...",
+		Summary:     `Delete an application channel.`,
+		Description: `Deletes the channel with matching application ID (--app-id) and channel (--channel).`,
+		Run:         channelDelete,
+	}
 )
 
 func init() {
@@ -63,6 +72,9 @@ func init() {
 	cmdChannelUpdate.Flags.Var(&channelFlags.channel, "channel", "The channel to update.")
 	cmdChannelUpdate.Flags.BoolVar(&channelFlags.publish, "publish", false, "Publish or unpublish the channel.")
 	cmdChannelUpdate.Flags.Var(&channelFlags.version, "version", "The version to update the channel to.")
+
+	cmdChannelDelete.Flags.Var(&channelFlags.appId, "app-id", "The application ID that the channel belongs to.")
+	cmdChannelDelete.Flags.Var(&channelFlags.channel, "channel", "The channel to update.")
 }
 
 func formatChannel(channel *update.AppChannel) string {
@@ -124,6 +136,22 @@ func channelUpdate(args []string, service *update.Service, out *tabwriter.Writer
 	}
 
 	fmt.Fprintf(out, "%s", formatChannel(channel))
+	out.Flush()
+	return OK
+}
+
+func channelDelete(args []string, service *update.Service, out *tabwriter.Writer) int {
+	if channelFlags.appId.Get() == nil || channelFlags.channel.Get() == nil {
+		return ERROR_USAGE
+	}
+
+	call := service.Channel.Delete(channelFlags.appId.String(), channelFlags.channel.String())
+	_, err := call.Do()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	fmt.Fprintf(out, "deleted channel: %s, for application: %s\n", channelFlags.channel.String(), channelFlags.appId.String())
 	out.Flush()
 	return OK
 }
