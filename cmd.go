@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strings"
 	"text/tabwriter"
 
 	"github.com/coreos/updateservicectl/auth"
@@ -209,6 +210,10 @@ func main() {
 	if len(args) < 1 {
 		args = append(args, "help")
 	}
+
+	// trim the right most slash because all other uses of globalFlags.Server
+	// append the / already
+	globalFlags.Server = strings.TrimRight(globalFlags.Server, "/")
 
 	cmd, name := findCommand("", args, commands)
 
