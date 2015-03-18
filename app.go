@@ -63,6 +63,8 @@ func init() {
 	cmdAppDelete.Flags.Var(&appFlags.appId, "app-id", "Application ID to delete.")
 }
 
+const appHeader = "Id\tLabel\tDescription\n"
+
 func formatApp(app *update.App) string {
 	return fmt.Sprintf("%s\t%s\t%s\n", app.Id, app.Label, app.Description)
 }
@@ -75,7 +77,7 @@ func appList(args []string, service *update.Service, out *tabwriter.Writer) int 
 		log.Fatal(err)
 	}
 
-	fmt.Fprintln(out, "Id\tLabel\tDescription")
+	fmt.Fprint(out, appHeader)
 	for _, app := range list.Items {
 		fmt.Fprintf(out, "%s", formatApp(app))
 	}
@@ -101,6 +103,7 @@ func appCreate(args []string, service *update.Service, out *tabwriter.Writer) in
 		log.Fatal(err)
 	}
 
+	fmt.Fprint(out, appHeader)
 	fmt.Fprintf(out, "%s", formatApp(app))
 
 	out.Flush()
@@ -121,6 +124,7 @@ func appUpdate(args []string, service *update.Service, out *tabwriter.Writer) in
 		log.Fatal(err)
 	}
 
+	fmt.Fprint(out, appHeader)
 	fmt.Fprintf(out, "%s", formatApp(app))
 
 	out.Flush()
@@ -140,6 +144,7 @@ func appDelete(args []string, service *update.Service, out *tabwriter.Writer) in
 		log.Fatal(err)
 	}
 
+	fmt.Fprint(out, appHeader)
 	fmt.Fprintf(out, "%s", formatApp(app))
 
 	out.Flush()
