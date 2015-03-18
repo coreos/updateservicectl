@@ -151,9 +151,13 @@ func init() {
 		"End date filter")
 }
 
+const groupHeader = "Label\tApp\tChannel\tId\tPaused\tCount\tInterval\n"
+
 func formatGroup(group *update.Group) string {
-	return fmt.Sprintf("%s\t%s\t%s\t%s\t%s\t%v\t%v\n", group.Label, group.AppId, group.ChannelId,
-		group.Id, strconv.FormatBool(group.UpdatesPaused), group.UpdateCount, group.UpdateInterval)
+	return fmt.Sprintf("%s\t%s\t%s\t%s\t%s\t%v\t%v\n",
+		group.Label, group.AppId, group.ChannelId,
+		group.Id, strconv.FormatBool(group.UpdatesPaused),
+		group.UpdateCount, group.UpdateInterval)
 }
 
 func groupList(args []string, service *update.Service, out *tabwriter.Writer) int {
@@ -168,7 +172,7 @@ func groupList(args []string, service *update.Service, out *tabwriter.Writer) in
 		log.Fatal(err)
 	}
 
-	fmt.Fprintln(out, "Label\tApp\tChannel\tId\tUpdatesPaused")
+	fmt.Fprint(out, groupHeader)
 	for _, group := range list.Items {
 		fmt.Fprintf(out, "%s", formatGroup(group))
 	}
@@ -254,8 +258,8 @@ func groupCreate(args []string, service *update.Service, out *tabwriter.Writer) 
 		log.Fatal(err)
 	}
 
+	fmt.Fprint(out, groupHeader)
 	fmt.Fprintf(out, "%s", formatGroup(group))
-
 	out.Flush()
 	return OK
 }
@@ -273,8 +277,8 @@ func groupDelete(args []string, service *update.Service, out *tabwriter.Writer) 
 		log.Fatal(err)
 	}
 
+	fmt.Fprint(out, groupHeader)
 	fmt.Fprintf(out, "%s", formatGroup(group))
-
 	out.Flush()
 	return OK
 }
@@ -310,6 +314,7 @@ func setUpdatesPaused(service *update.Service, out *tabwriter.Writer, paused boo
 		log.Fatal(err)
 	}
 
+	fmt.Fprint(out, groupHeader)
 	fmt.Fprintf(out, "%s", formatGroup(group))
 
 	out.Flush()
@@ -362,6 +367,7 @@ func groupUpdate(args []string, service *update.Service, out *tabwriter.Writer) 
 		log.Fatal(err)
 	}
 
+	fmt.Fprintln(out, groupHeader)
 	fmt.Fprintf(out, "%s", formatGroup(group))
 
 	out.Flush()
