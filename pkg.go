@@ -22,8 +22,8 @@ import (
 	"sync"
 	"text/tabwriter"
 
-	"github.com/coreos/updateservicectl/Godeps/_workspace/src/github.com/coreos/go-semver/semver"
 	"github.com/coreos/updateservicectl/Godeps/_workspace/src/github.com/cheggaaa/pb"
+	"github.com/coreos/updateservicectl/Godeps/_workspace/src/github.com/coreos/go-semver/semver"
 	update "github.com/coreos/updateservicectl/client/update/v1"
 )
 
@@ -160,6 +160,8 @@ func init() {
 		"Directory containing files to upload.")
 }
 
+const packageHeader = "Version\tURL\tSize\n"
+
 func formatPackage(pkg *update.Package) string {
 	return fmt.Sprintf("%s\t%s\t%s\n", pkg.Version, pkg.Url, pkg.Size)
 }
@@ -236,7 +238,8 @@ func packageCreate(args []string, service *update.Service, out *tabwriter.Writer
 		log.Fatal(err)
 	}
 
-	fmt.Fprintln(out, packageFlags.appId.String(), packageFlags.version.String())
+	fmt.Fprint(out, packageHeader)
+	fmt.Fprintf(out, "%s", formatPackage(pkg))
 
 	out.Flush()
 	return OK
@@ -448,9 +451,9 @@ func packageList(args []string, service *update.Service, out *tabwriter.Writer) 
 		log.Fatal(err)
 	}
 
-	fmt.Fprintln(out, "Version\tURL\tSize")
+	fmt.Fprint(out, packageHeader)
 	for _, pkg := range list.Items {
-		fmt.Fprintf(out, "%s\t%s\t%s\n", pkg.Version, pkg.Url, pkg.Size)
+		fmt.Fprintf(out, "%s", formatPackage(pkg))
 	}
 
 	out.Flush()
@@ -470,6 +473,7 @@ func packageDelete(args []string, service *update.Service, out *tabwriter.Writer
 		log.Fatal(err)
 	}
 
+	fmt.Fprint(out, packageHeader)
 	fmt.Fprintf(out, "%s", formatPackage(pkg))
 
 	out.Flush()
