@@ -77,6 +77,8 @@ func init() {
 	cmdChannelDelete.Flags.Var(&channelFlags.channel, "channel", "The channel to update.")
 }
 
+const channelHeader = "Label\tVersion\tPublish\tUpstream\n"
+
 func formatChannel(channel *update.AppChannel) string {
 	return fmt.Sprintf("%s\t%s\t%t\t%s\n", channel.Label, channel.Version, channel.Publish, channel.Upstream)
 }
@@ -91,7 +93,7 @@ func channelList(args []string, service *update.Service, out *tabwriter.Writer) 
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Fprint(out, "Label\tVersion\tPublish\tUpstream\n")
+	fmt.Fprint(out, channelHeader)
 	for _, channel := range list.Items {
 		fmt.Fprintf(out, "%s", formatChannel(channel))
 	}
@@ -117,6 +119,7 @@ func channelCreate(args []string, service *update.Service, out *tabwriter.Writer
 		log.Fatal(err)
 	}
 
+	fmt.Fprint(out, channelHeader)
 	fmt.Fprintf(out, "%s", formatChannel(channel))
 	out.Flush()
 	return OK
@@ -135,6 +138,7 @@ func channelUpdate(args []string, service *update.Service, out *tabwriter.Writer
 		log.Fatal(err)
 	}
 
+	fmt.Fprint(out, channelHeader)
 	fmt.Fprintf(out, "%s", formatChannel(channel))
 	out.Flush()
 	return OK
