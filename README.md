@@ -38,6 +38,4 @@ Example: `scripts/new-release 0.2.0+git`.
 
 [Using the Client](Documentation/client.md) - Read about all of the supported commands in `updateservicectl`
 
-[Example Upgrade Workflow](Documentation/example-container-update.md) - Walk through updating a set of containers running on CoreOS
-
 [Protocol](Documentation/protocol.md) - A technical document about the Omaha protocol
