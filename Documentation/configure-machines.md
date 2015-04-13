@@ -29,7 +29,7 @@ coreos:
     server: https://customer.update.core-os.net/v1/update/
 ```
 
-### Join Newly Createds Group
+### Join Newly Created Group
 
 Set the value of `server` to the custom address of your installation and `group` to the unique identifier of your application group.
 
