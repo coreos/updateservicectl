@@ -65,6 +65,14 @@ To apply the changes, run:
 sudo systemctl restart update-engine
 ```
 
+In addition to `GROUP=` and `SERVER=`,  a few other options exist but are set to defaults:
+
+`COREOS_RELEASE_APPID`: the CoreOS app ID, `e96281a6-d1af-4bde-9a0a-97b76e56dc57`
+
+`COREOS_RELEASE_VERSION`: defaults to the version of CoreOS you're running
+
+`COREOS_RELEASE_BOARD`: defaults to `amd64-usr`
+
 ## Viewing Machines in CoreUpdate
 
 Each machine should check in about 10 minutes after boot and roughly every hour after that. If you'd like to see it sooner, you can force an update check, which will skip any rate-limiting settings that are configured.
