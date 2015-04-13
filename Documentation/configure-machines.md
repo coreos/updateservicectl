@@ -4,7 +4,34 @@ Configuring new or existing CoreOS machines to communicate with a [CoreUpdate](h
 
 ## New Machines
 
-New servers can be configured to communicate with your CoreUpdate installation by using [cloud-config](https://coreos.com/docs/cluster-management/setup/cloudinit-cloud-config). Set the value of `server` to the custom address of your installation and `group` to the unique identifier of your application group.
+New servers can be configured to communicate with your CoreUpdate installation by using [cloud-config](https://coreos.com/docs/cluster-management/setup/cloudinit-cloud-config).
+
+By default, your installation has a single application, CoreOS, with the identifier `e96281a6-d1af-4bde-9a0a-97b76e56dc57`. This ID is universal and all CoreOS machines are configured to use it. Within the CoreOS application, there are several application groups which have been created to match CoreOS channels (`alpha`, `beta`, etc). Each of these groups have a unique identifier that is a generated UUID or custom string, which must be configured on your CoreOS machines.
+
+In addition to the default groups, you may choose to create your own group that is configured to use a specific channel, rate-limit and other settings.
+
+### Join Preconfigured/Default Group
+
+Set the value of `server` to the custom address of your installation and `group` to one of the default application groups: `alpha`, `beta`, or `stable`.
+
+For example, here is what the Alpha group looks like in CoreUpdate:
+
+![CoreUpdate Group](img/coreupdate-group-alpha.png)
+
+Here's the cloud-config to use:
+
+```
+#cloud-config
+
+coreos:
+  update:
+    group: alpha
+    server: https://customer.update.core-os.net/v1/update/
+```
+
+### Join Newly Createds Group
+
+Set the value of `server` to the custom address of your installation and `group` to the unique identifier of your application group.
 
 For example, here is what "NYC Production" looks like in CoreUpdate:
 
