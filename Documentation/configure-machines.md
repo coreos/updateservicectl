@@ -6,11 +6,13 @@ Configuring new or existing CoreOS machines to communicate with a [CoreUpdate](h
 
 New servers can be configured to communicate with your CoreUpdate installation by using [cloud-config](https://coreos.com/docs/cluster-management/setup/cloudinit-cloud-config).
 
-By default, your installation has a single application, CoreOS, with the identifier `e96281a6-d1af-4bde-9a0a-97b76e56dc57`. This ID is universal and all CoreOS machines are configured to use it. Within the CoreOS application, there are several application groups which have been created to match CoreOS channels (`alpha`, `beta`, etc). Each of these groups have a unique identifier that is a generated UUID or custom string, which must be configured on your CoreOS machines.
+By default, your installation has a single application, CoreOS, with the identifier `e96281a6-d1af-4bde-9a0a-97b76e56dc57`. This ID is universal and all CoreOS machines are configured to use it. Within the CoreOS application, there are several application groups which have been created to match CoreOS channels with the indentifiers `alpha`, `beta`, and `stable`.
 
-In addition to the default groups, you may choose to create your own group that is configured to use a specific channel, rate-limit and other settings.
+In addition to the default groups, you may choose to create your own group that is configured to use a specific channel, rate-limit and other settings. Groups that you create will have a unique identifier that is a generated UUID or you may provide a custom string.
 
-### Join Preconfigured/Default Group
+To place a CoreOS machine in one of these groups, you must configure the update settings via cloud-config or a file on disk.
+
+### Join Preconfigured Group
 
 Set the value of `server` to the custom address of your installation and `group` to one of the default application groups: `alpha`, `beta`, or `stable`.
 
@@ -29,7 +31,7 @@ coreos:
     server: https://customer.update.core-os.net/v1/update/
 ```
 
-### Join Newly Created Group
+### Join Custom Group
 
 Set the value of `server` to the custom address of your installation and `group` to the unique identifier of your application group.
 
@@ -65,7 +67,7 @@ To apply the changes, run:
 sudo systemctl restart update-engine
 ```
 
-In addition to `GROUP=` and `SERVER=`,  a few other options exist but are set to defaults:
+In addition to `GROUP=` and `SERVER=`,  a few other internal values exist, but are set to defaults. You shouldn't have to modify these.
 
 `COREOS_RELEASE_APPID`: the CoreOS app ID, `e96281a6-d1af-4bde-9a0a-97b76e56dc57`
 
