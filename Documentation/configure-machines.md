@@ -18,7 +18,7 @@ Set the value of `server` to the custom address of your installation and `group`
 
 For example, here is what the Alpha group looks like in CoreUpdate:
 
-![CoreUpdate Group](img/coreupdate-group-alpha.png)
+![CoreUpdate Group](img/coreupdate-group-default.png)
 
 Here's the cloud-config to use:
 
