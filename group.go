@@ -24,7 +24,7 @@ var (
 
 	cmdGroup = &Command{
 		Name:    "group",
-		Summary: "Operations that manage groups in an applciation.",
+		Summary: "Operations that manage groups in an application.",
 		Subcommands: []*Command{
 			cmdGroupList,
 			cmdGroupCreate,
