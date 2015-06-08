@@ -3,14 +3,14 @@
 The update service is a tool that helps you manage large-scale rolling upgrades of software. The service consists of three main parts:
 
 1. A distributed web application that runs on top of fleet and docker.
-2. `updateservicectl` a CLI interface to the service
+2. [updateservicectl](https://github.com/coreos/updateservicectl/releases) a CLI interface to the service
 3. Communication specification for your applications to report their current status and receive notifications of an available update.
 
 The update service is based on an open protocol from Google. This protocol powers updates for the Chrome browser, ChromeOS, Google Earth and more.
 
 ## Accessing the Update Service
 
-The update service is an optional hosted service provided by CoreOS and is not included in a standard CoreOS cluster. Head over to the [Update Service]() page for more details.
+The update service is an optional hosted service provided by CoreOS and is not included in a standard CoreOS cluster. Head over to the [Update Service](https://coreos.com/products) page for more details.
 
 Authentication for `updateservicectl` is done with a username and API key combination. Additional users and API keys can be provisioned by an existing user. Substitute the server address you were given during the activation process:
 
