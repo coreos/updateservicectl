@@ -1,6 +1,9 @@
 # Configure Machines to Use CoreUpdate
 
-Configuring new or existing CoreOS machines to communicate with a [CoreUpdate](https://coreos.com/products/coreupdate) instance is a simple change to a configuration file.
+Configuring new or existing CoreOS machines to communicate with a [CoreUpdate](https://coreos.com/products/coreupdate) instance is a simple change to a configuration file.  Prior to making these changes ensure that you have the following information:
+
+  - The server endpoint (in this example we will use `customer.update.core-os.net` as our example hostname)
+  - The group identifier you wish to use. By default, the identifier for a group of machines is a UUID generated when the group was created. You may optionally specify a unique string which contains the characters `a-Z`, `0-9`, `-`, and `_`. This can be seen in practice with the default groups "alpha", "beta", and "stable" that map to those respective channels. The uniqueness of the string need only be in scope of the CoreUpdate deployment, not globally.
 
 ## New Machines
 
