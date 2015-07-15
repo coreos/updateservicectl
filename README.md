@@ -14,7 +14,7 @@ The update service is a tool that helps you manage large-scale rolling upgrades 
 
 ## Getting Started
 
-Once you have gained access to your update service installation, check out the [Getting Started guide](Documentation/getting-started.md) that will walk you through configuration of your applications, groups and update settings.
+Once you have gained access to your update service installation, check out the [Getting Started guide](http://coreos.com/products/coreupdate/docs/latest/getting-started.html) that will walk you through configuration of your applications, groups and update settings.
 
 ## Building the Client
 
@@ -36,6 +36,6 @@ Example: `scripts/new-release 0.2.0+git`.
 
 ## Documentation
 
-[Using the Client](Documentation/client.md) - Read about all of the supported commands in `updateservicectl`
+[Using the Client](http://coreos.com/products/coreupdate/docs/latest/updatectl-client.md) - Read about all of the supported commands in `updateservicectl`
 
-[Protocol](Documentation/protocol.md) - A technical document about the Omaha protocol
+[Protocol](http://coreos.com/products/coreupdate/docs/latest/update-protocol.md) - A technical document about the Omaha protocol
