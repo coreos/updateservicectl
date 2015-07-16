@@ -36,6 +36,6 @@ Example: `scripts/new-release 0.2.0+git`.
 
 ## Documentation
 
-[Using the Client](http://coreos.com/products/coreupdate/docs/latest/updatectl-client.md) - Read about all of the supported commands in `updateservicectl`
+[Using the Client](http://coreos.com/products/coreupdate/docs/latest/updatectl-client.html) - Read about all of the supported commands in `updateservicectl`
 
-[Protocol](http://coreos.com/products/coreupdate/docs/latest/update-protocol.md) - A technical document about the Omaha protocol
+[Protocol](http://coreos.com/products/coreupdate/docs/latest/update-protocol.html) - A technical document about the Omaha protocol
