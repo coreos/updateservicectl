@@ -32,8 +32,8 @@
 			"Rev": "ecf753e7c962639ab5a1fb46f7da627d4c0a04b8"
 		},
 		{
-			"ImportPath": "github.com/tent/hawk-go",
-			"Rev": "4e63675e10dc4d456117c22910a1431a507a99ec"
+			"ImportPath": "github.com/coreos/hawk-go",
+			"Rev": "e2691d10fc256cc09e895f3417a51db81e638012"
 		}
 	]
 }
