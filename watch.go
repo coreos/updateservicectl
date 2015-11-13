@@ -170,7 +170,10 @@ func watch(args []string, service *update.Service, out *tabwriter.Writer) int {
 		fmt.Fprintf(os.Stderr, err.Error())
 		os.Exit(1)
 	}
-	runCmd(args[0], args[1:], appId, version, "", updateCheck)
+
+	if updateCheck.Status != "noupdate" && updateCheck.Status == "error-version" {
+		runCmd(args[0], args[1:], appId, version, "", updateCheck)
+	}
 
 	for {
 		select {
