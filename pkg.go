@@ -424,7 +424,14 @@ func createPackageFromInfoFile(filename string, service *update.Service, handleE
 			pkg.AppId, pkg.Version,
 			path.Base(pkg.Url),
 		)
-		pkg.Url = path.Join(baseUrl, filename)
+
+		u, err := url.Parse(baseUrl)
+		if err != nil {
+			handleError(err)
+			return
+		}
+		u.Path = path.Join(u.Path, filename)
+		pkg.Url = u.String()
 	}
 
 	// Add package
