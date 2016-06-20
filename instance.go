@@ -336,7 +336,7 @@ func instanceFake(args []string, service *update.Service, out *tabwriter.Writer)
 
 	for i := 0; i < instanceFlags.clientsPerApp; i++ {
 		c := &Client{
-			Id:             fmt.Sprintf("{fake-client-%03d}", i),
+			Id:             uuid.New(),
 			SessionId:      uuid.New(),
 			Version:        instanceFlags.version,
 			AppId:          instanceFlags.appId.String(),
