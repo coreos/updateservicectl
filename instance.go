@@ -7,6 +7,7 @@ import (
 	"log"
 	"math/rand"
 	"net/http"
+	"strings"
 	"text/tabwriter"
 	"time"
 
@@ -336,7 +337,7 @@ func instanceFake(args []string, service *update.Service, out *tabwriter.Writer)
 
 	for i := 0; i < instanceFlags.clientsPerApp; i++ {
 		c := &Client{
-			Id:             uuid.New(),
+			Id:             strings.Replace(uuid.New(), "-", "", -1),
 			SessionId:      uuid.New(),
 			Version:        instanceFlags.version,
 			AppId:          instanceFlags.appId.String(),
