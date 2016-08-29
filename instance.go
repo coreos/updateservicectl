@@ -64,7 +64,20 @@ var (
 		Description: "Simulate multiple fake instances.",
 		Run:         instanceFake,
 	}
+
+	prefix = "fake-" + randomHex(6)
 )
+
+func randomHex(n int) string {
+	rand.Seed(time.Now().UnixNano())
+
+	chars := "abcdef0123456789"
+	b := make([]byte, n)
+	for i := range b {
+		b[i] = chars[rand.Intn(len(chars))]
+	}
+	return string(b)
+}
 
 func init() {
 	cmdInstanceListUpdates.Flags.Var(&instanceFlags.groupId, "group-id", "Group id")
@@ -337,7 +350,7 @@ func instanceFake(args []string, service *update.Service, out *tabwriter.Writer)
 
 	for i := 0; i < instanceFlags.clientsPerApp; i++ {
 		c := &Client{
-			Id:             strings.Replace(uuid.New(), "-", "", -1),
+			Id:             prefix + "-" + strings.Replace(uuid.New(), "-", "", -1),
 			SessionId:      uuid.New(),
 			Version:        instanceFlags.version,
 			AppId:          instanceFlags.appId.String(),
