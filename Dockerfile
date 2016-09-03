@@ -1,4 +1,4 @@
-FROM google/golang
+FROM golang:1.6
 
 WORKDIR /gopath/src/github.com/coreos/updateservicectl
 ADD . /gopath/src/github.com/coreos/updateservicectl
