@@ -30,10 +30,10 @@ var (
 		clientId string
 	}
 	cmdWatch = &Command{
-		Name:        "watch",
-		Usage:       "[OPTION]... <cmd> <args>",
+		Name:    "watch",
+		Usage:   "[OPTION]... <cmd> <args>",
 		Summary: `Watch for app versions and exec a given command.`,
-		Run:         watch,
+		Run:     watch,
 	}
 )
 
@@ -171,7 +171,7 @@ func watch(args []string, service *update.Service, out *tabwriter.Writer) int {
 		os.Exit(1)
 	}
 
-	if updateCheck.Status != "noupdate" && updateCheck.Status == "error-version" {
+	if updateCheck.Status != "noupdate" && updateCheck.Status != "error-version" {
 		runCmd(args[0], args[1:], appId, version, "", updateCheck)
 	}
 
