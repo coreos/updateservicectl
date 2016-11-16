@@ -70,7 +70,13 @@ func fetchUpdateCheck(server string, appID string, groupID string, clientID stri
 		fmt.Fprintf(os.Stderr, "Request: %s%s\n", xml.Header, raw)
 	}
 
-	resp, err := client.Post(server+"/v1/update/", "text/xml", bytes.NewReader(raw))
+	u, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+	u.Path = path.Join(u.Path, "/v1/update")
+
+	resp, err := client.Post(u.String(), "text/xml", bytes.NewReader(raw))
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		return nil, err
