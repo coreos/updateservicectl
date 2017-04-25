@@ -10,7 +10,7 @@ import (
 
 var (
 	upstreamFlags struct {
-		id    int64
+		id    StringFlag
 		url   StringFlag
 		label StringFlag
 	}
@@ -60,11 +60,11 @@ func init() {
 	cmdUpstreamCreate.Flags.Var(&upstreamFlags.url, "url", "The root url of the upstream Update Service.")
 	cmdUpstreamCreate.Flags.Var(&upstreamFlags.label, "label", "The label of the upstream Update Service.")
 
-	cmdUpstreamUpdate.Flags.Int64Var(&upstreamFlags.id, "id", 0, "The id of the upstream to update.")
+	cmdUpstreamUpdate.Flags.Var(&upstreamFlags.id, "id", "The id of the upstream to update.")
 	cmdUpstreamUpdate.Flags.Var(&upstreamFlags.url, "url", "The root url of the upstream Update Service.")
 	cmdUpstreamUpdate.Flags.Var(&upstreamFlags.label, "label", "The label of the upstream Update Service.")
 
-	cmdUpstreamDelete.Flags.Int64Var(&upstreamFlags.id, "id", 0, "The id of the upstream to delete.")
+	cmdUpstreamDelete.Flags.Var(&upstreamFlags.id, "id", "The id of the upstream to delete.")
 }
 
 func writeUpstreamHeading(out *tabwriter.Writer) {
@@ -72,7 +72,7 @@ func writeUpstreamHeading(out *tabwriter.Writer) {
 }
 
 func formatUpstream(us *update.Upstream) string {
-	return fmt.Sprintf("%d\t%s\t%s\n", us.Id, us.Url, us.Label)
+	return fmt.Sprintf("%s\t%s\t%s\n", us.Id, us.Url, us.Label)
 }
 
 func upstreamCreate(args []string, service *update.Service, out *tabwriter.Writer) int {
@@ -99,12 +99,12 @@ func upstreamCreate(args []string, service *update.Service, out *tabwriter.Write
 }
 
 func upstreamUpdate(args []string, service *update.Service, out *tabwriter.Writer) int {
-	if upstreamFlags.url.Get() == nil || upstreamFlags.id == 0 {
+	if upstreamFlags.url.Get() == nil || upstreamFlags.id.Get() == nil {
 		return ERROR_USAGE
 	}
 
 	req := &update.Upstream{
-		Id:    upstreamFlags.id,
+		Id:    upstreamFlags.id.String(),
 		Url:   upstreamFlags.url.String(),
 		Label: upstreamFlags.label.String(),
 	}
@@ -123,11 +123,11 @@ func upstreamUpdate(args []string, service *update.Service, out *tabwriter.Write
 }
 
 func upstreamDelete(args []string, service *update.Service, out *tabwriter.Writer) int {
-	if upstreamFlags.id == 0 {
+	if upstreamFlags.id.Get() == nil {
 		return ERROR_USAGE
 	}
 
-	call := service.Upstream.Delete(upstreamFlags.id)
+	call := service.Upstream.Delete(upstreamFlags.id.String())
 	upstream, err := call.Do()
 	if err != nil {
 		log.Fatal(err)

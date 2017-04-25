@@ -522,8 +522,7 @@
    "type": "object",
    "properties": {
     "id": {
-     "type": "integer",
-     "format": "int32"
+     "type": "string"
     },
     "label": {
      "type": "string"
@@ -1524,9 +1523,8 @@
      "description": "Delete an upstream.",
      "parameters": {
       "id": {
-       "type": "integer",
+       "type": "string",
        "required": true,
-       "format": "int32",
        "location": "path"
       },
       "label": {
@@ -1583,9 +1581,8 @@
      "description": "Update an upstream.",
      "parameters": {
       "id": {
-       "type": "integer",
+       "type": "string",
        "required": true,
-       "format": "int32",
        "location": "path"
       }
      },
