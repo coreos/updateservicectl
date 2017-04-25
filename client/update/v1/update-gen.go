@@ -425,7 +425,7 @@ type PublicPackageList struct {
 }
 
 type Upstream struct {
-	Id int64 `json:"id,omitempty"`
+	Id string `json:"id,omitempty"`
 
 	Label string `json:"label,omitempty"`
 
@@ -3301,12 +3301,12 @@ func (c *GroupRequestsVersionsRollupCall) Do() (*GroupRequestsRollup, error) {
 
 type UpstreamDeleteCall struct {
 	s    *Service
-	id   int64
+	id   string
 	opt_ map[string]interface{}
 }
 
 // Delete: Delete an upstream.
-func (r *UpstreamService) Delete(id int64) *UpstreamDeleteCall {
+func (r *UpstreamService) Delete(id string) *UpstreamDeleteCall {
 	c := &UpstreamDeleteCall{s: r.s, opt_: make(map[string]interface{})}
 	c.id = id
 	return c
@@ -3337,7 +3337,7 @@ func (c *UpstreamDeleteCall) Do() (*Upstream, error) {
 	urls := googleapi.ResolveRelative(c.s.BasePath, "upstream/{id}")
 	urls += "?" + params.Encode()
 	req, _ := http.NewRequest("DELETE", urls, body)
-	req.URL.Path = strings.Replace(req.URL.Path, "{id}", strconv.FormatInt(c.id, 10), 1)
+	req.URL.Path = strings.Replace(req.URL.Path, "{id}", url.QueryEscape(c.id), 1)
 	googleapi.SetOpaque(req.URL)
 	req.Header.Set("User-Agent", "google-api-go-client/0.5")
 	res, err := c.s.client.Do(req)
@@ -3362,10 +3362,9 @@ func (c *UpstreamDeleteCall) Do() (*Upstream, error) {
 	//   ],
 	//   "parameters": {
 	//     "id": {
-	//       "format": "int32",
 	//       "location": "path",
 	//       "required": true,
-	//       "type": "integer"
+	//       "type": "string"
 	//     },
 	//     "label": {
 	//       "location": "query",
@@ -3541,13 +3540,13 @@ func (c *UpstreamSyncCall) Do() (*UpstreamSyncResp, error) {
 
 type UpstreamUpdateCall struct {
 	s        *Service
-	id       int64
+	id       string
 	upstream *Upstream
 	opt_     map[string]interface{}
 }
 
 // Update: Update an upstream.
-func (r *UpstreamService) Update(id int64, upstream *Upstream) *UpstreamUpdateCall {
+func (r *UpstreamService) Update(id string, upstream *Upstream) *UpstreamUpdateCall {
 	c := &UpstreamUpdateCall{s: r.s, opt_: make(map[string]interface{})}
 	c.id = id
 	c.upstream = upstream
@@ -3566,7 +3565,7 @@ func (c *UpstreamUpdateCall) Do() (*Upstream, error) {
 	urls := googleapi.ResolveRelative(c.s.BasePath, "upstream/{id}")
 	urls += "?" + params.Encode()
 	req, _ := http.NewRequest("PUT", urls, body)
-	req.URL.Path = strings.Replace(req.URL.Path, "{id}", strconv.FormatInt(c.id, 10), 1)
+	req.URL.Path = strings.Replace(req.URL.Path, "{id}", url.QueryEscape(c.id), 1)
 	googleapi.SetOpaque(req.URL)
 	req.Header.Set("Content-Type", ctype)
 	req.Header.Set("User-Agent", "google-api-go-client/0.5")
@@ -3592,10 +3591,9 @@ func (c *UpstreamUpdateCall) Do() (*Upstream, error) {
 	//   ],
 	//   "parameters": {
 	//     "id": {
-	//       "format": "int32",
 	//       "location": "path",
 	//       "required": true,
-	//       "type": "integer"
+	//       "type": "string"
 	//     }
 	//   },
 	//   "path": "upstream/{id}",
