@@ -15,6 +15,7 @@ var (
 		channel        StringFlag
 		appId          StringFlag
 		groupId        StringFlag
+		oemBlacklist   StringFlag
 		start          int64
 		end            int64
 		resolution     int64
@@ -113,6 +114,8 @@ func init() {
 		"Label describing the group")
 	cmdGroupUpdate.Flags.Var(&groupFlags.channel, "channel",
 		"Channel to associate with the group.")
+	cmdGroupUpdate.Flags.Var(&groupFlags.oemBlacklist, "oem-blacklist",
+		"Comma-separated list of OEMs to exclude from updates.")
 	cmdGroupUpdate.Flags.Int64Var(&groupFlags.updateCount, "update-count",
 		-1, "Number of instances per interval")
 	cmdGroupUpdate.Flags.Int64Var(&groupFlags.updateInterval,
@@ -348,6 +351,9 @@ func groupUpdate(args []string, service *update.Service, out *tabwriter.Writer) 
 	}
 	if groupFlags.channel.Get() != nil {
 		group.ChannelId = groupFlags.channel.String()
+	}
+	if groupFlags.oemBlacklist.Get() != nil {
+		group.OemBlacklist = groupFlags.oemBlacklist.String()
 	}
 
 	// set update pooling based on other flags
