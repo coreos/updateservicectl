@@ -359,16 +359,9 @@
     "oemBlacklist": {
      "type": "string"
     },
-    "updateCount": {
+    "updatePercent": {
      "type": "integer",
-     "format": "int32"
-    },
-    "updateInterval": {
-     "type": "integer",
-     "format": "int32"
-    },
-    "updatePooling": {
-     "type": "boolean"
+     "format": "float64"
     },
     "updatesPaused": {
      "type": "boolean"
@@ -1215,18 +1208,9 @@
        "type": "string",
        "location": "query"
       },
-      "updateCount": {
+      "updatePercent": {
        "type": "integer",
-       "format": "int32",
-       "location": "query"
-      },
-      "updateInterval": {
-       "type": "integer",
-       "format": "int32",
-       "location": "query"
-      },
-      "updatePooling": {
-       "type": "boolean",
+       "format": "float64",
        "location": "query"
       },
       "updatesPaused": {
@@ -1270,18 +1254,9 @@
        "type": "string",
        "location": "query"
       },
-      "updateCount": {
+      "updatePercent": {
        "type": "integer",
-       "format": "int32",
-       "location": "query"
-      },
-      "updateInterval": {
-       "type": "integer",
-       "format": "int32",
-       "location": "query"
-      },
-      "updatePooling": {
-       "type": "boolean",
+       "format": "float64",
        "location": "query"
       },
       "updatesPaused": {
