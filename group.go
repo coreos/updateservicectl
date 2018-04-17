@@ -354,7 +354,7 @@ func groupUpdate(args []string, service *update.Service, out *tabwriter.Writer) 
 		log.Fatal(err)
 	}
 
-	fmt.Fprintln(out, groupHeader)
+	fmt.Fprint(out, groupHeader)
 	fmt.Fprintf(out, "%s", formatGroup(group))
 
 	out.Flush()
