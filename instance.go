@@ -64,20 +64,7 @@ var (
 		Description: "Simulate multiple fake instances.",
 		Run:         instanceFake,
 	}
-
-	prefix = "fake-" + randomHex(6)
 )
-
-func randomHex(n int) string {
-	rand.Seed(time.Now().UnixNano())
-
-	chars := "abcdef0123456789"
-	b := make([]byte, n)
-	for i := range b {
-		b[i] = chars[rand.Intn(len(chars))]
-	}
-	return string(b)
-}
 
 func init() {
 	cmdInstanceListUpdates.Flags.Var(&instanceFlags.groupId, "group-id", "Group id")
@@ -339,6 +326,17 @@ func randSleep(n, m int) {
 	time.Sleep(time.Duration(r) * time.Second)
 }
 
+func randomHex(n int) string {
+	rand.Seed(time.Now().UnixNano())
+
+	chars := "abcdef0123456789"
+	b := make([]byte, n)
+	for i := range b {
+		b[i] = chars[rand.Intn(len(chars))]
+	}
+	return string(b)
+}
+
 func instanceFake(args []string, service *update.Service, out *tabwriter.Writer) int {
 	if instanceFlags.appId.Get() == nil || instanceFlags.groupId.Get() == nil {
 		return ERROR_USAGE
@@ -348,9 +346,14 @@ func instanceFake(args []string, service *update.Service, out *tabwriter.Writer)
 		server: globalFlags.Server,
 	}
 
+	// generate a prefix with a well-known string and a constant sequence of hex
+	// this lets us easily recognize fake instances
+	// it still has to be a valid uuid though
+	prefix := "deadbeef" + randomHex(6)
+
 	for i := 0; i < instanceFlags.clientsPerApp; i++ {
 		c := &Client{
-			Id:             prefix + "-" + strings.Replace(uuid.New(), "-", "", -1),
+			Id:             prefix + strings.Replace(uuid.New(), "-", "", -1)[14:],
 			SessionId:      uuid.New(),
 			Version:        instanceFlags.version,
 			AppId:          instanceFlags.appId.String(),
