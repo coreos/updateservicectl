@@ -9,10 +9,10 @@ package update
 
 import (
 	"bytes"
-	"github.com/coreos/updateservicectl/Godeps/_workspace/src/code.google.com/p/google-api-go-client/googleapi"
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/coreos/updateservicectl/Godeps/_workspace/src/code.google.com/p/google-api-go-client/googleapi"
 	"io"
 	"net/http"
 	"net/url"
@@ -351,11 +351,7 @@ type Group struct {
 
 	OemBlacklist string `json:"oemBlacklist,omitempty"`
 
-	UpdateCount int64 `json:"updateCount,omitempty"`
-
-	UpdateInterval int64 `json:"updateInterval,omitempty"`
-
-	UpdatePooling bool `json:"updatePooling,omitempty"`
+	UpdatePercent float64 `json:"updatePercent,omitempty"`
 
 	UpdatesPaused bool `json:"updatesPaused,omitempty"`
 }
@@ -2468,21 +2464,9 @@ func (c *GroupDeleteCall) OemBlacklist(oemBlacklist string) *GroupDeleteCall {
 	return c
 }
 
-// UpdateCount sets the optional parameter "updateCount":
-func (c *GroupDeleteCall) UpdateCount(updateCount int64) *GroupDeleteCall {
-	c.opt_["updateCount"] = updateCount
-	return c
-}
-
-// UpdateInterval sets the optional parameter "updateInterval":
-func (c *GroupDeleteCall) UpdateInterval(updateInterval int64) *GroupDeleteCall {
-	c.opt_["updateInterval"] = updateInterval
-	return c
-}
-
-// UpdatePooling sets the optional parameter "updatePooling":
-func (c *GroupDeleteCall) UpdatePooling(updatePooling bool) *GroupDeleteCall {
-	c.opt_["updatePooling"] = updatePooling
+// UpdatePercent sets the optional parameter "updatePercent":
+func (c *GroupDeleteCall) UpdatePercent(updatePercent float64) *GroupDeleteCall {
+	c.opt_["updatePercent"] = updatePercent
 	return c
 }
 
@@ -2505,14 +2489,8 @@ func (c *GroupDeleteCall) Do() (*Group, error) {
 	if v, ok := c.opt_["oemBlacklist"]; ok {
 		params.Set("oemBlacklist", fmt.Sprintf("%v", v))
 	}
-	if v, ok := c.opt_["updateCount"]; ok {
-		params.Set("updateCount", fmt.Sprintf("%v", v))
-	}
-	if v, ok := c.opt_["updateInterval"]; ok {
-		params.Set("updateInterval", fmt.Sprintf("%v", v))
-	}
-	if v, ok := c.opt_["updatePooling"]; ok {
-		params.Set("updatePooling", fmt.Sprintf("%v", v))
+	if v, ok := c.opt_["updatePercent"]; ok {
+		params.Set("updatePercent", fmt.Sprintf("%v", v))
 	}
 	if v, ok := c.opt_["updatesPaused"]; ok {
 		params.Set("updatesPaused", fmt.Sprintf("%v", v))
@@ -2568,19 +2546,10 @@ func (c *GroupDeleteCall) Do() (*Group, error) {
 	//       "location": "query",
 	//       "type": "string"
 	//     },
-	//     "updateCount": {
-	//       "format": "int32",
+	//     "updatePercent": {
+	//       "format": "float64",
 	//       "location": "query",
 	//       "type": "integer"
-	//     },
-	//     "updateInterval": {
-	//       "format": "int32",
-	//       "location": "query",
-	//       "type": "integer"
-	//     },
-	//     "updatePooling": {
-	//       "location": "query",
-	//       "type": "boolean"
 	//     },
 	//     "updatesPaused": {
 	//       "location": "query",
@@ -2630,21 +2599,9 @@ func (c *GroupGetCall) OemBlacklist(oemBlacklist string) *GroupGetCall {
 	return c
 }
 
-// UpdateCount sets the optional parameter "updateCount":
-func (c *GroupGetCall) UpdateCount(updateCount int64) *GroupGetCall {
-	c.opt_["updateCount"] = updateCount
-	return c
-}
-
-// UpdateInterval sets the optional parameter "updateInterval":
-func (c *GroupGetCall) UpdateInterval(updateInterval int64) *GroupGetCall {
-	c.opt_["updateInterval"] = updateInterval
-	return c
-}
-
-// UpdatePooling sets the optional parameter "updatePooling":
-func (c *GroupGetCall) UpdatePooling(updatePooling bool) *GroupGetCall {
-	c.opt_["updatePooling"] = updatePooling
+// UpdatePercent sets the optional parameter "updatePercent":
+func (c *GroupGetCall) UpdatePercent(updatePercent float64) *GroupGetCall {
+	c.opt_["updatePercent"] = updatePercent
 	return c
 }
 
@@ -2667,14 +2624,8 @@ func (c *GroupGetCall) Do() (*Group, error) {
 	if v, ok := c.opt_["oemBlacklist"]; ok {
 		params.Set("oemBlacklist", fmt.Sprintf("%v", v))
 	}
-	if v, ok := c.opt_["updateCount"]; ok {
-		params.Set("updateCount", fmt.Sprintf("%v", v))
-	}
-	if v, ok := c.opt_["updateInterval"]; ok {
-		params.Set("updateInterval", fmt.Sprintf("%v", v))
-	}
-	if v, ok := c.opt_["updatePooling"]; ok {
-		params.Set("updatePooling", fmt.Sprintf("%v", v))
+	if v, ok := c.opt_["updatePercent"]; ok {
+		params.Set("updatePercent", fmt.Sprintf("%v", v))
 	}
 	if v, ok := c.opt_["updatesPaused"]; ok {
 		params.Set("updatesPaused", fmt.Sprintf("%v", v))
@@ -2730,19 +2681,10 @@ func (c *GroupGetCall) Do() (*Group, error) {
 	//       "location": "query",
 	//       "type": "string"
 	//     },
-	//     "updateCount": {
-	//       "format": "int32",
+	//     "updatePercent": {
+	//       "format": "float64",
 	//       "location": "query",
 	//       "type": "integer"
-	//     },
-	//     "updateInterval": {
-	//       "format": "int32",
-	//       "location": "query",
-	//       "type": "integer"
-	//     },
-	//     "updatePooling": {
-	//       "location": "query",
-	//       "type": "boolean"
 	//     },
 	//     "updatesPaused": {
 	//       "location": "query",

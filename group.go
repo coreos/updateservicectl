@@ -11,16 +11,15 @@ import (
 
 var (
 	groupFlags struct {
-		label          StringFlag
-		channel        StringFlag
-		appId          StringFlag
-		groupId        StringFlag
-		oemBlacklist   StringFlag
-		start          int64
-		end            int64
-		resolution     int64
-		updateCount    int64
-		updateInterval int64
+		label         StringFlag
+		channel       StringFlag
+		appId         StringFlag
+		groupId       StringFlag
+		oemBlacklist  StringFlag
+		start         int64
+		end           int64
+		resolution    int64
+		updatePercent float64
 	}
 
 	cmdGroup = &Command{
@@ -116,10 +115,8 @@ func init() {
 		"Channel to associate with the group.")
 	cmdGroupUpdate.Flags.Var(&groupFlags.oemBlacklist, "oem-blacklist",
 		"Comma-separated list of OEMs to exclude from updates.")
-	cmdGroupUpdate.Flags.Int64Var(&groupFlags.updateCount, "update-count",
-		-1, "Number of instances per interval")
-	cmdGroupUpdate.Flags.Int64Var(&groupFlags.updateInterval,
-		"update-interval", -1, "Interval between updates")
+	cmdGroupUpdate.Flags.Float64Var(&groupFlags.updatePercent,
+		"update-percent", -1, "Percentage of machines to update")
 
 	cmdGroupPause.Flags.Var(&groupFlags.appId, "app-id",
 		"Application containing the group to pause.")
@@ -154,13 +151,13 @@ func init() {
 		"End date filter")
 }
 
-const groupHeader = "Label\tApp\tChannel\tId\tPaused\tCount\tInterval\n"
+const groupHeader = "Label\tApp\tChannel\tId\tPaused\tPercent\n"
 
 func formatGroup(group *update.Group) string {
-	return fmt.Sprintf("%s\t%s\t%s\t%s\t%s\t%v\t%v\n",
+	return fmt.Sprintf("%s\t%s\t%s\t%s\t%s\t%v\n",
 		group.Label, group.AppId, group.ChannelId,
 		group.Id, strconv.FormatBool(group.UpdatesPaused),
-		group.UpdateCount, group.UpdateInterval)
+		group.UpdatePercent)
 }
 
 func groupList(args []string, service *update.Service, out *tabwriter.Writer) int {
@@ -337,14 +334,8 @@ func groupUpdate(args []string, service *update.Service, out *tabwriter.Writer) 
 		log.Fatal(err)
 	}
 
-	checkUpdatePooling := false
-	if groupFlags.updateCount != -1 {
-		group.UpdateCount = groupFlags.updateCount
-		checkUpdatePooling = true
-	}
-	if groupFlags.updateInterval != -1 {
-		group.UpdateInterval = groupFlags.updateInterval
-		checkUpdatePooling = true
+	if groupFlags.updatePercent != -1 {
+		group.UpdatePercent = groupFlags.updatePercent
 	}
 	if groupFlags.label.Get() != nil {
 		group.Label = groupFlags.label.String()
@@ -356,16 +347,6 @@ func groupUpdate(args []string, service *update.Service, out *tabwriter.Writer) 
 		group.OemBlacklist = groupFlags.oemBlacklist.String()
 	}
 
-	// set update pooling based on other flags
-	// this only changes if the user changed a value
-	if checkUpdatePooling {
-		if group.UpdateCount == 0 && group.UpdateInterval == 0 {
-			group.UpdatePooling = false
-		} else {
-			group.UpdatePooling = true
-		}
-	}
-
 	updateCall := service.Group.Patch(groupFlags.appId.String(), groupFlags.groupId.String(), group)
 	group, err = updateCall.Do()
 
@@ -373,7 +354,7 @@ func groupUpdate(args []string, service *update.Service, out *tabwriter.Writer) 
 		log.Fatal(err)
 	}
 
-	fmt.Fprintln(out, groupHeader)
+	fmt.Fprint(out, groupHeader)
 	fmt.Fprintf(out, "%s", formatGroup(group))
 
 	out.Flush()
