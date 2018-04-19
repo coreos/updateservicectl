@@ -4,6 +4,12 @@
 let you manage users, groups, packages and write a very simple client that gets
 its state via environment variables.
 
+## Compatibility with CoreUpdate versions
+
+`updateservicectl v2.0.0` is compatible with `CoreUpdate v2.2.0` or newer.
+
+`updateservicectl v1.4.0` is compatible with `CoreUpdate v2.1.1` or older.
+
 ## About the Update Service
 
 The update service is a tool that helps you manage large-scale rolling upgrades of software. The service consists of three main parts:
