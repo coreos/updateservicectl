@@ -5,7 +5,8 @@ import (
 	"log"
 	"text/tabwriter"
 
-	"github.com/coreos/updateservicectl/Godeps/_workspace/src/code.google.com/p/go-uuid/uuid"
+	"github.com/pborman/uuid"
+
 	"github.com/coreos/updateservicectl/client/update/v1"
 )
 

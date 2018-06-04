@@ -11,8 +11,9 @@ import (
 	"text/tabwriter"
 	"time"
 
-	"github.com/coreos/updateservicectl/Godeps/_workspace/src/code.google.com/p/go-uuid/uuid"
-	"github.com/coreos/updateservicectl/Godeps/_workspace/src/github.com/coreos/go-omaha/omaha"
+	"github.com/coreos/go-omaha/omaha"
+	"github.com/pborman/uuid"
+
 	update "github.com/coreos/updateservicectl/client/update/v1"
 )
 
