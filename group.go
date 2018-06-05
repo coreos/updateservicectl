@@ -34,6 +34,7 @@ var (
 			cmdGroupUnpause,
 			cmdGroupEvents,
 			cmdGroupVersions,
+			cmdGroupPercent,
 		},
 	}
 
@@ -85,6 +86,12 @@ var (
 		Summary: "List events from clients by time.",
 		Run:     groupEvents,
 	}
+	cmdGroupPercent = &Command{
+		Name:    "group percent",
+		Usage:   "[OPTION]...",
+		Summary: "Set the update percentage for a group.",
+		Run:     groupPercent,
+	}
 )
 
 func init() {
@@ -115,8 +122,6 @@ func init() {
 		"Channel to associate with the group.")
 	cmdGroupUpdate.Flags.Var(&groupFlags.oemBlacklist, "oem-blacklist",
 		"Comma-separated list of OEMs to exclude from updates.")
-	cmdGroupUpdate.Flags.Float64Var(&groupFlags.updatePercent,
-		"update-percent", -1, "Percentage of machines to update")
 
 	cmdGroupPause.Flags.Var(&groupFlags.appId, "app-id",
 		"Application containing the group to pause.")
@@ -149,6 +154,13 @@ func init() {
 		"Start date filter")
 	cmdGroupEvents.Flags.Int64Var(&groupFlags.end, "end", 0,
 		"End date filter")
+
+	cmdGroupPercent.Flags.Var(&groupFlags.appId, "app-id",
+		"Application containing the group.")
+	cmdGroupPercent.Flags.Var(&groupFlags.groupId, "group-id",
+		"ID for the group.")
+	cmdGroupPercent.Flags.Float64Var(&groupFlags.updatePercent,
+		"update-percent", -1, "Percentage of machines to update")
 }
 
 const groupHeader = "Label\tApp\tChannel\tId\tPaused\tPercent\n"
@@ -334,9 +346,6 @@ func groupUpdate(args []string, service *update.Service, out *tabwriter.Writer) 
 		log.Fatal(err)
 	}
 
-	if groupFlags.updatePercent != -1 {
-		group.UpdatePercent = groupFlags.updatePercent
-	}
 	if groupFlags.label.Get() != nil {
 		group.Label = groupFlags.label.String()
 	}
@@ -357,6 +366,31 @@ func groupUpdate(args []string, service *update.Service, out *tabwriter.Writer) 
 	fmt.Fprint(out, groupHeader)
 	fmt.Fprintf(out, "%s", formatGroup(group))
 
+	out.Flush()
+	return OK
+}
+
+func groupPercent(args []string, service *update.Service, out *tabwriter.Writer) int {
+	if groupFlags.appId.Get() == nil ||
+		groupFlags.groupId.Get() == nil ||
+		groupFlags.updatePercent == -1 {
+		return ERROR_USAGE
+	}
+
+	groupPercent := &update.GroupPercent{
+		AppId:         groupFlags.appId.String(),
+		Id:            groupFlags.groupId.String(),
+		UpdatePercent: groupFlags.updatePercent,
+	}
+
+	setCall := service.Group.Percent.Set(groupFlags.appId.String(), groupFlags.groupId.String(), groupPercent)
+	groupPercent, err := setCall.Do()
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	fmt.Fprintf(out, "update percent set to %f\n", groupPercent.UpdatePercent)
 	out.Flush()
 	return OK
 }
