@@ -163,13 +163,13 @@ func init() {
 		"update-percent", -1, "Percentage of machines to update")
 }
 
-const groupHeader = "Label\tApp\tChannel\tId\tPaused\tPercent\n"
+const groupHeader = "Label\tApp\tChannel\tId\tUpdates Paused\tPercent\tRollout Active\n"
 
 func formatGroup(group *update.Group) string {
-	return fmt.Sprintf("%s\t%s\t%s\t%s\t%s\t%v\n",
+	return fmt.Sprintf("%s\t%s\t%s\t%s\t%s\t%v\t%s\n",
 		group.Label, group.AppId, group.ChannelId,
 		group.Id, strconv.FormatBool(group.UpdatesPaused),
-		group.UpdatePercent)
+		group.UpdatePercent, strconv.FormatBool(group.RolloutActive))
 }
 
 func groupList(args []string, service *update.Service, out *tabwriter.Writer) int {
