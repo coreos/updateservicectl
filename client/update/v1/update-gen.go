@@ -159,14 +159,29 @@ type ClientupdateService struct {
 
 func NewGroupService(s *Service) *GroupService {
 	rs := &GroupService{s: s}
+	rs.Percent = NewGroupPercentService(s)
 	rs.Requests = NewGroupRequestsService(s)
+	rs.Rollout = NewGroupRolloutService(s)
 	return rs
 }
 
 type GroupService struct {
 	s *Service
 
+	Percent *GroupPercentService
+
 	Requests *GroupRequestsService
+
+	Rollout *GroupRolloutService
+}
+
+func NewGroupPercentService(s *Service) *GroupPercentService {
+	rs := &GroupPercentService{s: s}
+	return rs
+}
+
+type GroupPercentService struct {
+	s *Service
 }
 
 func NewGroupRequestsService(s *Service) *GroupRequestsService {
@@ -199,6 +214,27 @@ func NewGroupRequestsVersionsService(s *Service) *GroupRequestsVersionsService {
 }
 
 type GroupRequestsVersionsService struct {
+	s *Service
+}
+
+func NewGroupRolloutService(s *Service) *GroupRolloutService {
+	rs := &GroupRolloutService{s: s}
+	rs.Active = NewGroupRolloutActiveService(s)
+	return rs
+}
+
+type GroupRolloutService struct {
+	s *Service
+
+	Active *GroupRolloutActiveService
+}
+
+func NewGroupRolloutActiveService(s *Service) *GroupRolloutActiveService {
+	rs := &GroupRolloutActiveService{s: s}
+	return rs
+}
+
+type GroupRolloutActiveService struct {
 	s *Service
 }
 
@@ -770,6 +806,48 @@ func (s *ClientUpdateList) MarshalJSON() ([]byte, error) {
 	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
+type Frame struct {
+	Duration int64 `json:"duration,omitempty,string"`
+
+	Percent float64 `json:"percent,omitempty"`
+
+	// ForceSendFields is a list of field names (e.g. "Duration") to
+	// unconditionally include in API requests. By default, fields with
+	// empty values are omitted from API requests. However, any non-pointer,
+	// non-interface field appearing in ForceSendFields will be sent to the
+	// server regardless of whether the field is empty or not. This may be
+	// used to include empty fields in Patch requests.
+	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "Duration") to include in
+	// API requests with the JSON null value. By default, fields with empty
+	// values are omitted from API requests. However, any field with an
+	// empty value appearing in NullFields will be sent to the server as
+	// null. It is an error if a field in this list has a non-empty value.
+	// This may be used to include null fields in Patch requests.
+	NullFields []string `json:"-"`
+}
+
+func (s *Frame) MarshalJSON() ([]byte, error) {
+	type NoMethod Frame
+	raw := NoMethod(*s)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+}
+
+func (s *Frame) UnmarshalJSON(data []byte) error {
+	type NoMethod Frame
+	var s1 struct {
+		Percent gensupport.JSONFloat64 `json:"percent"`
+		*NoMethod
+	}
+	s1.NoMethod = (*NoMethod)(s)
+	if err := json.Unmarshal(data, &s1); err != nil {
+		return err
+	}
+	s.Percent = float64(s1.Percent)
+	return nil
+}
+
 type GenerateUuidResp struct {
 	Uuid string `json:"uuid,omitempty"`
 
@@ -810,6 +888,8 @@ type Group struct {
 	Label string `json:"label,omitempty"`
 
 	OemBlacklist string `json:"oemBlacklist,omitempty"`
+
+	RolloutActive bool `json:"rolloutActive,omitempty"`
 
 	UpdatePercent float64 `json:"updatePercent,omitempty"`
 
@@ -884,6 +964,54 @@ func (s *GroupList) MarshalJSON() ([]byte, error) {
 	type NoMethod GroupList
 	raw := NoMethod(*s)
 	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+}
+
+type GroupPercent struct {
+	AppId string `json:"appId,omitempty"`
+
+	Id string `json:"id,omitempty"`
+
+	UpdatePercent float64 `json:"updatePercent,omitempty"`
+
+	// ServerResponse contains the HTTP response code and headers from the
+	// server.
+	googleapi.ServerResponse `json:"-"`
+
+	// ForceSendFields is a list of field names (e.g. "AppId") to
+	// unconditionally include in API requests. By default, fields with
+	// empty values are omitted from API requests. However, any non-pointer,
+	// non-interface field appearing in ForceSendFields will be sent to the
+	// server regardless of whether the field is empty or not. This may be
+	// used to include empty fields in Patch requests.
+	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "AppId") to include in API
+	// requests with the JSON null value. By default, fields with empty
+	// values are omitted from API requests. However, any field with an
+	// empty value appearing in NullFields will be sent to the server as
+	// null. It is an error if a field in this list has a non-empty value.
+	// This may be used to include null fields in Patch requests.
+	NullFields []string `json:"-"`
+}
+
+func (s *GroupPercent) MarshalJSON() ([]byte, error) {
+	type NoMethod GroupPercent
+	raw := NoMethod(*s)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+}
+
+func (s *GroupPercent) UnmarshalJSON(data []byte) error {
+	type NoMethod GroupPercent
+	var s1 struct {
+		UpdatePercent gensupport.JSONFloat64 `json:"updatePercent"`
+		*NoMethod
+	}
+	s1.NoMethod = (*NoMethod)(s)
+	if err := json.Unmarshal(data, &s1); err != nil {
+		return err
+	}
+	s.UpdatePercent = float64(s1.UpdatePercent)
+	return nil
 }
 
 type GroupRequestsItem struct {
@@ -1112,6 +1240,104 @@ type PublicPackageList struct {
 
 func (s *PublicPackageList) MarshalJSON() ([]byte, error) {
 	type NoMethod PublicPackageList
+	raw := NoMethod(*s)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+}
+
+type Rollout struct {
+	AppId string `json:"appId,omitempty"`
+
+	GroupId string `json:"groupId,omitempty"`
+
+	Rollout []*Frame `json:"rollout,omitempty"`
+
+	// ServerResponse contains the HTTP response code and headers from the
+	// server.
+	googleapi.ServerResponse `json:"-"`
+
+	// ForceSendFields is a list of field names (e.g. "AppId") to
+	// unconditionally include in API requests. By default, fields with
+	// empty values are omitted from API requests. However, any non-pointer,
+	// non-interface field appearing in ForceSendFields will be sent to the
+	// server regardless of whether the field is empty or not. This may be
+	// used to include empty fields in Patch requests.
+	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "AppId") to include in API
+	// requests with the JSON null value. By default, fields with empty
+	// values are omitted from API requests. However, any field with an
+	// empty value appearing in NullFields will be sent to the server as
+	// null. It is an error if a field in this list has a non-empty value.
+	// This may be used to include null fields in Patch requests.
+	NullFields []string `json:"-"`
+}
+
+func (s *Rollout) MarshalJSON() ([]byte, error) {
+	type NoMethod Rollout
+	raw := NoMethod(*s)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+}
+
+type RolloutActive struct {
+	Active bool `json:"active,omitempty"`
+
+	AppId string `json:"appId,omitempty"`
+
+	GroupId string `json:"groupId,omitempty"`
+
+	// ServerResponse contains the HTTP response code and headers from the
+	// server.
+	googleapi.ServerResponse `json:"-"`
+
+	// ForceSendFields is a list of field names (e.g. "Active") to
+	// unconditionally include in API requests. By default, fields with
+	// empty values are omitted from API requests. However, any non-pointer,
+	// non-interface field appearing in ForceSendFields will be sent to the
+	// server regardless of whether the field is empty or not. This may be
+	// used to include empty fields in Patch requests.
+	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "Active") to include in API
+	// requests with the JSON null value. By default, fields with empty
+	// values are omitted from API requests. However, any field with an
+	// empty value appearing in NullFields will be sent to the server as
+	// null. It is an error if a field in this list has a non-empty value.
+	// This may be used to include null fields in Patch requests.
+	NullFields []string `json:"-"`
+}
+
+func (s *RolloutActive) MarshalJSON() ([]byte, error) {
+	type NoMethod RolloutActive
+	raw := NoMethod(*s)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+}
+
+type RolloutSetReq struct {
+	Rollout *Rollout `json:"Rollout,omitempty"`
+
+	AppId string `json:"appId,omitempty"`
+
+	GroupId string `json:"groupId,omitempty"`
+
+	// ForceSendFields is a list of field names (e.g. "Rollout") to
+	// unconditionally include in API requests. By default, fields with
+	// empty values are omitted from API requests. However, any non-pointer,
+	// non-interface field appearing in ForceSendFields will be sent to the
+	// server regardless of whether the field is empty or not. This may be
+	// used to include empty fields in Patch requests.
+	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "Rollout") to include in
+	// API requests with the JSON null value. By default, fields with empty
+	// values are omitted from API requests. However, any field with an
+	// empty value appearing in NullFields will be sent to the server as
+	// null. It is an error if a field in this list has a non-empty value.
+	// This may be used to include null fields in Patch requests.
+	NullFields []string `json:"-"`
+}
+
+func (s *RolloutSetReq) MarshalJSON() ([]byte, error) {
+	type NoMethod RolloutSetReq
 	raw := NoMethod(*s)
 	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
@@ -4674,6 +4900,12 @@ func (c *GroupDeleteCall) OemBlacklist(oemBlacklist string) *GroupDeleteCall {
 	return c
 }
 
+// RolloutActive sets the optional parameter "rolloutActive":
+func (c *GroupDeleteCall) RolloutActive(rolloutActive bool) *GroupDeleteCall {
+	c.urlParams_.Set("rolloutActive", fmt.Sprint(rolloutActive))
+	return c
+}
+
 // UpdatePercent sets the optional parameter "updatePercent":
 func (c *GroupDeleteCall) UpdatePercent(updatePercent float64) *GroupDeleteCall {
 	c.urlParams_.Set("updatePercent", fmt.Sprint(updatePercent))
@@ -4798,6 +5030,10 @@ func (c *GroupDeleteCall) Do(opts ...googleapi.CallOption) (*Group, error) {
 	//       "location": "query",
 	//       "type": "string"
 	//     },
+	//     "rolloutActive": {
+	//       "location": "query",
+	//       "type": "boolean"
+	//     },
 	//     "updatePercent": {
 	//       "format": "double",
 	//       "location": "query",
@@ -4851,6 +5087,12 @@ func (c *GroupGetCall) Label(label string) *GroupGetCall {
 // OemBlacklist sets the optional parameter "oemBlacklist":
 func (c *GroupGetCall) OemBlacklist(oemBlacklist string) *GroupGetCall {
 	c.urlParams_.Set("oemBlacklist", oemBlacklist)
+	return c
+}
+
+// RolloutActive sets the optional parameter "rolloutActive":
+func (c *GroupGetCall) RolloutActive(rolloutActive bool) *GroupGetCall {
+	c.urlParams_.Set("rolloutActive", fmt.Sprint(rolloutActive))
 	return c
 }
 
@@ -4990,6 +5232,10 @@ func (c *GroupGetCall) Do(opts ...googleapi.CallOption) (*Group, error) {
 	//     "oemBlacklist": {
 	//       "location": "query",
 	//       "type": "string"
+	//     },
+	//     "rolloutActive": {
+	//       "location": "query",
+	//       "type": "boolean"
 	//     },
 	//     "updatePercent": {
 	//       "format": "double",
@@ -5561,6 +5807,287 @@ func (c *GroupUpdateCall) Do(opts ...googleapi.CallOption) (*Group, error) {
 
 }
 
+// method id "update.group.percent.get":
+
+type GroupPercentGetCall struct {
+	s            *Service
+	appId        string
+	id           string
+	urlParams_   gensupport.URLParams
+	ifNoneMatch_ string
+	ctx_         context.Context
+	header_      http.Header
+}
+
+// Get: Get the update percentage for this group.
+func (r *GroupPercentService) Get(appId string, id string) *GroupPercentGetCall {
+	c := &GroupPercentGetCall{s: r.s, urlParams_: make(gensupport.URLParams)}
+	c.appId = appId
+	c.id = id
+	return c
+}
+
+// Fields allows partial responses to be retrieved. See
+// https://developers.google.com/gdata/docs/2.0/basics#PartialResponse
+// for more information.
+func (c *GroupPercentGetCall) Fields(s ...googleapi.Field) *GroupPercentGetCall {
+	c.urlParams_.Set("fields", googleapi.CombineFields(s))
+	return c
+}
+
+// IfNoneMatch sets the optional parameter which makes the operation
+// fail if the object's ETag matches the given value. This is useful for
+// getting updates only after the object has changed since the last
+// request. Use googleapi.IsNotModified to check whether the response
+// error from Do is the result of In-None-Match.
+func (c *GroupPercentGetCall) IfNoneMatch(entityTag string) *GroupPercentGetCall {
+	c.ifNoneMatch_ = entityTag
+	return c
+}
+
+// Context sets the context to be used in this call's Do method. Any
+// pending HTTP request will be aborted if the provided context is
+// canceled.
+func (c *GroupPercentGetCall) Context(ctx context.Context) *GroupPercentGetCall {
+	c.ctx_ = ctx
+	return c
+}
+
+// Header returns an http.Header that can be modified by the caller to
+// add HTTP headers to the request.
+func (c *GroupPercentGetCall) Header() http.Header {
+	if c.header_ == nil {
+		c.header_ = make(http.Header)
+	}
+	return c.header_
+}
+
+func (c *GroupPercentGetCall) doRequest(alt string) (*http.Response, error) {
+	reqHeaders := make(http.Header)
+	for k, v := range c.header_ {
+		reqHeaders[k] = v
+	}
+	reqHeaders.Set("User-Agent", c.s.userAgent())
+	if c.ifNoneMatch_ != "" {
+		reqHeaders.Set("If-None-Match", c.ifNoneMatch_)
+	}
+	var body io.Reader = nil
+	c.urlParams_.Set("alt", alt)
+	urls := googleapi.ResolveRelative(c.s.BasePath, "apps/{appId}/groups/{id}")
+	urls += "?" + c.urlParams_.Encode()
+	req, _ := http.NewRequest("GET", urls, body)
+	req.Header = reqHeaders
+	googleapi.Expand(req.URL, map[string]string{
+		"appId": c.appId,
+		"id":    c.id,
+	})
+	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+}
+
+// Do executes the "update.group.percent.get" call.
+// Exactly one of *GroupPercent or error will be non-nil. Any non-2xx
+// status code is an error. Response headers are in either
+// *GroupPercent.ServerResponse.Header or (if a response was returned at
+// all) in error.(*googleapi.Error).Header. Use googleapi.IsNotModified
+// to check whether the returned error was because
+// http.StatusNotModified was returned.
+func (c *GroupPercentGetCall) Do(opts ...googleapi.CallOption) (*GroupPercent, error) {
+	gensupport.SetOptions(c.urlParams_, opts...)
+	res, err := c.doRequest("json")
+	if res != nil && res.StatusCode == http.StatusNotModified {
+		if res.Body != nil {
+			res.Body.Close()
+		}
+		return nil, &googleapi.Error{
+			Code:   res.StatusCode,
+			Header: res.Header,
+		}
+	}
+	if err != nil {
+		return nil, err
+	}
+	defer googleapi.CloseBody(res)
+	if err := googleapi.CheckResponse(res); err != nil {
+		return nil, err
+	}
+	ret := &GroupPercent{
+		ServerResponse: googleapi.ServerResponse{
+			Header:         res.Header,
+			HTTPStatusCode: res.StatusCode,
+		},
+	}
+	target := &ret
+	if err := gensupport.DecodeResponse(target, res); err != nil {
+		return nil, err
+	}
+	return ret, nil
+	// {
+	//   "description": "Get the update percentage for this group.",
+	//   "httpMethod": "GET",
+	//   "id": "update.group.percent.get",
+	//   "parameterOrder": [
+	//     "appId",
+	//     "id"
+	//   ],
+	//   "parameters": {
+	//     "appId": {
+	//       "location": "path",
+	//       "required": true,
+	//       "type": "string"
+	//     },
+	//     "id": {
+	//       "location": "path",
+	//       "required": true,
+	//       "type": "string"
+	//     }
+	//   },
+	//   "path": "apps/{appId}/groups/{id}",
+	//   "response": {
+	//     "$ref": "GroupPercent"
+	//   }
+	// }
+
+}
+
+// method id "update.group.percent.set":
+
+type GroupPercentSetCall struct {
+	s            *Service
+	appId        string
+	id           string
+	grouppercent *GroupPercent
+	urlParams_   gensupport.URLParams
+	ctx_         context.Context
+	header_      http.Header
+}
+
+// Set: Set the update percentage for this group.
+func (r *GroupPercentService) Set(appId string, id string, grouppercent *GroupPercent) *GroupPercentSetCall {
+	c := &GroupPercentSetCall{s: r.s, urlParams_: make(gensupport.URLParams)}
+	c.appId = appId
+	c.id = id
+	c.grouppercent = grouppercent
+	return c
+}
+
+// Fields allows partial responses to be retrieved. See
+// https://developers.google.com/gdata/docs/2.0/basics#PartialResponse
+// for more information.
+func (c *GroupPercentSetCall) Fields(s ...googleapi.Field) *GroupPercentSetCall {
+	c.urlParams_.Set("fields", googleapi.CombineFields(s))
+	return c
+}
+
+// Context sets the context to be used in this call's Do method. Any
+// pending HTTP request will be aborted if the provided context is
+// canceled.
+func (c *GroupPercentSetCall) Context(ctx context.Context) *GroupPercentSetCall {
+	c.ctx_ = ctx
+	return c
+}
+
+// Header returns an http.Header that can be modified by the caller to
+// add HTTP headers to the request.
+func (c *GroupPercentSetCall) Header() http.Header {
+	if c.header_ == nil {
+		c.header_ = make(http.Header)
+	}
+	return c.header_
+}
+
+func (c *GroupPercentSetCall) doRequest(alt string) (*http.Response, error) {
+	reqHeaders := make(http.Header)
+	for k, v := range c.header_ {
+		reqHeaders[k] = v
+	}
+	reqHeaders.Set("User-Agent", c.s.userAgent())
+	var body io.Reader = nil
+	body, err := googleapi.WithoutDataWrapper.JSONReader(c.grouppercent)
+	if err != nil {
+		return nil, err
+	}
+	reqHeaders.Set("Content-Type", "application/json")
+	c.urlParams_.Set("alt", alt)
+	urls := googleapi.ResolveRelative(c.s.BasePath, "apps/{appId}/groups/{id}")
+	urls += "?" + c.urlParams_.Encode()
+	req, _ := http.NewRequest("POST", urls, body)
+	req.Header = reqHeaders
+	googleapi.Expand(req.URL, map[string]string{
+		"appId": c.appId,
+		"id":    c.id,
+	})
+	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+}
+
+// Do executes the "update.group.percent.set" call.
+// Exactly one of *GroupPercent or error will be non-nil. Any non-2xx
+// status code is an error. Response headers are in either
+// *GroupPercent.ServerResponse.Header or (if a response was returned at
+// all) in error.(*googleapi.Error).Header. Use googleapi.IsNotModified
+// to check whether the returned error was because
+// http.StatusNotModified was returned.
+func (c *GroupPercentSetCall) Do(opts ...googleapi.CallOption) (*GroupPercent, error) {
+	gensupport.SetOptions(c.urlParams_, opts...)
+	res, err := c.doRequest("json")
+	if res != nil && res.StatusCode == http.StatusNotModified {
+		if res.Body != nil {
+			res.Body.Close()
+		}
+		return nil, &googleapi.Error{
+			Code:   res.StatusCode,
+			Header: res.Header,
+		}
+	}
+	if err != nil {
+		return nil, err
+	}
+	defer googleapi.CloseBody(res)
+	if err := googleapi.CheckResponse(res); err != nil {
+		return nil, err
+	}
+	ret := &GroupPercent{
+		ServerResponse: googleapi.ServerResponse{
+			Header:         res.Header,
+			HTTPStatusCode: res.StatusCode,
+		},
+	}
+	target := &ret
+	if err := gensupport.DecodeResponse(target, res); err != nil {
+		return nil, err
+	}
+	return ret, nil
+	// {
+	//   "description": "Set the update percentage for this group.",
+	//   "httpMethod": "POST",
+	//   "id": "update.group.percent.set",
+	//   "parameterOrder": [
+	//     "appId",
+	//     "id"
+	//   ],
+	//   "parameters": {
+	//     "appId": {
+	//       "location": "path",
+	//       "required": true,
+	//       "type": "string"
+	//     },
+	//     "id": {
+	//       "location": "path",
+	//       "required": true,
+	//       "type": "string"
+	//     }
+	//   },
+	//   "path": "apps/{appId}/groups/{id}",
+	//   "request": {
+	//     "$ref": "GroupPercent",
+	//     "parameterName": "resource"
+	//   },
+	//   "response": {
+	//     "$ref": "GroupPercent"
+	//   }
+	// }
+
+}
+
 // method id "update.group.requests.events.rollup":
 
 type GroupRequestsEventsRollupCall struct {
@@ -5922,6 +6449,568 @@ func (c *GroupRequestsVersionsRollupCall) Do(opts ...googleapi.CallOption) (*Gro
 	//   "path": "apps/{appId}/groups/{groupId}/requests/versions/{dateStart}/{dateEnd}",
 	//   "response": {
 	//     "$ref": "GroupRequestsRollup"
+	//   }
+	// }
+
+}
+
+// method id "update.group.rollout.get":
+
+type GroupRolloutGetCall struct {
+	s            *Service
+	appId        string
+	groupId      string
+	urlParams_   gensupport.URLParams
+	ifNoneMatch_ string
+	ctx_         context.Context
+	header_      http.Header
+}
+
+// Get: Get the current rollout strategy for this group.
+func (r *GroupRolloutService) Get(appId string, groupId string) *GroupRolloutGetCall {
+	c := &GroupRolloutGetCall{s: r.s, urlParams_: make(gensupport.URLParams)}
+	c.appId = appId
+	c.groupId = groupId
+	return c
+}
+
+// Fields allows partial responses to be retrieved. See
+// https://developers.google.com/gdata/docs/2.0/basics#PartialResponse
+// for more information.
+func (c *GroupRolloutGetCall) Fields(s ...googleapi.Field) *GroupRolloutGetCall {
+	c.urlParams_.Set("fields", googleapi.CombineFields(s))
+	return c
+}
+
+// IfNoneMatch sets the optional parameter which makes the operation
+// fail if the object's ETag matches the given value. This is useful for
+// getting updates only after the object has changed since the last
+// request. Use googleapi.IsNotModified to check whether the response
+// error from Do is the result of In-None-Match.
+func (c *GroupRolloutGetCall) IfNoneMatch(entityTag string) *GroupRolloutGetCall {
+	c.ifNoneMatch_ = entityTag
+	return c
+}
+
+// Context sets the context to be used in this call's Do method. Any
+// pending HTTP request will be aborted if the provided context is
+// canceled.
+func (c *GroupRolloutGetCall) Context(ctx context.Context) *GroupRolloutGetCall {
+	c.ctx_ = ctx
+	return c
+}
+
+// Header returns an http.Header that can be modified by the caller to
+// add HTTP headers to the request.
+func (c *GroupRolloutGetCall) Header() http.Header {
+	if c.header_ == nil {
+		c.header_ = make(http.Header)
+	}
+	return c.header_
+}
+
+func (c *GroupRolloutGetCall) doRequest(alt string) (*http.Response, error) {
+	reqHeaders := make(http.Header)
+	for k, v := range c.header_ {
+		reqHeaders[k] = v
+	}
+	reqHeaders.Set("User-Agent", c.s.userAgent())
+	if c.ifNoneMatch_ != "" {
+		reqHeaders.Set("If-None-Match", c.ifNoneMatch_)
+	}
+	var body io.Reader = nil
+	c.urlParams_.Set("alt", alt)
+	urls := googleapi.ResolveRelative(c.s.BasePath, "apps/{appId}/groups/{groupId}/rollout")
+	urls += "?" + c.urlParams_.Encode()
+	req, _ := http.NewRequest("GET", urls, body)
+	req.Header = reqHeaders
+	googleapi.Expand(req.URL, map[string]string{
+		"appId":   c.appId,
+		"groupId": c.groupId,
+	})
+	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+}
+
+// Do executes the "update.group.rollout.get" call.
+// Exactly one of *Rollout or error will be non-nil. Any non-2xx status
+// code is an error. Response headers are in either
+// *Rollout.ServerResponse.Header or (if a response was returned at all)
+// in error.(*googleapi.Error).Header. Use googleapi.IsNotModified to
+// check whether the returned error was because http.StatusNotModified
+// was returned.
+func (c *GroupRolloutGetCall) Do(opts ...googleapi.CallOption) (*Rollout, error) {
+	gensupport.SetOptions(c.urlParams_, opts...)
+	res, err := c.doRequest("json")
+	if res != nil && res.StatusCode == http.StatusNotModified {
+		if res.Body != nil {
+			res.Body.Close()
+		}
+		return nil, &googleapi.Error{
+			Code:   res.StatusCode,
+			Header: res.Header,
+		}
+	}
+	if err != nil {
+		return nil, err
+	}
+	defer googleapi.CloseBody(res)
+	if err := googleapi.CheckResponse(res); err != nil {
+		return nil, err
+	}
+	ret := &Rollout{
+		ServerResponse: googleapi.ServerResponse{
+			Header:         res.Header,
+			HTTPStatusCode: res.StatusCode,
+		},
+	}
+	target := &ret
+	if err := gensupport.DecodeResponse(target, res); err != nil {
+		return nil, err
+	}
+	return ret, nil
+	// {
+	//   "description": "Get the current rollout strategy for this group.",
+	//   "httpMethod": "GET",
+	//   "id": "update.group.rollout.get",
+	//   "parameterOrder": [
+	//     "appId",
+	//     "groupId"
+	//   ],
+	//   "parameters": {
+	//     "appId": {
+	//       "location": "path",
+	//       "required": true,
+	//       "type": "string"
+	//     },
+	//     "groupId": {
+	//       "location": "path",
+	//       "required": true,
+	//       "type": "string"
+	//     }
+	//   },
+	//   "path": "apps/{appId}/groups/{groupId}/rollout",
+	//   "response": {
+	//     "$ref": "Rollout"
+	//   }
+	// }
+
+}
+
+// method id "update.group.rollout.set":
+
+type GroupRolloutSetCall struct {
+	s             *Service
+	appId         string
+	groupId       string
+	rolloutsetreq *RolloutSetReq
+	urlParams_    gensupport.URLParams
+	ctx_          context.Context
+	header_       http.Header
+}
+
+// Set: Set (and start) a new rollout strategy for this group.
+func (r *GroupRolloutService) Set(appId string, groupId string, rolloutsetreq *RolloutSetReq) *GroupRolloutSetCall {
+	c := &GroupRolloutSetCall{s: r.s, urlParams_: make(gensupport.URLParams)}
+	c.appId = appId
+	c.groupId = groupId
+	c.rolloutsetreq = rolloutsetreq
+	return c
+}
+
+// Fields allows partial responses to be retrieved. See
+// https://developers.google.com/gdata/docs/2.0/basics#PartialResponse
+// for more information.
+func (c *GroupRolloutSetCall) Fields(s ...googleapi.Field) *GroupRolloutSetCall {
+	c.urlParams_.Set("fields", googleapi.CombineFields(s))
+	return c
+}
+
+// Context sets the context to be used in this call's Do method. Any
+// pending HTTP request will be aborted if the provided context is
+// canceled.
+func (c *GroupRolloutSetCall) Context(ctx context.Context) *GroupRolloutSetCall {
+	c.ctx_ = ctx
+	return c
+}
+
+// Header returns an http.Header that can be modified by the caller to
+// add HTTP headers to the request.
+func (c *GroupRolloutSetCall) Header() http.Header {
+	if c.header_ == nil {
+		c.header_ = make(http.Header)
+	}
+	return c.header_
+}
+
+func (c *GroupRolloutSetCall) doRequest(alt string) (*http.Response, error) {
+	reqHeaders := make(http.Header)
+	for k, v := range c.header_ {
+		reqHeaders[k] = v
+	}
+	reqHeaders.Set("User-Agent", c.s.userAgent())
+	var body io.Reader = nil
+	body, err := googleapi.WithoutDataWrapper.JSONReader(c.rolloutsetreq)
+	if err != nil {
+		return nil, err
+	}
+	reqHeaders.Set("Content-Type", "application/json")
+	c.urlParams_.Set("alt", alt)
+	urls := googleapi.ResolveRelative(c.s.BasePath, "apps/{appId}/groups/{groupId}/rollout")
+	urls += "?" + c.urlParams_.Encode()
+	req, _ := http.NewRequest("POST", urls, body)
+	req.Header = reqHeaders
+	googleapi.Expand(req.URL, map[string]string{
+		"appId":   c.appId,
+		"groupId": c.groupId,
+	})
+	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+}
+
+// Do executes the "update.group.rollout.set" call.
+// Exactly one of *Rollout or error will be non-nil. Any non-2xx status
+// code is an error. Response headers are in either
+// *Rollout.ServerResponse.Header or (if a response was returned at all)
+// in error.(*googleapi.Error).Header. Use googleapi.IsNotModified to
+// check whether the returned error was because http.StatusNotModified
+// was returned.
+func (c *GroupRolloutSetCall) Do(opts ...googleapi.CallOption) (*Rollout, error) {
+	gensupport.SetOptions(c.urlParams_, opts...)
+	res, err := c.doRequest("json")
+	if res != nil && res.StatusCode == http.StatusNotModified {
+		if res.Body != nil {
+			res.Body.Close()
+		}
+		return nil, &googleapi.Error{
+			Code:   res.StatusCode,
+			Header: res.Header,
+		}
+	}
+	if err != nil {
+		return nil, err
+	}
+	defer googleapi.CloseBody(res)
+	if err := googleapi.CheckResponse(res); err != nil {
+		return nil, err
+	}
+	ret := &Rollout{
+		ServerResponse: googleapi.ServerResponse{
+			Header:         res.Header,
+			HTTPStatusCode: res.StatusCode,
+		},
+	}
+	target := &ret
+	if err := gensupport.DecodeResponse(target, res); err != nil {
+		return nil, err
+	}
+	return ret, nil
+	// {
+	//   "description": "Set (and start) a new rollout strategy for this group.",
+	//   "httpMethod": "POST",
+	//   "id": "update.group.rollout.set",
+	//   "parameterOrder": [
+	//     "appId",
+	//     "groupId"
+	//   ],
+	//   "parameters": {
+	//     "appId": {
+	//       "location": "path",
+	//       "required": true,
+	//       "type": "string"
+	//     },
+	//     "groupId": {
+	//       "location": "path",
+	//       "required": true,
+	//       "type": "string"
+	//     }
+	//   },
+	//   "path": "apps/{appId}/groups/{groupId}/rollout",
+	//   "request": {
+	//     "$ref": "RolloutSetReq",
+	//     "parameterName": "resource"
+	//   },
+	//   "response": {
+	//     "$ref": "Rollout"
+	//   }
+	// }
+
+}
+
+// method id "update.group.rollout.active.get":
+
+type GroupRolloutActiveGetCall struct {
+	s            *Service
+	appId        string
+	groupId      string
+	urlParams_   gensupport.URLParams
+	ifNoneMatch_ string
+	ctx_         context.Context
+	header_      http.Header
+}
+
+// Get: Get the active status of the rollout for this group.
+func (r *GroupRolloutActiveService) Get(appId string, groupId string) *GroupRolloutActiveGetCall {
+	c := &GroupRolloutActiveGetCall{s: r.s, urlParams_: make(gensupport.URLParams)}
+	c.appId = appId
+	c.groupId = groupId
+	return c
+}
+
+// Fields allows partial responses to be retrieved. See
+// https://developers.google.com/gdata/docs/2.0/basics#PartialResponse
+// for more information.
+func (c *GroupRolloutActiveGetCall) Fields(s ...googleapi.Field) *GroupRolloutActiveGetCall {
+	c.urlParams_.Set("fields", googleapi.CombineFields(s))
+	return c
+}
+
+// IfNoneMatch sets the optional parameter which makes the operation
+// fail if the object's ETag matches the given value. This is useful for
+// getting updates only after the object has changed since the last
+// request. Use googleapi.IsNotModified to check whether the response
+// error from Do is the result of In-None-Match.
+func (c *GroupRolloutActiveGetCall) IfNoneMatch(entityTag string) *GroupRolloutActiveGetCall {
+	c.ifNoneMatch_ = entityTag
+	return c
+}
+
+// Context sets the context to be used in this call's Do method. Any
+// pending HTTP request will be aborted if the provided context is
+// canceled.
+func (c *GroupRolloutActiveGetCall) Context(ctx context.Context) *GroupRolloutActiveGetCall {
+	c.ctx_ = ctx
+	return c
+}
+
+// Header returns an http.Header that can be modified by the caller to
+// add HTTP headers to the request.
+func (c *GroupRolloutActiveGetCall) Header() http.Header {
+	if c.header_ == nil {
+		c.header_ = make(http.Header)
+	}
+	return c.header_
+}
+
+func (c *GroupRolloutActiveGetCall) doRequest(alt string) (*http.Response, error) {
+	reqHeaders := make(http.Header)
+	for k, v := range c.header_ {
+		reqHeaders[k] = v
+	}
+	reqHeaders.Set("User-Agent", c.s.userAgent())
+	if c.ifNoneMatch_ != "" {
+		reqHeaders.Set("If-None-Match", c.ifNoneMatch_)
+	}
+	var body io.Reader = nil
+	c.urlParams_.Set("alt", alt)
+	urls := googleapi.ResolveRelative(c.s.BasePath, "apps/{appId}/groups/{groupId}/rollout/active")
+	urls += "?" + c.urlParams_.Encode()
+	req, _ := http.NewRequest("GET", urls, body)
+	req.Header = reqHeaders
+	googleapi.Expand(req.URL, map[string]string{
+		"appId":   c.appId,
+		"groupId": c.groupId,
+	})
+	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+}
+
+// Do executes the "update.group.rollout.active.get" call.
+// Exactly one of *RolloutActive or error will be non-nil. Any non-2xx
+// status code is an error. Response headers are in either
+// *RolloutActive.ServerResponse.Header or (if a response was returned
+// at all) in error.(*googleapi.Error).Header. Use
+// googleapi.IsNotModified to check whether the returned error was
+// because http.StatusNotModified was returned.
+func (c *GroupRolloutActiveGetCall) Do(opts ...googleapi.CallOption) (*RolloutActive, error) {
+	gensupport.SetOptions(c.urlParams_, opts...)
+	res, err := c.doRequest("json")
+	if res != nil && res.StatusCode == http.StatusNotModified {
+		if res.Body != nil {
+			res.Body.Close()
+		}
+		return nil, &googleapi.Error{
+			Code:   res.StatusCode,
+			Header: res.Header,
+		}
+	}
+	if err != nil {
+		return nil, err
+	}
+	defer googleapi.CloseBody(res)
+	if err := googleapi.CheckResponse(res); err != nil {
+		return nil, err
+	}
+	ret := &RolloutActive{
+		ServerResponse: googleapi.ServerResponse{
+			Header:         res.Header,
+			HTTPStatusCode: res.StatusCode,
+		},
+	}
+	target := &ret
+	if err := gensupport.DecodeResponse(target, res); err != nil {
+		return nil, err
+	}
+	return ret, nil
+	// {
+	//   "description": "Get the active status of the rollout for this group.",
+	//   "httpMethod": "GET",
+	//   "id": "update.group.rollout.active.get",
+	//   "parameterOrder": [
+	//     "appId",
+	//     "groupId"
+	//   ],
+	//   "parameters": {
+	//     "appId": {
+	//       "location": "path",
+	//       "required": true,
+	//       "type": "string"
+	//     },
+	//     "groupId": {
+	//       "location": "path",
+	//       "required": true,
+	//       "type": "string"
+	//     }
+	//   },
+	//   "path": "apps/{appId}/groups/{groupId}/rollout/active",
+	//   "response": {
+	//     "$ref": "RolloutActive"
+	//   }
+	// }
+
+}
+
+// method id "update.group.rollout.active.set":
+
+type GroupRolloutActiveSetCall struct {
+	s             *Service
+	appId         string
+	groupId       string
+	rolloutactive *RolloutActive
+	urlParams_    gensupport.URLParams
+	ctx_          context.Context
+	header_       http.Header
+}
+
+// Set: Set the active status of the rollout for this group.
+func (r *GroupRolloutActiveService) Set(appId string, groupId string, rolloutactive *RolloutActive) *GroupRolloutActiveSetCall {
+	c := &GroupRolloutActiveSetCall{s: r.s, urlParams_: make(gensupport.URLParams)}
+	c.appId = appId
+	c.groupId = groupId
+	c.rolloutactive = rolloutactive
+	return c
+}
+
+// Fields allows partial responses to be retrieved. See
+// https://developers.google.com/gdata/docs/2.0/basics#PartialResponse
+// for more information.
+func (c *GroupRolloutActiveSetCall) Fields(s ...googleapi.Field) *GroupRolloutActiveSetCall {
+	c.urlParams_.Set("fields", googleapi.CombineFields(s))
+	return c
+}
+
+// Context sets the context to be used in this call's Do method. Any
+// pending HTTP request will be aborted if the provided context is
+// canceled.
+func (c *GroupRolloutActiveSetCall) Context(ctx context.Context) *GroupRolloutActiveSetCall {
+	c.ctx_ = ctx
+	return c
+}
+
+// Header returns an http.Header that can be modified by the caller to
+// add HTTP headers to the request.
+func (c *GroupRolloutActiveSetCall) Header() http.Header {
+	if c.header_ == nil {
+		c.header_ = make(http.Header)
+	}
+	return c.header_
+}
+
+func (c *GroupRolloutActiveSetCall) doRequest(alt string) (*http.Response, error) {
+	reqHeaders := make(http.Header)
+	for k, v := range c.header_ {
+		reqHeaders[k] = v
+	}
+	reqHeaders.Set("User-Agent", c.s.userAgent())
+	var body io.Reader = nil
+	body, err := googleapi.WithoutDataWrapper.JSONReader(c.rolloutactive)
+	if err != nil {
+		return nil, err
+	}
+	reqHeaders.Set("Content-Type", "application/json")
+	c.urlParams_.Set("alt", alt)
+	urls := googleapi.ResolveRelative(c.s.BasePath, "apps/{appId}/groups/{groupId}/rollout/active")
+	urls += "?" + c.urlParams_.Encode()
+	req, _ := http.NewRequest("POST", urls, body)
+	req.Header = reqHeaders
+	googleapi.Expand(req.URL, map[string]string{
+		"appId":   c.appId,
+		"groupId": c.groupId,
+	})
+	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+}
+
+// Do executes the "update.group.rollout.active.set" call.
+// Exactly one of *RolloutActive or error will be non-nil. Any non-2xx
+// status code is an error. Response headers are in either
+// *RolloutActive.ServerResponse.Header or (if a response was returned
+// at all) in error.(*googleapi.Error).Header. Use
+// googleapi.IsNotModified to check whether the returned error was
+// because http.StatusNotModified was returned.
+func (c *GroupRolloutActiveSetCall) Do(opts ...googleapi.CallOption) (*RolloutActive, error) {
+	gensupport.SetOptions(c.urlParams_, opts...)
+	res, err := c.doRequest("json")
+	if res != nil && res.StatusCode == http.StatusNotModified {
+		if res.Body != nil {
+			res.Body.Close()
+		}
+		return nil, &googleapi.Error{
+			Code:   res.StatusCode,
+			Header: res.Header,
+		}
+	}
+	if err != nil {
+		return nil, err
+	}
+	defer googleapi.CloseBody(res)
+	if err := googleapi.CheckResponse(res); err != nil {
+		return nil, err
+	}
+	ret := &RolloutActive{
+		ServerResponse: googleapi.ServerResponse{
+			Header:         res.Header,
+			HTTPStatusCode: res.StatusCode,
+		},
+	}
+	target := &ret
+	if err := gensupport.DecodeResponse(target, res); err != nil {
+		return nil, err
+	}
+	return ret, nil
+	// {
+	//   "description": "Set the active status of the rollout for this group.",
+	//   "httpMethod": "POST",
+	//   "id": "update.group.rollout.active.set",
+	//   "parameterOrder": [
+	//     "appId",
+	//     "groupId"
+	//   ],
+	//   "parameters": {
+	//     "appId": {
+	//       "location": "path",
+	//       "required": true,
+	//       "type": "string"
+	//     },
+	//     "groupId": {
+	//       "location": "path",
+	//       "required": true,
+	//       "type": "string"
+	//     }
+	//   },
+	//   "path": "apps/{appId}/groups/{groupId}/rollout/active",
+	//   "request": {
+	//     "$ref": "RolloutActive",
+	//     "parameterName": "resource"
+	//   },
+	//   "response": {
+	//     "$ref": "RolloutActive"
 	//   }
 	// }
 
