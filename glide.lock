@@ -1,0 +1,31 @@
+hash: 28787ed0a9a6b6d47bf8b751c56e784354a4850db0cefee9dad97449c312d912
+updated: 2018-06-04T15:41:32.337112392-07:00
+imports:
+- name: github.com/cheggaaa/pb
+  version: 5e7fe2cfea55ddc0b8fd6a44cffdb2c3659dc0f8
+- name: github.com/coreos/go-omaha
+  version: bd37826a4f37c8b94ec7241c91c2c03be13f72b7
+  subpackages:
+  - omaha
+- name: github.com/coreos/go-semver
+  version: 6fe83ccda8fb9b7549c9ab4ba47f47858bc950aa
+  subpackages:
+  - semver
+- name: github.com/coreos/hawk-go
+  version: e2691d10fc256cc09e895f3417a51db81e638012
+- name: github.com/olekukonko/ts
+  version: ecf753e7c962639ab5a1fb46f7da627d4c0a04b8
+- name: github.com/pborman/uuid
+  version: c65b2f87fee37d1c7854c9164a450713c28d50cd
+- name: golang.org/x/net
+  version: 1e491301e022f8f977054da4c2d852decd59571f
+  subpackages:
+  - context
+  - context/ctxhttp
+- name: google.golang.org/api
+  version: 8e296ef260056b6323d10727db40512dac6d92d5
+  subpackages:
+  - gensupport
+  - googleapi
+  - googleapi/internal/uritemplates
+testImports: []

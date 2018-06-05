@@ -22,8 +22,9 @@ import (
 	"sync"
 	"text/tabwriter"
 
-	"github.com/coreos/updateservicectl/Godeps/_workspace/src/github.com/cheggaaa/pb"
-	"github.com/coreos/updateservicectl/Godeps/_workspace/src/github.com/coreos/go-semver/semver"
+	"github.com/cheggaaa/pb"
+	"github.com/coreos/go-semver/semver"
+
 	update "github.com/coreos/updateservicectl/client/update/v1"
 )
 

@@ -1,14 +1,14 @@
 {
  "kind": "discovery#restDescription",
- "etag": "\"koCc_mmAOJe4d9CoedmJUnZeEcg/xXD9YKn-mn9RGpaxAz-42hkHtkw\"",
+ "etag": "\"hf84vk5HeqXKpApUTgMOcmfTP8c/favzlzPfL3Iw99BTm3zIDvZF9Cs\"",
  "discoveryVersion": "v1",
  "id": "update:v1",
  "name": "update",
  "version": "v1",
  "description": "Update Management API",
  "icons": {
-  "x16": "http://www.google.com/images/icons/product/search-16.gif",
-  "x32": "http://www.google.com/images/icons/product/search-32.gif"
+  "x16": "https://www.gstatic.com/images/branding/product/1x/googleg_16dp.png",
+  "x32": "https://www.gstatic.com/images/branding/product/1x/googleg_32dp.png"
  },
  "protocol": "rest",
  "baseUrl": "http://internal/_ah/api/update/v1/",
@@ -52,12 +52,12 @@
   },
   "quotaUser": {
    "type": "string",
-   "description": "Available to use for quota purposes for server-side applications. Can be any arbitrary string assigned to a user, but should not exceed 40 characters. Overrides userIp if both are provided.",
+   "description": "An opaque string that represents a user for quota purposes. Must not exceed 40 characters.",
    "location": "query"
   },
   "userIp": {
    "type": "string",
-   "description": "IP address of the site where the request originates. Use this if you want to enforce per-user limits.",
+   "description": "Deprecated. Please use quotaUser instead.",
    "location": "query"
   }
  },
@@ -268,6 +268,9 @@
     "groupId": {
      "type": "string"
     },
+    "installSource": {
+     "type": "string"
+    },
     "version": {
      "type": "string"
     }
@@ -360,8 +363,8 @@
      "type": "string"
     },
     "updatePercent": {
-     "type": "integer",
-     "format": "float64"
+     "type": "number",
+     "format": "double"
     },
     "updatesPaused": {
      "type": "boolean"
@@ -1209,8 +1212,8 @@
        "location": "query"
       },
       "updatePercent": {
-       "type": "integer",
-       "format": "float64",
+       "type": "number",
+       "format": "double",
        "location": "query"
       },
       "updatesPaused": {
@@ -1255,8 +1258,8 @@
        "location": "query"
       },
       "updatePercent": {
-       "type": "integer",
-       "format": "float64",
+       "type": "number",
+       "format": "double",
        "location": "query"
       },
       "updatesPaused": {
