@@ -1,6 +1,6 @@
 {
  "kind": "discovery#restDescription",
- "etag": "\"hf84vk5HeqXKpApUTgMOcmfTP8c/favzlzPfL3Iw99BTm3zIDvZF9Cs\"",
+ "etag": "\"hf84vk5HeqXKpApUTgMOcmfTP8c/bT3HQZJtvzIzFsyQWqTOovsN7Gw\"",
  "discoveryVersion": "v1",
  "id": "update:v1",
  "name": "update",
@@ -334,6 +334,20 @@
     }
    }
   },
+  "Frame": {
+   "id": "Frame",
+   "type": "object",
+   "properties": {
+    "duration": {
+     "type": "string",
+     "format": "int64"
+    },
+    "percent": {
+     "type": "number",
+     "format": "double"
+    }
+   }
+  },
   "GenerateUuidResp": {
    "id": "GenerateUuidResp",
    "type": "object",
@@ -362,6 +376,9 @@
     "oemBlacklist": {
      "type": "string"
     },
+    "rolloutActive": {
+     "type": "boolean"
+    },
     "updatePercent": {
      "type": "number",
      "format": "double"
@@ -380,6 +397,22 @@
      "items": {
       "$ref": "Group"
      }
+    }
+   }
+  },
+  "GroupPercent": {
+   "id": "GroupPercent",
+   "type": "object",
+   "properties": {
+    "appId": {
+     "type": "string"
+    },
+    "id": {
+     "type": "string"
+    },
+    "updatePercent": {
+     "type": "number",
+     "format": "double"
     }
    }
   },
@@ -510,6 +543,54 @@
      "items": {
       "$ref": "PublicPackageItem"
      }
+    }
+   }
+  },
+  "Rollout": {
+   "id": "Rollout",
+   "type": "object",
+   "properties": {
+    "appId": {
+     "type": "string"
+    },
+    "groupId": {
+     "type": "string"
+    },
+    "rollout": {
+     "type": "array",
+     "items": {
+      "$ref": "Frame"
+     }
+    }
+   }
+  },
+  "RolloutActive": {
+   "id": "RolloutActive",
+   "type": "object",
+   "properties": {
+    "active": {
+     "type": "boolean"
+    },
+    "appId": {
+     "type": "string"
+    },
+    "groupId": {
+     "type": "string"
+    }
+   }
+  },
+  "RolloutSetReq": {
+   "id": "RolloutSetReq",
+   "type": "object",
+   "properties": {
+    "Rollout": {
+     "$ref": "Rollout"
+    },
+    "appId": {
+     "type": "string"
+    },
+    "groupId": {
+     "type": "string"
     }
    }
   },
@@ -1211,6 +1292,10 @@
        "type": "string",
        "location": "query"
       },
+      "rolloutActive": {
+       "type": "boolean",
+       "location": "query"
+      },
       "updatePercent": {
        "type": "number",
        "format": "double",
@@ -1255,6 +1340,10 @@
       },
       "oemBlacklist": {
        "type": "string",
+       "location": "query"
+      },
+      "rolloutActive": {
+       "type": "boolean",
        "location": "query"
       },
       "updatePercent": {
@@ -1382,6 +1471,64 @@
     }
    },
    "resources": {
+    "percent": {
+     "methods": {
+      "get": {
+       "id": "update.group.percent.get",
+       "path": "apps/{appId}/groups/{id}",
+       "httpMethod": "GET",
+       "description": "Get the update percentage for this group.",
+       "parameters": {
+        "appId": {
+         "type": "string",
+         "required": true,
+         "location": "path"
+        },
+        "id": {
+         "type": "string",
+         "required": true,
+         "location": "path"
+        }
+       },
+       "parameterOrder": [
+        "appId",
+        "id"
+       ],
+       "response": {
+        "$ref": "GroupPercent"
+       }
+      },
+      "set": {
+       "id": "update.group.percent.set",
+       "path": "apps/{appId}/groups/{id}",
+       "httpMethod": "POST",
+       "description": "Set the update percentage for this group.",
+       "parameters": {
+        "appId": {
+         "type": "string",
+         "required": true,
+         "location": "path"
+        },
+        "id": {
+         "type": "string",
+         "required": true,
+         "location": "path"
+        }
+       },
+       "parameterOrder": [
+        "appId",
+        "id"
+       ],
+       "request": {
+        "$ref": "GroupPercent",
+        "parameterName": "resource"
+       },
+       "response": {
+        "$ref": "GroupPercent"
+       }
+      }
+     }
+    },
     "requests": {
      "resources": {
       "events": {
@@ -1484,6 +1631,124 @@
          ],
          "response": {
           "$ref": "GroupRequestsRollup"
+         }
+        }
+       }
+      }
+     }
+    },
+    "rollout": {
+     "methods": {
+      "get": {
+       "id": "update.group.rollout.get",
+       "path": "apps/{appId}/groups/{groupId}/rollout",
+       "httpMethod": "GET",
+       "description": "Get the current rollout strategy for this group.",
+       "parameters": {
+        "appId": {
+         "type": "string",
+         "required": true,
+         "location": "path"
+        },
+        "groupId": {
+         "type": "string",
+         "required": true,
+         "location": "path"
+        }
+       },
+       "parameterOrder": [
+        "appId",
+        "groupId"
+       ],
+       "response": {
+        "$ref": "Rollout"
+       }
+      },
+      "set": {
+       "id": "update.group.rollout.set",
+       "path": "apps/{appId}/groups/{groupId}/rollout",
+       "httpMethod": "POST",
+       "description": "Set (and start) a new rollout strategy for this group.",
+       "parameters": {
+        "appId": {
+         "type": "string",
+         "required": true,
+         "location": "path"
+        },
+        "groupId": {
+         "type": "string",
+         "required": true,
+         "location": "path"
+        }
+       },
+       "parameterOrder": [
+        "appId",
+        "groupId"
+       ],
+       "request": {
+        "$ref": "RolloutSetReq",
+        "parameterName": "resource"
+       },
+       "response": {
+        "$ref": "Rollout"
+       }
+      }
+     },
+     "resources": {
+      "active": {
+       "methods": {
+        "get": {
+         "id": "update.group.rollout.active.get",
+         "path": "apps/{appId}/groups/{groupId}/rollout/active",
+         "httpMethod": "GET",
+         "description": "Get the active status of the rollout for this group.",
+         "parameters": {
+          "appId": {
+           "type": "string",
+           "required": true,
+           "location": "path"
+          },
+          "groupId": {
+           "type": "string",
+           "required": true,
+           "location": "path"
+          }
+         },
+         "parameterOrder": [
+          "appId",
+          "groupId"
+         ],
+         "response": {
+          "$ref": "RolloutActive"
+         }
+        },
+        "set": {
+         "id": "update.group.rollout.active.set",
+         "path": "apps/{appId}/groups/{groupId}/rollout/active",
+         "httpMethod": "POST",
+         "description": "Set the active status of the rollout for this group.",
+         "parameters": {
+          "appId": {
+           "type": "string",
+           "required": true,
+           "location": "path"
+          },
+          "groupId": {
+           "type": "string",
+           "required": true,
+           "location": "path"
+          }
+         },
+         "parameterOrder": [
+          "appId",
+          "groupId"
+         ],
+         "request": {
+          "$ref": "RolloutActive",
+          "parameterName": "resource"
+         },
+         "response": {
+          "$ref": "RolloutActive"
          }
         }
        }
