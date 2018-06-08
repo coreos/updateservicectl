@@ -1312,36 +1312,6 @@ func (s *RolloutActive) MarshalJSON() ([]byte, error) {
 	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
-type RolloutSetReq struct {
-	Rollout *Rollout `json:"Rollout,omitempty"`
-
-	AppId string `json:"appId,omitempty"`
-
-	GroupId string `json:"groupId,omitempty"`
-
-	// ForceSendFields is a list of field names (e.g. "Rollout") to
-	// unconditionally include in API requests. By default, fields with
-	// empty values are omitted from API requests. However, any non-pointer,
-	// non-interface field appearing in ForceSendFields will be sent to the
-	// server regardless of whether the field is empty or not. This may be
-	// used to include empty fields in Patch requests.
-	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "Rollout") to include in
-	// API requests with the JSON null value. By default, fields with empty
-	// values are omitted from API requests. However, any field with an
-	// empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
-	NullFields []string `json:"-"`
-}
-
-func (s *RolloutSetReq) MarshalJSON() ([]byte, error) {
-	type NoMethod RolloutSetReq
-	raw := NoMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
-}
-
 type Upstream struct {
 	Id string `json:"id,omitempty"`
 
@@ -6599,21 +6569,21 @@ func (c *GroupRolloutGetCall) Do(opts ...googleapi.CallOption) (*Rollout, error)
 // method id "update.group.rollout.set":
 
 type GroupRolloutSetCall struct {
-	s             *Service
-	appId         string
-	groupId       string
-	rolloutsetreq *RolloutSetReq
-	urlParams_    gensupport.URLParams
-	ctx_          context.Context
-	header_       http.Header
+	s          *Service
+	appId      string
+	groupId    string
+	rollout    *Rollout
+	urlParams_ gensupport.URLParams
+	ctx_       context.Context
+	header_    http.Header
 }
 
 // Set: Set (and start) a new rollout strategy for this group.
-func (r *GroupRolloutService) Set(appId string, groupId string, rolloutsetreq *RolloutSetReq) *GroupRolloutSetCall {
+func (r *GroupRolloutService) Set(appId string, groupId string, rollout *Rollout) *GroupRolloutSetCall {
 	c := &GroupRolloutSetCall{s: r.s, urlParams_: make(gensupport.URLParams)}
 	c.appId = appId
 	c.groupId = groupId
-	c.rolloutsetreq = rolloutsetreq
+	c.rollout = rollout
 	return c
 }
 
@@ -6649,7 +6619,7 @@ func (c *GroupRolloutSetCall) doRequest(alt string) (*http.Response, error) {
 	}
 	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
-	body, err := googleapi.WithoutDataWrapper.JSONReader(c.rolloutsetreq)
+	body, err := googleapi.WithoutDataWrapper.JSONReader(c.rollout)
 	if err != nil {
 		return nil, err
 	}
@@ -6725,7 +6695,7 @@ func (c *GroupRolloutSetCall) Do(opts ...googleapi.CallOption) (*Rollout, error)
 	//   },
 	//   "path": "apps/{appId}/groups/{groupId}/rollout",
 	//   "request": {
-	//     "$ref": "RolloutSetReq",
+	//     "$ref": "Rollout",
 	//     "parameterName": "resource"
 	//   },
 	//   "response": {
