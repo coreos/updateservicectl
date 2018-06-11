@@ -663,7 +663,7 @@ func downloadPackagePayload(pkg *update.Package, saveTo string, bar *pb.Progress
 	}
 	// Verify the hash matches
 	if string(pkgSha1) != string(sha1h.Sum(nil)) {
-		err = fmt.Errorf("SHA1 sums do not match: %s != $s", string(pkgSha1), string(sha1h.Sum(nil)))
+		err = fmt.Errorf("SHA1 sums do not match: %s != %s", string(pkgSha1), string(sha1h.Sum(nil)))
 		handle(err)
 		return
 	}
