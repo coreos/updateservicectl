@@ -107,6 +107,8 @@ func init() {
 		cmdInstance,
 		// pkg.go
 		cmdPackage,
+		// rollout.go
+		cmdRollout,
 		// watch.go
 		cmdWatch,
 		// upstream.go

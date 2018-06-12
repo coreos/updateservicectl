@@ -1,6 +1,6 @@
 {
  "kind": "discovery#restDescription",
- "etag": "\"hf84vk5HeqXKpApUTgMOcmfTP8c/bT3HQZJtvzIzFsyQWqTOovsN7Gw\"",
+ "etag": "\"hf84vk5HeqXKpApUTgMOcmfTP8c/7tw3GQM9__ChSSf-au9cv5wobG8\"",
  "discoveryVersion": "v1",
  "id": "update:v1",
  "name": "update",
@@ -570,21 +570,6 @@
    "properties": {
     "active": {
      "type": "boolean"
-    },
-    "appId": {
-     "type": "string"
-    },
-    "groupId": {
-     "type": "string"
-    }
-   }
-  },
-  "RolloutSetReq": {
-   "id": "RolloutSetReq",
-   "type": "object",
-   "properties": {
-    "Rollout": {
-     "$ref": "Rollout"
     },
     "appId": {
      "type": "string"
@@ -1686,7 +1671,7 @@
         "groupId"
        ],
        "request": {
-        "$ref": "RolloutSetReq",
+        "$ref": "Rollout",
         "parameterName": "resource"
        },
        "response": {
