@@ -211,11 +211,6 @@ func main() {
 		os.Exit(OK)
 	}
 
-	// no command specified - trigger help
-	if len(args) < 1 {
-		args = append(args, "help")
-	}
-
 	// trim the right most slash because all other uses of globalFlags.Server
 	// append the / already
 	globalFlags.Server = strings.TrimRight(globalFlags.Server, "/")
@@ -224,7 +219,7 @@ func main() {
 
 	if cmd == nil {
 		fmt.Printf("%v: unknown subcommand: %q\n", cliName, name)
-		fmt.Printf("Run '%v help' for usage.\n", cliName)
+		fmt.Printf("Run '%v --help' for usage.\n", cliName)
 		os.Exit(ERROR_NO_COMMAND)
 	}
 
