@@ -54,7 +54,7 @@ COMMANDS:{{range .Commands}}
 GLOBAL OPTIONS:{{range .Flags}}
 {{printOption .Name .DefValue .Usage}}{{end}}
 
-Run "{{.Executable}} help <command>" for more details on a specific command.
+Run "{{.Executable}} <command> --help" for more details on a specific command.
 `[1:]))
 	commandUsageTemplate = template.Must(template.New("command_usage").Funcs(templFuncs).Parse(`
 NAME:
@@ -71,7 +71,7 @@ DESCRIPTION:
 {{end}}
 {{if .CmdFlags}}OPTIONS:{{range .CmdFlags}}
 {{printOption .Name .DefValue .Usage}}{{end}}
-{{end}}For help on global options run "{{.Executable}} help"
+{{end}}For help on global options run "{{.Executable}} --help"
 `[1:]))
 }
 
