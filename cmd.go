@@ -176,6 +176,9 @@ func findCommand(search string, args []string, commands []*Command) (cmd *Comman
 	for _, c := range commands {
 		if c.Name == search {
 			cmd = c
+			// Clear the usage on flags as we will be printing our own
+			// usage after parsing arguments
+			c.Flags.Usage = func() {}
 			if errHelp := c.Flags.Parse(args[1:]); errHelp != nil {
 				printCommandUsage(cmd)
 				os.Exit(ERROR_USAGE)
