@@ -176,6 +176,9 @@ func findCommand(search string, args []string, commands []*Command) (cmd *Comman
 	for _, c := range commands {
 		if c.Name == search {
 			cmd = c
+			// Clear the usage on flags as we will be printing our own
+			// usage after parsing arguments
+			c.Flags.Usage = func() {}
 			if errHelp := c.Flags.Parse(args[1:]); errHelp != nil {
 				printCommandUsage(cmd)
 				os.Exit(ERROR_USAGE)
@@ -208,11 +211,6 @@ func main() {
 		os.Exit(OK)
 	}
 
-	// no command specified - trigger help
-	if len(args) < 1 {
-		args = append(args, "help")
-	}
-
 	// trim the right most slash because all other uses of globalFlags.Server
 	// append the / already
 	globalFlags.Server = strings.TrimRight(globalFlags.Server, "/")
@@ -221,7 +219,7 @@ func main() {
 
 	if cmd == nil {
 		fmt.Printf("%v: unknown subcommand: %q\n", cliName, name)
-		fmt.Printf("Run '%v help' for usage.\n", cliName)
+		fmt.Printf("Run '%v --help' for usage.\n", cliName)
 		os.Exit(ERROR_NO_COMMAND)
 	}
 
