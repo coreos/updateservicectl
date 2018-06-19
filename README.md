@@ -6,6 +6,8 @@ its state via environment variables.
 
 ## Compatibility with CoreUpdate versions
 
+`updateservicectl v2.1.0` is compatible with `CoreUpdate v2.3.0` or newer.
+
 `updateservicectl v2.0.0` is compatible with `CoreUpdate v2.2.0` or newer.
 
 `updateservicectl v1.4.0` is compatible with `CoreUpdate v2.1.1` or older.
